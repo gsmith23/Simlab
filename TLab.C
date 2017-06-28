@@ -238,16 +238,15 @@ void TLab::MakeCalibratedDataTreeFile(){
   cout << endl;
   cout << " Making calibrated data tree " << endl;
 
-  // To Do - implement routine
-  // to extract AND data pedestals
-  // from OR - trigger data
-  //SetPedestals();
+  SetPedestals();
   
-  // To Do - implement routine
-  // to calibrate AND trigger Na22 data
-  // from OR trigger Ba133 data
-  //CalibrateEnergy();
-  //SetPhotopeaks();
+  // To Do 
+  // - fit photopeaks and hardcode mean
+  // in the function, or even better...
+  // - automate the fitting
+  // at present all the photopeaks are set 
+  // to 3000.
+  SetPhotopeaks();
   
   cout << endl;
   cout << "Post photopeak setting rootFileRawName is " 
@@ -322,27 +321,33 @@ void TLab::MakeCalibratedDataTreeFile(){
     // crystal number scheme
     // for ease of use in 
     // asymmetry calculation
+    
+    Int_t kA, kB;
+    
     for (Int_t k = 0 ; k < 5 ; k ++){ 
-      QA[k]  = Q[k];
-      TA[k]  = T[k];
       
+      kA = k;
+      kB = (k+5);
       
-      //EA[k]  = (Q[k]-pedQ[k])*511./(phoQ[k]-pedQ[k]) ;
+      QA[k]  = Q[kA];
+      QB[k]  = Q[kB];
       
-      EA[k]  = GetEnergy(Q[k],k);
-      //EA[k]  = GetEnergy(Q[k]);
+      TA[k]  = T[kA];
+      TB[k]  = T[kB];
+      
+      // Array A
+      EA[k]  = (Q[kA]-pedQ[kA])*511./(phoQ[kA]-pedQ[kA]) ;
+      EB[k]  = (Q[kB]-pedQ[kB])*511./(phoQ[kB]-pedQ[kB]) ; ;
       
       // for all apart from centre crystal
-      tHA[k] = PhotonEnergyToTheta(EA[k]);
-      tHA[4] = ElectronEnergyToTheta(EA[k]);
+      tHA[k] = PhotonEnergyToTheta(EA[kA]);
+      tHB[k] = PhotonEnergyToTheta(EB[kB]);
       
-
-      QB[k]  = Q[k+5];
-      TB[k]  = T[k+5];
-      EB[k]  = GetEnergy(Q[k+5],k+5);
-
-      // for all apart from centre crystal
-      tHB[k] = PhotonEnergyToTheta(EB[k]);
+      // !!!!!!  check these    !!!!!!!!
+      // !!!!!! are the correct !!!!!!!!
+      // !!!!!!   channels     !!!!!!!!
+      // central crystals
+      tHA[4] = ElectronEnergyToTheta(EA[4]);
       tHB[4] = ElectronEnergyToTheta(EB[4]);
       
     }
@@ -392,11 +397,6 @@ void TLab::SetPedestals(){
     pedQ[i] = hQ[i]->GetXaxis()->GetBinCenter(hQ[i]->GetMaximumBin());
   }
   
-  //!!!!!!!!!!!!!!!!!
-  // Very temporary
-  pedQ[4] = 600.0;
-  pedQ[9] = 600.0;
-
   for( Int_t i = 0 ; i < nChannels ; i++ )
     cout << " pedQ["<< i << "] =  " << pedQ[i] << endl;
   
@@ -408,36 +408,11 @@ Float_t TLab::GetPedestal(Int_t channel){
   return pedQ[channel]; 
 }
 
-Float_t TLab::GetEnergy(Float_t Q, Int_t iCrystal){
+void TLab::SetPhotopeaks(){
 
-  Float_t m[10];
-  Float_t c[10];
+  for (Int_t i = 0 ; i < nChannels ; i++)
+    phoQ[i] = 3000.;
 
-  m[0] = 1.0;
-  m[1] = 1.0;
-  m[2] = 1.0;
-  m[3] = 1.0;
-  m[4] = 4.599;
-  m[5] = 1.0;
-  m[6] = 1.0;
-  m[7] = 1.0;
-  m[8] = 1.0;
-  m[9] = 6.13;
-
-  c[0] = 1.0;
-  c[1] = 1.0;
-  c[2] = 1.0;
-  c[3] = 1.0;
-  c[4] = 633.7;
-  c[5] = 1.0;
-  c[6] = 1.0;
-  c[7] = 1.0;
-  c[8] = 1.0;
-  c[9] = 613.0;
-  
-  Float_t energy = (Q - c[iCrystal])/m[iCrystal];
-  
-  return energy;
 }
 
 Float_t TLab::GetPhotopeak(Int_t channel){
