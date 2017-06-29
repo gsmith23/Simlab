@@ -9,6 +9,7 @@ ClassImp(TLab)
 TLab::TLab( ) {
   cout <<  endl;
   cout << " Default constructor. " << endl;
+	cout << " lalalalala " << endl;
 }
 
 // option for use with one raw file 
