@@ -348,11 +348,10 @@ void TLab::MakeCalibratedDataTreeFile(){
       // !!!!!! are the correct !!!!!!!!
       // !!!!!!   channels     !!!!!!!!
       // central crystals
-      tHA[4] = ElectronEnergyToTheta(EA[4]);
-      tHB[4] = ElectronEnergyToTheta(EB[4]);
+      tHA[2] = ElectronEnergyToTheta(EA[2]);
+      tHB[2] = ElectronEnergyToTheta(EB[2]);
       
     }
-    
     
     // Create Energy Histos
     for( Int_t j = 0 ; j < nChannels ; j++ ) {
@@ -418,6 +417,38 @@ void TLab::SetPhotopeaks(){
 
 Float_t TLab::GetPhotopeak(Int_t channel){
   return phoQ[channel]; 
+}
+
+Float_t TLab::GetEnergy(Float_t Q, Int_t iCrystal){
+
+  Float_t m[10];
+  Float_t c[10];
+
+  m[0] = 1.0;
+  m[1] = 1.0;
+  m[2] = 1.0;
+  m[3] = 1.0;
+  m[4] = 4.599;
+  m[5] = 1.0;
+  m[6] = 1.0;
+  m[7] = 1.0;
+  m[8] = 1.0;
+  m[9] = 6.13;
+
+  c[0] = 1.0;
+  c[1] = 1.0;
+  c[2] = 1.0;
+  c[3] = 1.0;
+  c[4] = 633.7;
+  c[5] = 1.0;
+  c[6] = 1.0;
+  c[7] = 1.0;
+  c[8] = 1.0;
+  c[9] = 613.0;
+  
+  Float_t energy = (Q - c[iCrystal])/m[iCrystal];
+  
+  return energy;
 }
 
 
@@ -564,6 +595,7 @@ Float_t TLab::PhotonEnergyToTheta(Float_t energy){
 
   return theta;
 }
+
 
 
 void TLab::GraphAsymmetry(Char_t option){
