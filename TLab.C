@@ -409,20 +409,18 @@ Float_t TLab::GetPedestal(Int_t channel){
 }
 
 void TLab::SetPhotopeaks(){
-
- // for (Int_t i = 0 ; i < nChannels ; i++)
- //   phoQ[i] = 3000.;
-Double_t phoQ[10]={2871.,
-		   3076.,
-		   3034., //central crystal A
-      		   2489.,
-      		   2570.,
-      		   2741.,
-      		   2917.,
-                   3011., //central crystal B
-                   2475.,
-                   3161.};
-
+  
+  
+  Double_t phoQ[10]={2871.,
+		     3076.,
+		     3034., //central crystal A
+		     2489.,
+		     2570.,
+		     2741.,
+		     2917.,
+		     3011., //central crystal B
+		     2475.,
+		     3161.};
 }
 
 Float_t TLab::GetPhotopeak(Int_t channel){
