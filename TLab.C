@@ -242,11 +242,10 @@ void TLab::MakeCalibratedDataTreeFile(){
   SetPedestals();
   
   // To Do 
-  // - fit photopeaks and hardcode mean
-  // in the function, or even better...
-  // - automate the fitting
-  // at present all the photopeaks are set 
-  // to 3000.
+  // - automate the fitting,
+  // at present all the photopeaks 
+  // are hardcoded from manual fits
+  
   SetPhotopeaks();
   
   cout << endl;
@@ -340,13 +339,21 @@ void TLab::MakeCalibratedDataTreeFile(){
       EA[k]  = (Q[kA]-pedQ[kA])*511./(phoQ[kA]-pedQ[kA]) ;
       EB[k]  = (Q[kB]-pedQ[kB])*511./(phoQ[kB]-pedQ[kB]) ; ;
       
+      if ( i == 100 ){
+	cout << endl;
+	cout << "Q[" << kA <<"]    = " << Q[kA] << endl;
+	cout << "pedQ[" << kA <<"] = " << pedQ[kA] << endl;
+	cout << "phoQ[" << kA <<"] = " << phoQ[kA] << endl;
+	cout << "EA[" << kA <<"]   = " << EA[kA] << endl;
+      }
+
+      // We presume the photons interacted 
+      // in the central crystal first
+      
       // for all apart from centre crystal
       tHA[k] = PhotonEnergyToTheta(EA[kA]);
       tHB[k] = PhotonEnergyToTheta(EB[kB]);
       
-      // !!!!!!  check these    !!!!!!!!
-      // !!!!!! are the correct !!!!!!!!
-      // !!!!!!   channels     !!!!!!!!
       // central crystals
       tHA[2] = ElectronEnergyToTheta(EA[2]);
       tHB[2] = ElectronEnergyToTheta(EB[2]);
@@ -397,9 +404,12 @@ void TLab::SetPedestals(){
     pedQ[i] = hQ[i]->GetXaxis()->GetBinCenter(hQ[i]->GetMaximumBin());
   }
   
+  cout << endl;
   for( Int_t i = 0 ; i < nChannels ; i++ )
     cout << " pedQ["<< i << "] =  " << pedQ[i] << endl;
-  
+
+  cout << endl;
+
   rootFileRawData->Close();
   
 }
@@ -411,16 +421,25 @@ Float_t TLab::GetPedestal(Int_t channel){
 void TLab::SetPhotopeaks(){
   
   
-  Double_t phoQ[10]={2871.,
-		     3076.,
-		     3034., //central crystal A
-		     2489.,
-		     2570.,
-		     2741.,
-		     2917.,
-		     3011., //central crystal B
-		     2475.,
-		     3161.};
+  Float_t phoQ_temp[10] = {2871.,
+			   3076.,
+			   3034., //central crystal A
+			   2489.,
+			   2570.,
+			   2741.,
+			   2917.,
+			   3011., //central crystal B
+			   2475.,
+			   3161.};
+  
+
+  
+  cout << endl;
+  for( Int_t i = 0 ; i < nChannels ; i++ ){
+    phoQ[i] = phoQ_temp[i];
+    cout << " phoQ["<< i << "] =  " << phoQ[i] << endl;
+  }
+  cout << endl;
 }
 
 Float_t TLab::GetPhotopeak(Int_t channel){
