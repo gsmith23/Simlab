@@ -537,8 +537,8 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     
     //cout << " EA[4] = " << EA[4] << endl;
     
-    if( ( EA[4] > 200.  ) &&
-	( EA[4] < 400.  )){
+    if( ( thA[4] > minTheta  ) &&
+	( thA[4] < maxTheta  )){
       
       A[4] = kTRUE;
       
@@ -547,7 +547,13 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
       //cout << " A[4] = " << A[4] << endl;    
     }
     
+    
+
+    
   }
+  
+  
+  
   
   cout << " nA4 = " << nA4 << endl;     
 
