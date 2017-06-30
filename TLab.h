@@ -39,8 +39,6 @@ class TLab : public TObject{
   void SetPhotopeaks();
   Float_t GetPhotopeak(Int_t);
     
-  Float_t GetEnergy(Float_t, Int_t);
-
   Bool_t GoodTiming(Float_t);
   Bool_t GoodTheta(Float_t);
 
