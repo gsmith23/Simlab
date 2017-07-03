@@ -527,22 +527,22 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   cout << endl;
   cout << " entries = " << calDataTree->GetEntries() << endl;
   
-  Int_t nA4 = 0; 
+  Int_t nA2 = 0; 
 
   for(Int_t i = 0 ; i < calDataTree->GetEntries(); i++ ){
     
     calDataTree->GetEvent(i);
     
-    A[4] = kFALSE;  
+    A[2] = kFALSE;  
     
     //cout << " EA[4] = " << EA[4] << endl;
     
-    if( ( thA[4] > minTheta  ) &&
-	( thA[4] < maxTheta  )){
+    if( ( thA[2] > minTheta  ) &&
+	( thA[2] < maxTheta  )){
       
-      A[4] = kTRUE;
+      A[2] = kTRUE;
       
-      nA4++;
+      nA2++;
       
       //cout << " A[4] = " << A[4] << endl;    
     }
@@ -552,10 +552,7 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     
   }
   
-  
-  
-  
-  cout << " nA4 = " << nA4 << endl;     
+  cout << " nA2 = " << nA4 << endl;     
 
   cout << endl;
   cout << " Here is where the Asymmetry be calculated " << endl;
