@@ -306,22 +306,22 @@ void TLab::MakeCalibratedDataTreeFile(){
 
   rawDataTree->SetBranchAddress("eventNumber",&eventNumber);
   
-  tempString.Form("EA[%d]/F",nChannels);
+  tempString.Form("EA[%d]/F",nCrystals);
   calDataTree->Branch("EA",EA,tempString);
 
-  tempString.Form("EB[%d]/F",nChannels);
+  tempString.Form("EB[%d]/F",nCrystals);
   calDataTree->Branch("EB",EB,tempString);
 
-  tempString.Form("tHA[%d]/F",nChannels);
+  tempString.Form("tHA[%d]/F",nCrystals);
   calDataTree->Branch("tHA",tHA,tempString);
   
-  tempString.Form("tHB[%d]/F",nChannels);
+  tempString.Form("tHB[%d]/F",nCrystals);
   calDataTree->Branch("tHB",tHB,tempString);
 
-  tempString.Form("TA[%d]/F",nChannels);
+  tempString.Form("TA[%d]/F",nCrystals);
   calDataTree->Branch("TA",TA,tempString);
 
-  tempString.Form("TB[%d]/F",nChannels);
+  tempString.Form("TB[%d]/F",nCrystals);
   calDataTree->Branch("TB",TB,tempString);
   
   TString plotNameA  = "";
@@ -332,7 +332,7 @@ void TLab::MakeCalibratedDataTreeFile(){
   Float_t min = 0;
   Float_t max = 1300;
 
-  for( Int_t i = 0 ; i < nChannels ; i++ ){
+  for( Int_t i = 0 ; i < nCrystals ; i++ ){
     plotNameA.Form("hEA%d",i);
     plotTitleA.Form("hEA%d;Energy (keV);Counts",i);
     hEA[i] = new TH1F(plotNameA,plotTitleA,512,min,max);
@@ -345,8 +345,24 @@ void TLab::MakeCalibratedDataTreeFile(){
   cout << " rawDataTree->GetEntries() = " << 
     rawDataTree->GetEntries() << endl;
   
+  for (Int_t i = 0 ; i < nCrystals ; i++){
+    EA[i]  = 0.;
+    EB[i]  = 0.;
+    tHA[i] = 0.;
+    tHB[i] = 0.;
+    TA[i]  = 0.;
+    TB[i]  = 0.;
+    
+    // not used
+    QA[i]  = 0.;
+    QB[i]  = 0.;
+  }
+  
   Long64_t maxEntries = rawDataTree->GetEntries();
-  maxEntries = 10000;
+  maxEntries = 100000;
+  
+  
+  Int_t chaA, chaB, cryA, cryB;
   
   // Calculate E,T,theta
   for( Long64_t i = 0 ; i <  maxEntries ; i++ ){
@@ -357,8 +373,6 @@ void TLab::MakeCalibratedDataTreeFile(){
     // crystal number scheme
     // for ease of use in 
     // asymmetry calculation
-    
-    Int_t chaA, chaB, cryA, cryB;
     
     for (Int_t k = 0 ; k < 5 ; k ++){ 
 
@@ -386,10 +400,10 @@ void TLab::MakeCalibratedDataTreeFile(){
       
       if ( i == 100 ){
 	cout << endl;
-	cout << "Q[" << chaA <<"]    = " << Q[chaA] << endl;
+	cout << "   Q["    << chaA <<"] = " << Q[chaA] << endl;
 	cout << "pedQ[" << chaA <<"] = " << pedQ[chaA] << endl;
 	cout << "phoQ[" << chaA <<"] = " << phoQ[chaA] << endl;
-	cout << "EA[" << chaA <<"]   = " << EA[chaA] << endl;
+	cout << "  EA["   << cryA <<"] = " << EA[cryA] << endl;
       }
 
       // We presume the photons interacted 
@@ -398,12 +412,11 @@ void TLab::MakeCalibratedDataTreeFile(){
       // for all apart from centre crystal
       tHA[cryA] = PhotonEnergyToTheta(EA[cryA]);
       tHB[cryB] = PhotonEnergyToTheta(EB[cryB]);
-      
-      // central crystals
-      tHA[2] = ElectronEnergyToTheta(EA[2]);
-      tHB[2] = ElectronEnergyToTheta(EB[2]);
-      
     }
+    
+    // central crystals
+    tHA[4] = ElectronEnergyToTheta(EA[4]);
+    tHB[4] = ElectronEnergyToTheta(EB[4]);
     
     // Create Energy Histos
     for( Int_t j = 0 ; j < nCrystals ; j++ ) {
