@@ -345,8 +345,11 @@ void TLab::MakeCalibratedDataTreeFile(){
   cout << " rawDataTree->GetEntries() = " << 
     rawDataTree->GetEntries() << endl;
   
+  Long64_t maxEntries = rawDataTree->GetEntries();
+  maxEntries = 10000;
+  
   // Calculate E,T,theta
-  for( Long64_t i = 0 ; i < rawDataTree->GetEntries() ; i++ ){
+  for( Long64_t i = 0 ; i <  maxEntries ; i++ ){
     
     rawDataTree->GetEntry(i);
     
