@@ -537,8 +537,8 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     
     //cout << " EA[4] = " << EA[4] << endl;
     
-    if( ( thA[2] > minTheta  ) &&
-	( thA[2] < maxTheta  )){
+    if( ( tHA[2] > minTh ) &&
+	( tHA[2] < maxTh )){
       
       A[2] = kTRUE;
       
@@ -552,7 +552,7 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     
   }
   
-  cout << " nA2 = " << nA4 << endl;     
+  //cout << " nA2 = " << nA4 << endl;     
 
   cout << endl;
   cout << " Here is where the Asymmetry be calculated " << endl;
