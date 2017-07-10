@@ -359,8 +359,7 @@ void TLab::MakeCalibratedDataTreeFile(){
   }
   
   Long64_t maxEntries = rawDataTree->GetEntries();
-  maxEntries = 100000;
-  
+  //  maxEntries = 100000;
   
   Int_t chaA, chaB, cryA, cryB;
   
@@ -425,7 +424,9 @@ void TLab::MakeCalibratedDataTreeFile(){
       hEB[j]->Fill(EB[j]);
       
     }
-    calDataTree->Fill();
+    
+    if(EA[4] > .200 && EB[4] > .200)
+      calDataTree->Fill();
     
   }
   
@@ -576,25 +577,39 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     nB[i] = 0.;
   }
   
-  // To Do:
-  // Implement routine to calculate 
-  // Asymmetry A(dPhi) = N(dPhi)/N(0)
-  // in a given theta range
-  // by counting four hit combinations
+  Bool_t A000 = kFALSE, A090 = kFALSE, A180 = kFALSE, A270 = kFALSE,
+    B000 = kFALSE, B090 = kFALSE, B180 = kFALSE, B270  = kFALSE;
   
-  cout << endl;
-  cout << " entries = " << calDataTree->GetEntries() << endl;
+  Bool_t AB000 = kFALSE, AB090 = kFALSE, AB180 = kFALSE;
+  
+  Double_t n000 = 0., n090 = 0., n180 = 0.;
   
   Long64_t maxEntry = calDataTree->GetEntries();
   
-  maxEntry = 1000000;
+  //  maxEntry = 1000000;
+  
+  // !!calculate
+  Float_t thRes = 10.;
+  
+  minTh = minTh - thRes;
+  maxTh = maxTh + thRes;
+  
+  cout << endl;
+  cout << " Calculating Asymmetry  " << endl;
+  cout << " A(" << dPhi << ") in the range " 
+       << minTh << " < #theta < " << maxTh << endl;
+  cout << endl;
   
   for(Long64_t i = 0 ; i < maxEntry; i++ ){
     
     calDataTree->GetEvent(i);
+  
+    A000 = kFALSE, A090 = kFALSE, A180 = kFALSE, A270 = kFALSE;
+    B000 = kFALSE, B090 = kFALSE, B180 = kFALSE, B270  = kFALSE;
+    AB000 = kFALSE, AB090 = kFALSE, AB180 = kFALSE;
     
     for (Int_t j = 0 ; j < nCrystals ; j++){
-	   
+      
       A[j] = kFALSE;  
       B[j] = kFALSE;  
       
@@ -609,20 +624,54 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
 	B[j] = kTRUE;
 	nB[j]++;
       }
-      
-    } // end of: for (Int_t j = 0 ; j < nCrystals
+    } // end of: for (Int_t j = 0 ; j < nCrystals  
+    
+    // Central Crystals are always required
+    
+    if( !A[4] || !B[4])
+      continue;
+    
+    if((A[1]&&B[1])||
+       (A[3]&&B[3])||
+       (A[5]&&B[5])||
+       (A[7]&&B[7])){
+      AB000 = kTRUE;
+      n000++;
+    }
+    
+    if((A[1]&&B[3])||
+       (A[3]&&B[7])||
+       (A[7]&&B[5])||
+       (A[5]&&B[1])){
+      AB090 = kTRUE;
+      n090++;
+    }
+    
+    if((A[1]&&B[7])||
+       (A[3]&&B[5])||
+       (A[7]&&B[1])||
+       (A[5]&&B[3])){
+      AB180 = kTRUE;
+      n180++;
+    }
+    
+    if(AB000 && AB090){
+      cout << endl;
+      cout << " AB000 && AB090 " << endl;
+      cout << endl;
+    }
+    
     
   } // end of : for(Int_t i = 0 ; i < calDa...
   
-  cout << endl;
-  cout << " nA[" << 1 << "] = " << nA[1] <<  endl;
-  cout << " nB[" << 1 << "] = " << nB[1] <<  endl;
+  
+  Asym = (Float_t)n090/n000;
   
   cout << endl;
-  cout << " Here is where the Asymmetry be calculated " << endl;
-  cout << " A(" << dPhi << ") in the range " 
-       << minTh << " < #theta < " << maxTh << endl;
-  cout << endl;
+  cout << " n000 = " << n000 <<  endl;
+  cout << " n090 = " << n090 <<  endl;
+  cout << " n180 = " << n180 <<  endl;
+  
   
 }
 
@@ -668,7 +717,7 @@ void TLab::GraphAsymmetry(Char_t option){
 				10,10,1200,800);
 
   //const Int_t nBins = 10;
-  const Int_t nBins = 4;
+  const Int_t nBins = 5;
 
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
@@ -681,16 +730,16 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t  Ae090[nBins];
   
   // Theta range 
-  Float_t thetaLowEdge  = 30.;
+  Float_t thetaLowEdge  = 50.;
   //thetaLowEdge  = 0.;
-  Float_t thetaHighEdge = 130.;
+  Float_t thetaHighEdge = 150.;
   //thetaHighEdge = 180.;
   
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nBins;
   
   // Axis
   TH1F * hr;
-  hr = canvas->DrawFrame(thetaLowEdge,0.5,thetaHighEdge,2.5);
+  hr = canvas->DrawFrame(thetaLowEdge,0.5,thetaHighEdge,3.5);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   
   hr->GetYaxis()->SetTitle("P(90^{o})/P(0^{o})");
