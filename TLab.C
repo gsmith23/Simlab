@@ -410,8 +410,8 @@ void TLab::MakeCalibratedDataTreeFile(){
       tHB[cryB] = PhotonEnergyToTheta(EB[cryB]);
       
       // central crystals
-      tHA[2] = ElectronEnergyToTheta(EA[2]);
-      tHB[2] = ElectronEnergyToTheta(EB[2]);
+      tHA[4] = ElectronEnergyToTheta(EA[4]);
+      tHB[4] = ElectronEnergyToTheta(EB[4]);
       
     }
     
