@@ -316,22 +316,22 @@ void TLab::MakeCalibratedDataTreeFile(){
 
   rawDataTree->SetBranchAddress("eventNumber",&eventNumber);
   
-  tempString.Form("EA[%d]/F",nChannels);
+  tempString.Form("EA[%d]/F",nCrystals);
   calDataTree->Branch("EA",EA,tempString);
 
-  tempString.Form("EB[%d]/F",nChannels);
+  tempString.Form("EB[%d]/F",nCrystals);
   calDataTree->Branch("EB",EB,tempString);
 
-  tempString.Form("tHA[%d]/F",nChannels);
+  tempString.Form("tHA[%d]/F",nCrystals);
   calDataTree->Branch("tHA",tHA,tempString);
   
-  tempString.Form("tHB[%d]/F",nChannels);
+  tempString.Form("tHB[%d]/F",nCrystals);
   calDataTree->Branch("tHB",tHB,tempString);
 
-  tempString.Form("TA[%d]/F",nChannels);
+  tempString.Form("TA[%d]/F",nCrystals);
   calDataTree->Branch("TA",TA,tempString);
 
-  tempString.Form("TB[%d]/F",nChannels);
+  tempString.Form("TB[%d]/F",nCrystals);
   calDataTree->Branch("TB",TB,tempString);
   
   TString plotNameA  = "";
@@ -342,7 +342,7 @@ void TLab::MakeCalibratedDataTreeFile(){
   Float_t min = 0;
   Float_t max = 1300;
 
-  for( Int_t i = 0 ; i < nChannels ; i++ ){
+  for( Int_t i = 0 ; i < nCrystals ; i++ ){
     plotNameA.Form("hEA%d",i);
     plotTitleA.Form("hEA%d;Energy (keV);Counts",i);
     hEA[i] = new TH1F(plotNameA,plotTitleA,512,min,max);
@@ -357,6 +357,21 @@ void TLab::MakeCalibratedDataTreeFile(){
   
   Long64_t maxEntries = rawDataTree->GetEntries();
   //maxEntries = 10000;
+
+  for (Int_t i = 0 ; i < nCrystals ; i++){
+    EA[i]  = 0.;
+    EB[i]  = 0.;
+    tHA[i] = 0.;
+    tHB[i] = 0.;
+    TA[i]  = 0.;
+    TB[i]  = 0.;
+    
+    // not used
+    QA[i]  = 0.;
+    QB[i]  = 0.;
+  }
+  
+  Int_t chaA, chaB, cryA, cryB;
   
   // Calculate E,T,theta
   for( Long64_t i = 0 ; i <  maxEntries ; i++ ){
@@ -367,8 +382,6 @@ void TLab::MakeCalibratedDataTreeFile(){
     // crystal number scheme
     // for ease of use in 
     // asymmetry calculation
-    
-    Int_t chaA, chaB, cryA, cryB;
     
     for (Int_t k = 0 ; k < 5 ; k ++){ 
 
@@ -383,14 +396,17 @@ void TLab::MakeCalibratedDataTreeFile(){
       cryB = Chan2ArrayB(chaB);
       
       // pedestal subtracted
+
       QA[cryA]  = Q[chaA] - pedQ[chaA][0];
       QB[cryB]  = Q[chaB] - pedQ[chaB][0];
+
       
       // to do: time calibration
       TA[cryA]  = T[chaA];
       TB[cryB]  = T[chaB];
       
       // Energy Arrays 
+
       EA[cryA]  = (Q[chaA]-pedQ[chaA][0])*511./(phoQ[chaA]-pedQ[chaA][0]) ;
       EB[cryB]  = (Q[chaB]-pedQ[chaB][0])*511./(phoQ[chaB]-pedQ[chaB][0]) ; ;
       
@@ -400,6 +416,7 @@ void TLab::MakeCalibratedDataTreeFile(){
 	cout << "pedQ[" << chaA <<"] = " << pedQ[chaA][0] << endl;
 	cout << "phoQ[" << chaA <<"] = " << phoQ[chaA] << endl;
 	cout << "EA[" << chaA <<"]   = " << EA[chaA] << endl;
+
       }
 
       // We presume the photons interacted 
@@ -408,12 +425,19 @@ void TLab::MakeCalibratedDataTreeFile(){
       // for all apart from centre crystal
       tHA[cryA] = PhotonEnergyToTheta(EA[cryA]);
       tHB[cryB] = PhotonEnergyToTheta(EB[cryB]);
+<<<<<<< HEAD
       
       // central crystals
       tHA[4] = ElectronEnergyToTheta(EA[4]);
       tHB[4] = ElectronEnergyToTheta(EB[4]);
       
+=======
+>>>>>>> upstream/master
     }
+    
+    // central crystals
+    tHA[4] = ElectronEnergyToTheta(EA[4]);
+    tHB[4] = ElectronEnergyToTheta(EB[4]);
     
     // Create Energy Histos
     for( Int_t j = 0 ; j < nCrystals ; j++ ) {
@@ -422,7 +446,9 @@ void TLab::MakeCalibratedDataTreeFile(){
       hEB[j]->Fill(EB[j]);
       
     }
-    calDataTree->Fill();
+    
+    if(EA[4] > .200 && EB[4] > .200)
+      calDataTree->Fill();
     
   }
   
@@ -615,25 +641,40 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     nB[i] = 0.;
   }
   
-  // To Do:
-  // Implement routine to calculate 
-  // Asymmetry A(dPhi) = N(dPhi)/N(0)
-  // in a given theta range
-  // by counting four hit combinations
+  Bool_t A000 = kFALSE, A090 = kFALSE, A180 = kFALSE, A270 = kFALSE,
+    B000 = kFALSE, B090 = kFALSE, B180 = kFALSE, B270  = kFALSE;
   
-  cout << endl;
-  cout << " entries = " << calDataTree->GetEntries() << endl;
+  Bool_t AB000 = kFALSE, AB090 = kFALSE, AB180 = kFALSE;
+  
+  Double_t n000 = 0., n090 = 0., n180 = 0.;
+
   
   Long64_t maxEntry = calDataTree->GetEntries();
   
-  maxEntry = 1000000;
+  //  maxEntry = 1000000;
   
+  // !!calculate
+  Float_t thRes = 10.;
+  
+  minTh = minTh - thRes;
+  maxTh = maxTh + thRes;
+  
+  cout << endl;
+  cout << " Calculating Asymmetry  " << endl;
+  cout << " A(" << dPhi << ") in the range " 
+       << minTh << " < #theta < " << maxTh << endl;
+  cout << endl;
+
   for(Long64_t i = 0 ; i < maxEntry; i++ ){
     
     calDataTree->GetEvent(i);
+  
+    A000 = kFALSE, A090 = kFALSE, A180 = kFALSE, A270 = kFALSE;
+    B000 = kFALSE, B090 = kFALSE, B180 = kFALSE, B270  = kFALSE;
+    AB000 = kFALSE, AB090 = kFALSE, AB180 = kFALSE;
     
     for (Int_t j = 0 ; j < nCrystals ; j++){
-	   
+      
       A[j] = kFALSE;  
       B[j] = kFALSE;  
       
@@ -648,20 +689,54 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
 	B[j] = kTRUE;
 	nB[j]++;
       }
-      
-    } // end of: for (Int_t j = 0 ; j < nCrystals
+    } // end of: for (Int_t j = 0 ; j < nCrystals  
+    
+    // Central Crystals are always required
+    
+    if( !A[4] || !B[4])
+      continue;
+    
+    if((A[1]&&B[1])||
+       (A[3]&&B[3])||
+       (A[5]&&B[5])||
+       (A[7]&&B[7])){
+      AB000 = kTRUE;
+      n000++;
+    }
+    
+    if((A[1]&&B[3])||
+       (A[3]&&B[7])||
+       (A[7]&&B[5])||
+       (A[5]&&B[1])){
+      AB090 = kTRUE;
+      n090++;
+    }
+    
+    if((A[1]&&B[7])||
+       (A[3]&&B[5])||
+       (A[7]&&B[1])||
+       (A[5]&&B[3])){
+      AB180 = kTRUE;
+      n180++;
+    }
+    
+    if(AB000 && AB090){
+      cout << endl;
+      cout << " AB000 && AB090 " << endl;
+      cout << endl;
+    }
+    
     
   } // end of : for(Int_t i = 0 ; i < calDa...
   
-  cout << endl;
-  cout << " nA[" << 1 << "] = " << nA[1] <<  endl;
-  cout << " nB[" << 1 << "] = " << nB[1] <<  endl;
+  
+  Asym = (Float_t)n090/n000;
   
   cout << endl;
-  cout << " Here is where the Asymmetry be calculated " << endl;
-  cout << " A(" << dPhi << ") in the range " 
-       << minTh << " < #theta < " << maxTh << endl;
-  cout << endl;
+  cout << " n000 = " << n000 <<  endl;
+  cout << " n090 = " << n090 <<  endl;
+  cout << " n180 = " << n180 <<  endl;
+  
   
 }
 
@@ -707,7 +782,7 @@ void TLab::GraphAsymmetry(Char_t option){
 				10,10,1200,800);
 
   //const Int_t nBins = 10;
-  const Int_t nBins = 4;
+  const Int_t nBins = 5;
 
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
@@ -720,16 +795,16 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t  Ae090[nBins];
   
   // Theta range 
-  Float_t thetaLowEdge  = 30.;
+  Float_t thetaLowEdge  = 50.;
   //thetaLowEdge  = 0.;
-  Float_t thetaHighEdge = 130.;
+  Float_t thetaHighEdge = 150.;
   //thetaHighEdge = 180.;
   
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nBins;
   
   // Axis
   TH1F * hr;
-  hr = canvas->DrawFrame(thetaLowEdge,0.5,thetaHighEdge,2.5);
+  hr = canvas->DrawFrame(thetaLowEdge,0.5,thetaHighEdge,3.5);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   
   hr->GetYaxis()->SetTitle("P(90^{o})/P(0^{o})");
