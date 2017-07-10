@@ -9,7 +9,6 @@ ClassImp(TLab)
 TLab::TLab( ) {
   cout <<  endl;
   cout << " Default constructor. " << endl;
-	cout << " lalalalala " << endl;
 }
 
 // option for use with one raw file 
@@ -147,19 +146,22 @@ void TLab::MakeRawDataTreeFile(){
   
   TString nameHist;
   TString titleHist;
-    
+
+  
   for(Int_t i = 0 ; i < nChannels ; i++ ){
-    
-    nameHist.Form("hQ%d",i);
-    titleHist.Form("hQ%d;QDC bin;Counts",i);
-    hQ[i] = new TH1F(nameHist,titleHist,4096,0,4096);
-    
+
+    for(Int_t run = 0 ; run < nRuns ; run++ ){    
+
+      nameHist.Form("hQ%d_%d",i,run);
+      titleHist.Form("hQ%d_%d;QDC bin;Counts",i,run);
+      hQ[i][run] = new TH1F(nameHist,titleHist,4096,0,4096);
+      
+    }
+
     nameHist.Form("hT%d",i);
     titleHist.Form("hT%d;TDC bin;Counts",i);
     hT[i] = new TH1F(nameHist,titleHist,5200,0,5200);
-  
   }
-  
   cout << endl;
   cout << " Making tree " << endl;
   
@@ -199,12 +201,19 @@ void TLab::MakeRawDataTreeFile(){
 	   << T[4+index] << " " 
 	   << endl;
     }
-  
+    
     for(Int_t i = index ; i < (index+5) ; i++ ){
-      hQ[i]->Fill(Q[i]);
+      
+      if      ( eventNumber < nOR1 )
+	hQ[i][0]->Fill(Q[i]);
+      else if ( eventNumber > (nOR1+nAND))
+	hQ[i][2]->Fill(Q[i]);
+      else
+	hQ[i][1]->Fill(Q[i]);
+      
       hT[i]->Fill(T[i]);
     } // end of: for(Int_t i = 0 ; i < 16 ; i++ ...
-        
+    
     if(index==5){
       rawDataTree->Fill();
       eventNumber++;
@@ -232,6 +241,42 @@ void TLab::MakeRawDataTreeFile(){
 Bool_t TLab::CalibratedROOTFileExists(){
   TFile *file = TFile::Open(rootFileCalName);
   return file;
+}
+
+Int_t TLab::Chan2ArrayA(Int_t channel){
+  
+  Int_t crystal = -1;
+  
+  if     (channel == 0)
+    crystal = 1;
+  else if(channel == 1)
+    crystal = 3;
+  else if(channel == 2)
+    crystal = 4;
+  else if(channel == 3)
+    crystal = 5;
+  else if(channel == 4)
+    crystal = 7;
+  
+  return crystal;
+}
+
+Int_t TLab::Chan2ArrayB(Int_t channel){
+  
+  Int_t crystal = -1;
+  
+  if     (channel == 5)
+    crystal = 1;
+  else if(channel == 6)
+    crystal = 5;
+  else if(channel == 7)
+    crystal = 4;
+  else if(channel == 8)
+    crystal = 3;
+  else if(channel == 9)
+    crystal = 7;
+  
+  return crystal;
 }
 
 void TLab::MakeCalibratedDataTreeFile(){
@@ -310,10 +355,11 @@ void TLab::MakeCalibratedDataTreeFile(){
   cout << " rawDataTree->GetEntries() = " << 
     rawDataTree->GetEntries() << endl;
   
-
+  Long64_t maxEntries = rawDataTree->GetEntries();
+  //maxEntries = 10000;
   
   // Calculate E,T,theta
-  for( Int_t i = 0 ; i < rawDataTree->GetEntries() ; i++ ){
+  for( Long64_t i = 0 ; i <  maxEntries ; i++ ){
     
     rawDataTree->GetEntry(i);
     
@@ -322,37 +368,46 @@ void TLab::MakeCalibratedDataTreeFile(){
     // for ease of use in 
     // asymmetry calculation
     
-    Int_t kA, kB;
+    Int_t chaA, chaB, cryA, cryB;
     
     for (Int_t k = 0 ; k < 5 ; k ++){ 
+
+      // channels for A go from 0 - 4
+      chaA = k;
+      // channels for B go from 5 - 9
+      chaB = (k+5);
       
-      kA = k;
-      kB = (k+5);
+      // crytals for A 
+      cryA = Chan2ArrayA(chaA);
+      // crytals for B 
+      cryB = Chan2ArrayB(chaB);
       
-      QA[k]  = Q[kA];
-      QB[k]  = Q[kB];
+      // pedestal subtracted
+      QA[cryA]  = Q[chaA] - pedQ[chaA][0];
+      QB[cryB]  = Q[chaB] - pedQ[chaB][0];
       
-      TA[k]  = T[kA];
-      TB[k]  = T[kB];
+      // to do: time calibration
+      TA[cryA]  = T[chaA];
+      TB[cryB]  = T[chaB];
       
-      // Array A
-      EA[k]  = (Q[kA]-pedQ[kA])*511./(phoQ[kA]-pedQ[kA]) ;
-      EB[k]  = (Q[kB]-pedQ[kB])*511./(phoQ[kB]-pedQ[kB]) ; ;
+      // Energy Arrays 
+      EA[cryA]  = (Q[chaA]-pedQ[chaA][0])*511./(phoQ[chaA]-pedQ[chaA][0]) ;
+      EB[cryB]  = (Q[chaB]-pedQ[chaB][0])*511./(phoQ[chaB]-pedQ[chaB][0]) ; ;
       
       if ( i == 100 ){
 	cout << endl;
-	cout << "Q[" << kA <<"]    = " << Q[kA] << endl;
-	cout << "pedQ[" << kA <<"] = " << pedQ[kA] << endl;
-	cout << "phoQ[" << kA <<"] = " << phoQ[kA] << endl;
-	cout << "EA[" << kA <<"]   = " << EA[kA] << endl;
+	cout << "Q[" << chaA <<"]    = " << Q[chaA] << endl;
+	cout << "pedQ[" << chaA <<"] = " << pedQ[chaA][0] << endl;
+	cout << "phoQ[" << chaA <<"] = " << phoQ[chaA] << endl;
+	cout << "EA[" << chaA <<"]   = " << EA[chaA] << endl;
       }
 
       // We presume the photons interacted 
       // in the central crystal first
       
       // for all apart from centre crystal
-      tHA[k] = PhotonEnergyToTheta(EA[kA]);
-      tHB[k] = PhotonEnergyToTheta(EB[kB]);
+      tHA[cryA] = PhotonEnergyToTheta(EA[cryA]);
+      tHB[cryB] = PhotonEnergyToTheta(EB[cryB]);
       
       // central crystals
       tHA[2] = ElectronEnergyToTheta(EA[2]);
@@ -361,7 +416,7 @@ void TLab::MakeCalibratedDataTreeFile(){
     }
     
     // Create Energy Histos
-    for( Int_t j = 0 ; j < nChannels ; j++ ) {
+    for( Int_t j = 0 ; j < nCrystals ; j++ ) {
       
       hEA[j]->Fill(EA[j]);
       hEB[j]->Fill(EB[j]);
@@ -399,15 +454,21 @@ void TLab::SetPedestals(){
   
   cout << endl;
   for( Int_t i = 0 ; i < nChannels ; i++ ){
-    histName.Form("hQ%d",i);
-    hQ[i] = (TH1F*)rootFileRawData->Get(histName);
-    pedQ[i] = hQ[i]->GetXaxis()->GetBinCenter(hQ[i]->GetMaximumBin());
+
+    for(Int_t run = 0 ; run < nRuns ; run++ ){    
+      histName.Form("hQ%d_%d",i,run);
+      hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
+      pedQ[i][run] = hQ[i][run]->GetXaxis()->
+	GetBinCenter(hQ[i][run]->GetMaximumBin());
+    }
   }
   
   cout << endl;
-  for( Int_t i = 0 ; i < nChannels ; i++ )
-    cout << " pedQ["<< i << "] =  " << pedQ[i] << endl;
-
+  for(Int_t run = 0 ; run < nRuns ; run++ ){
+    cout << endl;
+    for( Int_t i = 0 ; i < nChannels ; i++ )
+      cout << " pedQ["<< i << "][" << run << "] =  " << pedQ[i][run] << endl;
+  }
   cout << endl;
 
   rootFileRawData->Close();
@@ -415,31 +476,67 @@ void TLab::SetPedestals(){
 }
 
 Float_t TLab::GetPedestal(Int_t channel){
-  return pedQ[channel]; 
+  return pedQ[channel][0]; 
 }
 
 void TLab::SetPhotopeaks(){
+
+   cout << endl;
+  cout << " Setting Photopeaks " << endl;
   
+  TString rawFileName;
   
-  Float_t phoQ_temp[10] = {2871.,
-			   3076.,
-			   3034., //central crystal A
-			   2489.,
-			   2570.,
-			   2741.,
-			   2917.,
-			   3011., //central crystal B
-			   2475.,
-			   3161.};
+  cout << endl;
+  cout << " Reading " << rootFileRawName << endl;
+  rootFileRawData = new TFile(rootFileRawName);
   
+  TString histName = "";
+  Double_t HWHM[10]={0.};
+  Double_t maxv = 0.;
+  
+  cout << endl;
+  for( Int_t i = 0 ; i < nChannels ; i++ ){
+    histName.Form("hQ%d_0",i);
+    hQ[i][0] = (TH1F*)rootFileRawData->Get(histName);
+    hQ[i][0]->GetXaxis()->SetRangeUser(3000,4000);
+    maxv = hQ[i][0]->GetXaxis()->GetBinCenter(hQ[i][0]->GetMaximumBin());
+    TF1 *phoQfit = new TF1("phoQfit","[0]*exp(-0.5*(((x-[1])/[2])^2))",maxv-300,maxv+300);
+    phoQfit->SetParameters(10.,3000.,100.,0.,0.);
+    phoQfit->SetParLimits(1.,3000.,3600.);
+    phoQfit->SetParLimits(2.,100.,300.);
+    hQ[i][0]->Fit("phoQfit","R");
+    TF1 *fit = hQ[i][0]->GetFunction("phoQfit");
+    phoQ[i] = fit->GetParameter(1.);
+    HWHM[i]=(fit->GetParameter(2.))*TMath::Sqrt(TMath::Log(2.));
+    }
+  
+  cout << endl;
+  for( Int_t i = 0 ; i < nChannels ; i++ )
+    cout << " phoQ["<< i << "] =  " << phoQ[i] << endl;
+
+  cout << endl;
+
+  rootFileRawData->Close();
+  
+   Float_t phoQ_temp[10] = {3347.,
+			    3515.,
+			    3225., //central crystal A
+			    3161.,
+			    3395.,
+			    3148.,
+			    3309.,
+			    3458., //central crystal B
+			    3412.,
+			    3263.};
+   
 
   
   cout << endl;
   for( Int_t i = 0 ; i < nChannels ; i++ ){
     phoQ[i] = phoQ_temp[i];
-    cout << " phoQ["<< i << "] =  " << phoQ[i] << endl;
-  }
-  cout << endl;
+     cout << " phoQ["<< i << "] =  " << phoQ[i] << endl;
+   }
+   cout << endl;
 }
 
 Float_t TLab::GetPhotopeak(Int_t channel){
@@ -505,17 +602,18 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   calDataTree->SetBranchAddress("TA",&TA);
   calDataTree->SetBranchAddress("TB",&TB);
   
-  // example variables to use for checking
-  // hits 
-  Bool_t A[nChannels];
-  Bool_t B[nChannels];
+  // 
+  Bool_t A[nCrystals];
+  Bool_t B[nCrystals];
   
-  for ( Int_t i = 0 ; i < nChannels ; i++ ){
-    A[i] = kFALSE;
-    B[i] = kFALSE;
+  Long64_t nA[nCrystals], nB[nCrystals];
+  
+  for ( Int_t i = 0 ; i < nCrystals ; i++ ){
+    A[i]  = kFALSE;
+    B[i]  = kFALSE;
+    nA[i] = 0.;
+    nB[i] = 0.;
   }
-  
-  
   
   // To Do:
   // Implement routine to calculate 
@@ -523,37 +621,42 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   // in a given theta range
   // by counting four hit combinations
   
-  
   cout << endl;
   cout << " entries = " << calDataTree->GetEntries() << endl;
   
-  Int_t nA2 = 0; 
-
-  for(Int_t i = 0 ; i < calDataTree->GetEntries(); i++ ){
+  Long64_t maxEntry = calDataTree->GetEntries();
+  
+  maxEntry = 1000000;
+  
+  for(Long64_t i = 0 ; i < maxEntry; i++ ){
     
     calDataTree->GetEvent(i);
     
-    A[2] = kFALSE;  
-    
-    //cout << " EA[4] = " << EA[4] << endl;
-    
-    if( ( tHA[2] > minTh ) &&
-	( tHA[2] < maxTh )){
+    for (Int_t j = 0 ; j < nCrystals ; j++){
+	   
+      A[j] = kFALSE;  
+      B[j] = kFALSE;  
       
-      A[2] = kTRUE;
+      if( ( tHA[j] > minTh  ) &&
+	  ( tHA[j] < maxTh  )){
+	A[j] = kTRUE;
+	nA[j]++;
+      }
       
-      nA2++;
+      if( ( tHB[j] > minTh  ) &&
+	  ( tHB[j] < maxTh  )){
+	B[j] = kTRUE;
+	nB[j]++;
+      }
       
-      //cout << " A[4] = " << A[4] << endl;    
-    }
+    } // end of: for (Int_t j = 0 ; j < nCrystals
     
-    
-
-    
-  }
+  } // end of : for(Int_t i = 0 ; i < calDa...
   
-  //cout << " nA2 = " << nA4 << endl;     
-
+  cout << endl;
+  cout << " nA[" << 1 << "] = " << nA[1] <<  endl;
+  cout << " nB[" << 1 << "] = " << nB[1] <<  endl;
+  
   cout << endl;
   cout << " Here is where the Asymmetry be calculated " << endl;
   cout << " A(" << dPhi << ") in the range " 
@@ -618,9 +721,9 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // Theta range 
   Float_t thetaLowEdge  = 30.;
-  thetaLowEdge  = 0.;
+  //thetaLowEdge  = 0.;
   Float_t thetaHighEdge = 130.;
-  thetaHighEdge = 360.;
+  //thetaHighEdge = 180.;
   
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nBins;
   

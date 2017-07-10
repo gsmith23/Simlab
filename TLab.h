@@ -30,6 +30,9 @@ class TLab : public TObject{
   Bool_t CalibratedROOTFileExists();
   
   void MakeRawDataTreeFile();
+
+  Int_t Chan2ArrayA(Int_t);
+  Int_t Chan2ArrayB(Int_t);
   
   void MakeCalibratedDataTreeFile();
   
@@ -58,6 +61,11 @@ class TLab : public TObject{
   //======================
   
   static const Int_t nChannels = 10;
+  static const Int_t nCrystals = 9;
+  static const Int_t nRuns = 3;
+
+  static const Long64_t nOR1 = 500000;
+  static const Long64_t nAND = 6580429; 
   
   Int_t runNumberInt;
 
@@ -78,7 +86,7 @@ class TLab : public TObject{
   TCanvas *canvas2;
   
   // Raw data
-  TH1F   *hQ[nChannels];
+  TH1F   *hQ[nChannels][nRuns];
   TH1F   *hT[nChannels];
 
   Long64_t eventNumber;
@@ -87,7 +95,7 @@ class TLab : public TObject{
   
   Float_t T[nChannels];
 
-  Float_t pedQ[nChannels];
+  Float_t pedQ[nChannels][nRuns];
   Float_t phoQ[nChannels];
 
   // Cal data
