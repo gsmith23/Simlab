@@ -146,19 +146,22 @@ void TLab::MakeRawDataTreeFile(){
   
   TString nameHist;
   TString titleHist;
-    
+
+  
   for(Int_t i = 0 ; i < nChannels ; i++ ){
-    
-    nameHist.Form("hQ%d",i);
-    titleHist.Form("hQ%d;QDC bin;Counts",i);
-    hQ[i] = new TH1F(nameHist,titleHist,4096,0,4096);
-    
+
+    for(Int_t run = 0 ; run < nRuns ; run++ ){    
+
+      nameHist.Form("hQ%d_%d",i,run);
+      titleHist.Form("hQ%d_%d;QDC bin;Counts",i,run);
+      hQ[i][run] = new TH1F(nameHist,titleHist,4096,0,4096);
+      
+    }
+
     nameHist.Form("hT%d",i);
     titleHist.Form("hT%d;TDC bin;Counts",i);
     hT[i] = new TH1F(nameHist,titleHist,5200,0,5200);
-  
   }
-  
   cout << endl;
   cout << " Making tree " << endl;
   
@@ -198,12 +201,19 @@ void TLab::MakeRawDataTreeFile(){
 	   << T[4+index] << " " 
 	   << endl;
     }
-  
+    
     for(Int_t i = index ; i < (index+5) ; i++ ){
-      hQ[i]->Fill(Q[i]);
+      
+      if      ( eventNumber < nOR1 )
+	hQ[i][0]->Fill(Q[i]);
+      else if ( eventNumber > (nOR1+nAND))
+	hQ[i][2]->Fill(Q[i]);
+      else
+	hQ[i][1]->Fill(Q[i]);
+      
       hT[i]->Fill(T[i]);
     } // end of: for(Int_t i = 0 ; i < 16 ; i++ ...
-        
+    
     if(index==5){
       rawDataTree->Fill();
       eventNumber++;
@@ -345,6 +355,9 @@ void TLab::MakeCalibratedDataTreeFile(){
   cout << " rawDataTree->GetEntries() = " << 
     rawDataTree->GetEntries() << endl;
   
+  Long64_t maxEntries = rawDataTree->GetEntries();
+  //maxEntries = 10000;
+
   for (Int_t i = 0 ; i < nCrystals ; i++){
     EA[i]  = 0.;
     EB[i]  = 0.;
@@ -357,9 +370,6 @@ void TLab::MakeCalibratedDataTreeFile(){
     QA[i]  = 0.;
     QB[i]  = 0.;
   }
-  
-  Long64_t maxEntries = rawDataTree->GetEntries();
-  //  maxEntries = 100000;
   
   Int_t chaA, chaB, cryA, cryB;
   
@@ -386,23 +396,27 @@ void TLab::MakeCalibratedDataTreeFile(){
       cryB = Chan2ArrayB(chaB);
       
       // pedestal subtracted
-      QA[cryA]  = Q[chaA] - pedQ[chaA];
-      QB[cryB]  = Q[chaB] - pedQ[chaB];
+
+      QA[cryA]  = Q[chaA] - pedQ[chaA][0];
+      QB[cryB]  = Q[chaB] - pedQ[chaB][0];
+
       
       // to do: time calibration
       TA[cryA]  = T[chaA];
       TB[cryB]  = T[chaB];
       
       // Energy Arrays 
-      EA[cryA]  = (Q[chaA]-pedQ[chaA])*511./(phoQ[chaA]-pedQ[chaA]) ;
-      EB[cryB]  = (Q[chaB]-pedQ[chaB])*511./(phoQ[chaB]-pedQ[chaB]) ; ;
+
+      EA[cryA]  = (Q[chaA]-pedQ[chaA][0])*511./(phoQ[chaA]-pedQ[chaA][0]) ;
+      EB[cryB]  = (Q[chaB]-pedQ[chaB][0])*511./(phoQ[chaB]-pedQ[chaB][0]) ; ;
       
       if ( i == 100 ){
 	cout << endl;
-	cout << "   Q["    << chaA <<"] = " << Q[chaA] << endl;
-	cout << "pedQ[" << chaA <<"] = " << pedQ[chaA] << endl;
+	cout << "Q[" << chaA <<"]    = " << Q[chaA] << endl;
+	cout << "pedQ[" << chaA <<"] = " << pedQ[chaA][0] << endl;
 	cout << "phoQ[" << chaA <<"] = " << phoQ[chaA] << endl;
-	cout << "  EA["   << cryA <<"] = " << EA[cryA] << endl;
+	cout << "EA[" << chaA <<"]   = " << EA[chaA] << endl;
+
       }
 
       // We presume the photons interacted 
@@ -458,15 +472,21 @@ void TLab::SetPedestals(){
   
   cout << endl;
   for( Int_t i = 0 ; i < nChannels ; i++ ){
-    histName.Form("hQ%d",i);
-    hQ[i] = (TH1F*)rootFileRawData->Get(histName);
-    pedQ[i] = hQ[i]->GetXaxis()->GetBinCenter(hQ[i]->GetMaximumBin());
+
+    for(Int_t run = 0 ; run < nRuns ; run++ ){    
+      histName.Form("hQ%d_%d",i,run);
+      hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
+      pedQ[i][run] = hQ[i][run]->GetXaxis()->
+	GetBinCenter(hQ[i][run]->GetMaximumBin());
+    }
   }
   
   cout << endl;
-  for( Int_t i = 0 ; i < nChannels ; i++ )
-    cout << " pedQ["<< i << "] =  " << pedQ[i] << endl;
-
+  for(Int_t run = 0 ; run < nRuns ; run++ ){
+    cout << endl;
+    for( Int_t i = 0 ; i < nChannels ; i++ )
+      cout << " pedQ["<< i << "][" << run << "] =  " << pedQ[i][run] << endl;
+  }
   cout << endl;
 
   rootFileRawData->Close();
@@ -474,31 +494,67 @@ void TLab::SetPedestals(){
 }
 
 Float_t TLab::GetPedestal(Int_t channel){
-  return pedQ[channel]; 
+  return pedQ[channel][0]; 
 }
 
 void TLab::SetPhotopeaks(){
+
+   cout << endl;
+  cout << " Setting Photopeaks " << endl;
   
+  TString rawFileName;
   
-  Float_t phoQ_temp[10] = {2871.,
-			   3076.,
-			   3034., //central crystal A
-			   2489.,
-			   2570.,
-			   2741.,
-			   2917.,
-			   3011., //central crystal B
-			   2475.,
-			   3161.};
+  cout << endl;
+  cout << " Reading " << rootFileRawName << endl;
+  rootFileRawData = new TFile(rootFileRawName);
   
+  TString histName = "";
+  Double_t HWHM[10]={0.};
+  Double_t maxv = 0.;
+  
+  cout << endl;
+  for( Int_t i = 0 ; i < nChannels ; i++ ){
+    histName.Form("hQ%d_0",i);
+    hQ[i][0] = (TH1F*)rootFileRawData->Get(histName);
+    hQ[i][0]->GetXaxis()->SetRangeUser(3000,4000);
+    maxv = hQ[i][0]->GetXaxis()->GetBinCenter(hQ[i][0]->GetMaximumBin());
+    TF1 *phoQfit = new TF1("phoQfit","[0]*exp(-0.5*(((x-[1])/[2])^2))",maxv-300,maxv+300);
+    phoQfit->SetParameters(10.,3000.,100.,0.,0.);
+    phoQfit->SetParLimits(1.,3000.,3600.);
+    phoQfit->SetParLimits(2.,100.,300.);
+    hQ[i][0]->Fit("phoQfit","R");
+    TF1 *fit = hQ[i][0]->GetFunction("phoQfit");
+    phoQ[i] = fit->GetParameter(1.);
+    HWHM[i]=(fit->GetParameter(2.))*TMath::Sqrt(TMath::Log(2.));
+    }
+  
+  cout << endl;
+  for( Int_t i = 0 ; i < nChannels ; i++ )
+    cout << " phoQ["<< i << "] =  " << phoQ[i] << endl;
+
+  cout << endl;
+
+  rootFileRawData->Close();
+  
+   Float_t phoQ_temp[10] = {3347.,
+			    3515.,
+			    3225., //central crystal A
+			    3161.,
+			    3395.,
+			    3148.,
+			    3309.,
+			    3458., //central crystal B
+			    3412.,
+			    3263.};
+   
 
   
   cout << endl;
   for( Int_t i = 0 ; i < nChannels ; i++ ){
     phoQ[i] = phoQ_temp[i];
-    cout << " phoQ["<< i << "] =  " << phoQ[i] << endl;
-  }
-  cout << endl;
+     cout << " phoQ["<< i << "] =  " << phoQ[i] << endl;
+   }
+   cout << endl;
 }
 
 Float_t TLab::GetPhotopeak(Int_t channel){
@@ -583,6 +639,7 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   Bool_t AB000 = kFALSE, AB090 = kFALSE, AB180 = kFALSE;
   
   Double_t n000 = 0., n090 = 0., n180 = 0.;
+
   
   Long64_t maxEntry = calDataTree->GetEntries();
   
@@ -599,7 +656,7 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   cout << " A(" << dPhi << ") in the range " 
        << minTh << " < #theta < " << maxTh << endl;
   cout << endl;
-  
+
   for(Long64_t i = 0 ; i < maxEntry; i++ ){
     
     calDataTree->GetEvent(i);
