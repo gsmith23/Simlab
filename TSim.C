@@ -320,8 +320,6 @@ Int_t TSim::SortEvents(TString inputFileName,
     newX[i] = 0.;
     newY[i] = 0.;
     newZ[i] = 0.;
-
-
   }
   
   TVector3 crossVector(0.,0.,0.);
