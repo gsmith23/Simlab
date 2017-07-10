@@ -418,8 +418,8 @@ void TLab::MakeCalibratedDataTreeFile(){
       QA_temp    = Q[chaA]-pedQ[chaA][0];
       QB_temp    = Q[chaB]-pedQ[chaB][0];
       
-      phoQA_temp = phoQ[chaA][0]-pedQ[chaA][0];
-      phoQB_temp = phoQ[chaB][0]-pedQ[chaB][0];
+      phoQA_temp = phoQ[chaA][2]-pedQ[chaA][0];
+      phoQB_temp = phoQ[chaB][2]-pedQ[chaB][0];
 	
       EA[cryA]  = QA_temp * 511./phoQA_temp;
       EB[cryB]  = QB_temp * 511./phoQB_temp;
@@ -576,7 +576,7 @@ void TLab::SetPhotopeaks(){
 }
 
 Float_t TLab::GetPhotopeak(Int_t channel){
-  return phoQ[channel][0]; 
+  return phoQ[channel][2]; 
 }
 
 
