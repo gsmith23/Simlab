@@ -52,9 +52,6 @@ class TLab : public TObject{
   
   void GraphAsymmetry(Char_t);
   
-  Int_t Chan2ArrayA(Int_t);
-  Int_t Chan2ArrayB(Int_t);
-
   void SetStyle();
   
   //======================
@@ -70,7 +67,7 @@ class TLab : public TObject{
 
   static const Long64_t nOR1 = 500000;
   static const Long64_t nAND = 6580429; 
-
+  static const Long64_t nOR2 = 890963;
   
   Int_t runNumberInt;
 
@@ -101,7 +98,12 @@ class TLab : public TObject{
   Float_t T[nChannels];
 
   Float_t pedQ[nChannels][nRuns];
-  Float_t phoQ[nChannels];
+  Float_t phoQ[nChannels][nRuns];
+  Float_t HWHM[nChannels][nRuns];
+
+  // Fit Results
+  
+  //Float_t 
 
   // Cal data
   TH1F   *hEA[nCrystals];
