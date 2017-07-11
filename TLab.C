@@ -724,6 +724,8 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   
   Double_t n000 = 0., n090 = 0., n180 = 0.;
   
+  Int_t nAB000090 = 0, nAB000180 = 0 , nAB090180 = 0;
+  
   Long64_t maxEntry = calDataTree->GetEntries();
 
   cout << endl;
@@ -754,23 +756,36 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
       goodThetaA = GoodTheta(tHA[j]);
       goodThetaB = GoodTheta(tHB[j]);
       
+      // if( ( goodThetaA ) &&
+// 	  ( tHA[j] > minTh - tHAErr[j]  ) &&
+// 	  ( tHA[j] < maxTh + tHAErr[j] )){
+// 	A[j] = kTRUE;
+// 	nA[j]++;
+//       }
+      
+//       if( ( goodThetaB ) &&
+// 	  ( tHB[j] > minTh - tHBErr[j] ) &&
+// 	  ( tHB[j] < maxTh + tHBErr[j])){
+// 	B[j] = kTRUE;
+// 	nB[j]++;
+	
       if( ( goodThetaA ) &&
-	  ( tHA[j] > minTh - tHAErr[j]  ) &&
-	  ( tHA[j] < maxTh + tHAErr[j] )){
+	  ( tHA[j] > minTh - thRes  ) &&
+	  ( tHA[j] < maxTh + thRes )){
 	A[j] = kTRUE;
 	nA[j]++;
       }
       
       if( ( goodThetaB ) &&
-	  ( tHB[j] > minTh - tHBErr[j] ) &&
-	  ( tHB[j] < maxTh + tHBErr[j])){
+	  ( tHB[j] > minTh - thRes ) &&
+	  ( tHB[j] < maxTh + thRes )){
 	B[j] = kTRUE;
 	nB[j]++;
+	
       }
     } // end of: for (Int_t j = 0 ; j < nCrystals  
     
     // Central Crystals are always required
-    
     if( !A[4] || !B[4])
       continue;
     
@@ -799,17 +814,15 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     }
     
     if(AB000 && AB090){
-      cout << endl;
-      cout << " entry = "  << i << endl;
-      cout << " AB000 && AB090 " << endl;
-      cout << endl;
+      nAB000090++;
     }
     
     if(AB000 && AB180){
-      cout << endl;
-      cout << " entry = "  << i << endl;
-      cout << " AB000 && AB180 " << endl;
-      cout << endl;
+      nAB000180++;
+    }
+    
+    if(AB090 && AB180){
+      nAB090180++;
     }
     
     
@@ -826,7 +839,9 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   cout << " n000 = " << n000 <<  endl;
   cout << " n090 = " << n090 <<  endl;
   cout << " n180 = " << n180 <<  endl;
-  
+  cout << " nAB000090 = " << nAB000090 << endl;
+  cout << " nAB000180 = " << nAB000180 << endl;
+  cout << " nAB090180 = " << nAB090180 << endl;
   
 }
 
