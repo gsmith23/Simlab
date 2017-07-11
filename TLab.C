@@ -295,6 +295,20 @@ void TLab::MakeCalibratedDataTreeFile(){
   // are hardcoded from manual fits
   
   SetPhotopeaks();
+
+  Float_t temp_phoQ = 0.;
+  
+  // HWHM QDC to energy
+  for (Int_t run = 0 ; run < nRuns ; run++){
+    for (Int_t i=0; i<nChannels; i++){
+      
+      // Set to use OR data after AND data
+      temp_phoQ = GetPhotopeak(i) - GetPedestal(i);
+      HWHM[i][run] = HWHM[i][run]*511./temp_phoQ;
+      
+      cout<<"HWHM["<<i<<"][" << run << "] = "<<HWHM[i][run]<<endl;
+    }
+  }
   
   cout << endl;
   cout << "Post photopeak setting rootFileRawName is " 
@@ -327,10 +341,16 @@ void TLab::MakeCalibratedDataTreeFile(){
 
   tempString.Form("tHA[%d]/F",nCrystals);
   calDataTree->Branch("tHA",tHA,tempString);
+
+  tempString.Form("tHAErr[%d]/F",nCrystals);
+  calDataTree->Branch("tHAErr",tHAErr,tempString);
   
   tempString.Form("tHB[%d]/F",nCrystals);
   calDataTree->Branch("tHB",tHB,tempString);
 
+  tempString.Form("tHBErr[%d]/F",nCrystals);
+  calDataTree->Branch("tHBErr",tHBErr,tempString);
+  
   tempString.Form("TA[%d]/F",nCrystals);
   calDataTree->Branch("TA",TA,tempString);
 
@@ -365,7 +385,9 @@ void TLab::MakeCalibratedDataTreeFile(){
     EA[i]  = 0.;
     EB[i]  = 0.;
     tHA[i] = 0.;
+    tHAErr[i] = 0.;
     tHB[i] = 0.;
+    tHBErr[i] = 0.;
     TA[i]  = 0.;
     TB[i]  = 0.;
     
@@ -405,22 +427,23 @@ void TLab::MakeCalibratedDataTreeFile(){
       // crytals for B 
       cryB = Chan2ArrayB(chaB);
       
-      // pedestal subtracted
-
-      QA[cryA]  = Q[chaA] - pedQ[chaA][0];
-      QB[cryB]  = Q[chaB] - pedQ[chaB][0];
-      
       // to do: time calibration
       TA[cryA]  = T[chaA];
       TB[cryB]  = T[chaB];
       
       // Energy Arrays 
-      QA_temp    = Q[chaA]-pedQ[chaA][0];
-      QB_temp    = Q[chaB]-pedQ[chaB][0];
+      // Set to use OR data after AND data
+      QA_temp   = Q[chaA]-GetPedestal(chaA);
+      QB_temp   = Q[chaB]-GetPedestal(chaB);
+
+      // pedestal subtracted
+      QA[cryA]  = QA_temp;
+      QB[cryB]  = QB_temp;
       
-      phoQA_temp = phoQ[chaA][2]-pedQ[chaA][0];
-      phoQB_temp = phoQ[chaB][2]-pedQ[chaB][0];
-	
+      // Set to use OR data after AND data
+      phoQA_temp = GetPhotopeak(chaA) - GetPedestal(chaA);
+      phoQB_temp = GetPhotopeak(chaB) - GetPedestal(chaB);
+      
       EA[cryA]  = QA_temp * 511./phoQA_temp;
       EB[cryB]  = QB_temp * 511./phoQB_temp;
       
@@ -430,8 +453,12 @@ void TLab::MakeCalibratedDataTreeFile(){
       // for all apart from centre crystal
       tHA[cryA] = PhotonEnergyToTheta(EA[cryA]);
       tHB[cryB] = PhotonEnergyToTheta(EB[cryB]);
+
+
+      tHAErr[cryA] = ThetaToThetaError(tHA[cryA],chaA);
+      tHBErr[cryB] = ThetaToThetaError(tHB[cryB],chaB);
     }
-    
+
     // central crystals
     tHA[4] = ElectronEnergyToTheta(EA[4]);
     tHB[4] = ElectronEnergyToTheta(EB[4]);
@@ -444,9 +471,7 @@ void TLab::MakeCalibratedDataTreeFile(){
       
     }
     
-    //if(EA[4] > .200 && EB[4] > .200)
     calDataTree->Fill();
-    
   }
   
   calDataTree->Write();
@@ -498,7 +523,7 @@ void TLab::SetPedestals(){
 }
 
 Float_t TLab::GetPedestal(Int_t channel){
-  return pedQ[channel][0]; 
+  return pedQ[channel][2]; 
 }
 
 void TLab::SetPhotopeaks(){
@@ -518,9 +543,8 @@ void TLab::SetPhotopeaks(){
 				10,10,1200,800);
   
   TString histName = "";
-  
   Char_t plotName[128];
-  
+
   Double_t maxv = 0.;
 
   TF1 *phoQfit = nullptr;
@@ -579,6 +603,46 @@ Float_t TLab::GetPhotopeak(Int_t channel){
   return phoQ[channel][2]; 
 }
 
+Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
+  return (511./(2 - Cos(TMath::DegToRad()*theta)));
+}
+
+Float_t TLab::ThetaToElectronEnergy(Float_t theta){
+  return (511. - (511./(2. - Cos(TMath::DegToRad()*theta))));
+}
+
+Float_t TLab::ThetaToThetaError(Float_t theta,
+				Int_t channel){
+  
+  // !! Use the post AND data result for now
+  // ie use HWHM[channel][2]
+  //
+  // Note that since we have 
+  // using namespace TMath in
+  // include.h, TMath:: can be omitted
+  Float_t EnergyRes = HWHM[channel][2]/Sqrt(511.);
+  Float_t energy = 0.;
+  Float_t energy_max = 0.;
+  Float_t energy_min = 0.;
+  Float_t theta_min = 0.;
+  Float_t theta_max = 0.;
+  
+  //Channels 2 and 7 correspond to central crystals
+  if ((channel!=2)&&(channel!=7)){
+    energy = ThetaToPhotonEnergy(theta);
+    energy_max = energy + EnergyRes*TMath::Sqrt(energy);
+    theta_min = theta -  PhotonEnergyToTheta(energy_max);
+    energy_min = energy - EnergyRes*TMath::Sqrt(energy);
+    theta_max = PhotonEnergyToTheta(energy_min)- theta;}
+  else{
+    energy = ThetaToElectronEnergy(theta);
+    energy_max = energy + EnergyRes*TMath::Sqrt(energy);
+    theta_max = ElectronEnergyToTheta(energy_max) - theta;
+    energy_min = energy - EnergyRes*TMath::Sqrt(energy);
+    theta_min = theta - ElectronEnergyToTheta(energy_min);
+  }
+  return (theta_max>theta_min? theta_max : theta_min);
+}
 
 Bool_t TLab::GoodTiming(Float_t time){
   
@@ -634,6 +698,9 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   
   calDataTree->SetBranchAddress("tHA",tHA);
   calDataTree->SetBranchAddress("tHB",tHB);
+
+  calDataTree->SetBranchAddress("tHAErr",tHAErr);
+  calDataTree->SetBranchAddress("tHBErr",tHBErr);
   
   calDataTree->SetBranchAddress("TA",&TA);
   calDataTree->SetBranchAddress("TB",&TB);
@@ -651,17 +718,16 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     nB[i] = 0.;
   }
   
+  Bool_t goodThetaA = kFALSE, goodThetaB = kFALSE;
+
   Bool_t AB000 = kFALSE, AB090 = kFALSE, AB180 = kFALSE;
   
   Double_t n000 = 0., n090 = 0., n180 = 0.;
-
   
   Long64_t maxEntry = calDataTree->GetEntries();
 
   cout << endl;
   cout << " n entries = " << maxEntry << endl;
-  
-  //  maxEntry = 1000000;
   
   cout << endl;
   cout << " Calculating Asymmetry  " << endl;
@@ -684,16 +750,20 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     for (Int_t j = 0 ; j < nCrystals ; j++){
       
       A[j] = kFALSE;  
-      B[j] = kFALSE;  
+      B[j] = kFALSE;
+      goodThetaA = GoodTheta(tHA[j]);
+      goodThetaB = GoodTheta(tHB[j]);
       
-      if( ( tHA[j] > minTh  ) &&
-	  ( tHA[j] < maxTh  )){
+      if( ( goodThetaA ) &&
+	  ( tHA[j] > minTh - tHAErr[j]  ) &&
+	  ( tHA[j] < maxTh + tHAErr[j] )){
 	A[j] = kTRUE;
 	nA[j]++;
       }
       
-      if( ( tHB[j] > minTh  ) &&
-	  ( tHB[j] < maxTh  )){
+      if( ( goodThetaB ) &&
+	  ( tHB[j] > minTh - tHBErr[j] ) &&
+	  ( tHB[j] < maxTh + tHBErr[j])){
 	B[j] = kTRUE;
 	nB[j]++;
       }
@@ -745,11 +815,13 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     
   } // end of : for(Int_t i = 0 ; i < calDa...
   
-  if     (dPhi==90)
+  if     (dPhi==90){
     Asym = (Float_t)n090/n000;
+    AsymErr = (Float_t)Asym*Sqrt((1/n090)+(1/n000));
+  }
   else if(dPhi==180)
     Asym = (Float_t)n180/n000;
-  
+
   cout << endl;
   cout << " n000 = " << n000 <<  endl;
   cout << " n090 = " << n090 <<  endl;

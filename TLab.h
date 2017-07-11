@@ -31,9 +31,6 @@ class TLab : public TObject{
   
   void MakeRawDataTreeFile();
 
-  Int_t Chan2ArrayA(Int_t);
-  Int_t Chan2ArrayB(Int_t);
-  
   void MakeCalibratedDataTreeFile();
   
   void SetPedestals();
@@ -48,6 +45,13 @@ class TLab : public TObject{
   Float_t ElectronEnergyToTheta(Float_t);
   Float_t PhotonEnergyToTheta(Float_t);
 
+  Float_t ThetaToThetaError(Float_t, Int_t);
+  Float_t ThetaToPhotonEnergy(Float_t);
+  Float_t ThetaToElectronEnergy(Float_t);
+
+  Int_t Chan2ArrayA(Int_t channel);
+  Int_t Chan2ArrayB(Int_t channel);
+  
   void CalculateAsymmetry(Int_t,Float_t,Float_t);
   
   void GraphAsymmetry(Char_t);
@@ -97,13 +101,11 @@ class TLab : public TObject{
   
   Float_t T[nChannels];
 
+
+  // Fit Results
   Float_t pedQ[nChannels][nRuns];
   Float_t phoQ[nChannels][nRuns];
   Float_t HWHM[nChannels][nRuns];
-
-  // Fit Results
-  
-  //Float_t 
 
   // Cal data
   TH1F   *hEA[nCrystals];
@@ -120,7 +122,10 @@ class TLab : public TObject{
   
   Float_t tHA[nCrystals];
   Float_t tHB[nCrystals];
-  
+
+  Float_t tHAErr[nCrystals];
+  Float_t tHBErr[nCrystals];
+
   Float_t Asym;
   Float_t AsymErr;
   
