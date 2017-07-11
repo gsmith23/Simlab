@@ -803,7 +803,7 @@ void TLab::GraphAsymmetry(Char_t option){
 				10,10,1200,800);
 
   //const Int_t nBins = 10;
-  const Int_t nThBins  = 7;
+  const Int_t nThBins  = 9;
   //  const Int_t nPhiBins = 4;
   
   Float_t  theta[nThBins];
@@ -816,9 +816,9 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t  Ae090[nThBins];
 
   // Theta range 
-  Float_t thetaLowEdge  = 30.;
+  Float_t thetaLowEdge  = 0.;
   //thetaLowEdge  = 0.;
-  Float_t thetaHighEdge = 170.;
+  Float_t thetaHighEdge = 180.;
   //thetaHighEdge = 180.;
 
   // The ratio to be calculated for the
@@ -831,7 +831,7 @@ void TLab::GraphAsymmetry(Char_t option){
   // Axis
   TH1F * hr;
 
-  Float_t maxY = 4.0;
+  Float_t maxY = 2.5;
   
   if(dPhiDiff==180)
     maxY = 6.0;
@@ -885,6 +885,9 @@ void TLab::GraphAsymmetry(Char_t option){
       As090[i] = Asym;
 	
       Ae090[i] = AsymErr;
+
+      if(As090[i] < 1.0 || As090[i] > 2.5)
+	As090[i] = 0.0;
 
       cout << endl;
       cout << " A(90,"<< theta[i] <<")/A(0,"<< theta[i] <<") = "  
