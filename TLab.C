@@ -803,14 +803,18 @@ void TLab::GraphAsymmetry(Char_t option){
 				10,10,1200,800);
 
   //const Int_t nBins = 10;
-  const Int_t nBins = 7;
+  const Int_t nThBins  = 7;
+  //  const Int_t nPhiBins = 4;
   
+  Float_t  theta[nThBins];
+  Float_t  thetaRange[nThBins][2];
   
-  Float_t  theta[nBins];
-  Float_t  thetaRange[nBins][2];
-  Float_t  As090[nBins];
-  Float_t  Ae090[nBins];
-  
+//   Float_t  phi[nPhiBins];
+//   Float_t  phiRange[nPhiBins];
+
+  Float_t  As090[nThBins];
+  Float_t  Ae090[nThBins];
+
   // Theta range 
   Float_t thetaLowEdge  = 30.;
   //thetaLowEdge  = 0.;
@@ -822,7 +826,7 @@ void TLab::GraphAsymmetry(Char_t option){
   // A(90) = P(90)/P(0) 
   Int_t   dPhiDiff = 90;
   
-  Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nBins;
+  Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
   // Axis
   TH1F * hr;
@@ -842,7 +846,7 @@ void TLab::GraphAsymmetry(Char_t option){
   hr->GetYaxis()->SetTitle(yAxis);
   
   // Theory curve
-  Float_t aTheory[nBins];
+  Float_t aTheory[nThBins];
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
   Float_t alpha1   = DegToRad()*22.5;
@@ -857,10 +861,10 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // Simulation results
   
-  Float_t aSim[nBins];
-  Float_t aSimE[nBins];
+  Float_t aSim[nThBins];
+  Float_t aSimE[nThBins];
   
-  for(Int_t i = 0 ; i < nBins ; i++){
+  for(Int_t i = 0 ; i < nThBins ; i++){
     thetaRange[i][0]  = thetaLowEdge + thetaBinWidth*i;
     thetaRange[i][1]  = thetaRange[i][0] + thetaBinWidth;
     theta[i] = (thetaRange[i][0] + thetaRange[i][1])/2.;
@@ -873,7 +877,7 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " Calculating asymmetry values and " << endl;
     cout << " associated errors for lab data ... " << endl;
     
-    for(Int_t i = 0 ; i < nBins ; i++){
+    for(Int_t i = 0 ; i < nThBins ; i++){
       
       CalculateAsymmetry(dPhiDiff,thetaRange[i][0],
 			 thetaRange[i][1]);
@@ -899,7 +903,7 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " semiSpan = " << semiSpan*RadToDeg() << endl;
     cout << " alpha1   = " << alpha1*RadToDeg()   << endl;
     
-    for(Int_t i = 0 ; i < nBins ; i++){
+    for(Int_t i = 0 ; i < nThBins ; i++){
       theta[i] = theta[i]*DegToRad();
             
       aTheory[i] = theory->rho2(theta[i],semiSpan,alpha1);
@@ -922,7 +926,7 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " Calculating theory curve " << endl;
     cout << " and simulation results ... " << endl;
     
-    for(Int_t i = 0 ; i < nBins ; i++){
+    for(Int_t i = 0 ; i < nThBins ; i++){
       theta[i] = theta[i]*DegToRad();
       
       aTheory[i] = theory->rho2(theta[i],semiSpan,alpha1);
@@ -940,10 +944,10 @@ void TLab::GraphAsymmetry(Char_t option){
   cout << " Plotting the results.  " << endl;
     
   TGraphErrors *grAsym[3];
-  grAsym[0] =  new TGraphErrors(nBins,theta,As090,0,Ae090);
-  grAsym[1] =  new TGraphErrors(nBins,theta,aTheory,0,0);
+  grAsym[0] =  new TGraphErrors(nThBins,theta,As090,0,Ae090);
+  grAsym[1] =  new TGraphErrors(nThBins,theta,aTheory,0,0);
   
-  grAsym[2] =  new TGraphErrors(nBins,theta,aSim,0,aSimE);
+  grAsym[2] =  new TGraphErrors(nThBins,theta,aSim,0,aSimE);
   
   grAsym[0]->SetLineColor(kBlue);
   grAsym[0]->SetMarkerColor(kBlue);
