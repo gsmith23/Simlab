@@ -64,14 +64,22 @@ class TLab : public TObject{
   //======================
   //======================
   
-  static const Int_t nChannels = 10;
+  // crystals per array
   static const Int_t nCrystals = 9;
-
+  
+  // only five per array are recorded
+  static const Int_t nChannels = 10;
+  
+  // OR, AND, OR
   static const Int_t nRuns = 3;
 
   static const Long64_t nOR1 = 500000;
   static const Long64_t nAND = 6580429; 
   static const Long64_t nOR2 = 890963;
+  
+  // For Graphing
+  static const Int_t nPhiBins = 4;
+  static const Int_t nThBins  = 8;
   
   Int_t runNumberInt;
 
@@ -101,7 +109,6 @@ class TLab : public TObject{
   
   Float_t T[nChannels];
 
-
   // Fit Results
   Float_t pedQ[nChannels][nRuns];
   Float_t phoQ[nChannels][nRuns];
@@ -128,6 +135,9 @@ class TLab : public TObject{
 
   Float_t Asym;
   Float_t AsymErr;
+  
+  Float_t AsymPhi[nPhiBins];
+  Float_t AsymPhiErr[nPhiBins];
   
   Double_t R000;
   Double_t R090;
