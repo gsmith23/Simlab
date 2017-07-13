@@ -31,9 +31,6 @@ class TLab : public TObject{
   
   void MakeRawDataTreeFile();
 
-  Int_t Chan2ArrayA(Int_t);
-  Int_t Chan2ArrayB(Int_t);
-  
   void MakeCalibratedDataTreeFile();
   
   void SetPedestals();
@@ -48,13 +45,17 @@ class TLab : public TObject{
   Float_t ElectronEnergyToTheta(Float_t);
   Float_t PhotonEnergyToTheta(Float_t);
 
+  Float_t ThetaToThetaError(Float_t, Int_t);
+  Float_t ThetaToPhotonEnergy(Float_t);
+  Float_t ThetaToElectronEnergy(Float_t);
+
+  Int_t Chan2ArrayA(Int_t channel);
+  Int_t Chan2ArrayB(Int_t channel);
+  
   void CalculateAsymmetry(Int_t,Float_t,Float_t);
   
   void GraphAsymmetry(Char_t);
   
-  Int_t Chan2ArrayA(Int_t);
-  Int_t Chan2ArrayB(Int_t);
-
   void SetStyle();
   
   //======================
@@ -63,14 +64,22 @@ class TLab : public TObject{
   //======================
   //======================
   
-  static const Int_t nChannels = 10;
+  // crystals per array
   static const Int_t nCrystals = 9;
-
+  
+  // only five per array are recorded
+  static const Int_t nChannels = 10;
+  
+  // OR, AND, OR
   static const Int_t nRuns = 3;
 
   static const Long64_t nOR1 = 500000;
   static const Long64_t nAND = 6580429; 
-
+  static const Long64_t nOR2 = 890963;
+  
+  // For Graphing
+  static const Int_t nPhiBins = 4;
+  static const Int_t nThBins  = 8;
   
   Int_t runNumberInt;
 
@@ -100,8 +109,10 @@ class TLab : public TObject{
   
   Float_t T[nChannels];
 
+  // Fit Results
   Float_t pedQ[nChannels][nRuns];
-  Float_t phoQ[nChannels];
+  Float_t phoQ[nChannels][nRuns];
+  Float_t HWHM[nChannels][nRuns];
 
   // Cal data
   TH1F   *hEA[nCrystals];
@@ -118,9 +129,15 @@ class TLab : public TObject{
   
   Float_t tHA[nCrystals];
   Float_t tHB[nCrystals];
-  
+
+  Float_t tHAErr[nCrystals];
+  Float_t tHBErr[nCrystals];
+
   Float_t Asym;
   Float_t AsymErr;
+  
+  Float_t AsymPhi[nPhiBins];
+  Float_t AsymPhiErr[nPhiBins];
   
   Double_t R000;
   Double_t R090;
