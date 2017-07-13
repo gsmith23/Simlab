@@ -698,7 +698,7 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   
   calDataTree->SetBranchAddress("tHA",tHA);
   calDataTree->SetBranchAddress("tHB",tHB);
-
+  
   calDataTree->SetBranchAddress("tHAErr",tHAErr);
   calDataTree->SetBranchAddress("tHBErr",tHBErr);
   
@@ -737,8 +737,8 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
        << minTh << " < #theta < " << maxTh << endl;
   cout << endl;
   
-  // !!calculate
-  Float_t thRes = 10.;
+  // !!!???!!!
+  Float_t thRes = 1.5;
   
   minTh = minTh - thRes;
   maxTh = maxTh + thRes;
@@ -832,9 +832,11 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
     Asym = (Float_t)n090/n000;
     AsymErr = (Float_t)Asym*Sqrt((1/n090)+(1/n000));
   }
-  else if(dPhi==180)
+  else if(dPhi==180){
     Asym = (Float_t)n180/n000;
-
+    AsymErr = (Float_t)Asym*Sqrt((1/n180)+(1/n000));
+  }
+  
   cout << endl;
   cout << " n000 = " << n000 <<  endl;
   cout << " n090 = " << n090 <<  endl;
@@ -889,19 +891,24 @@ void TLab::GraphAsymmetry(Char_t option){
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
 
-  //const Int_t nBins = 10;
   const Int_t nThBins  = 9;
-  //  const Int_t nPhiBins = 4;
+  const Int_t nPhiBins = 4;
   
   Float_t  theta[nThBins];
   Float_t  thetaRange[nThBins][2];
   
-//   Float_t  phi[nPhiBins];
-//   Float_t  phiRange[nPhiBins];
-
+  
   Float_t  As090[nThBins];
   Float_t  Ae090[nThBins];
+  
+  Float_t  phi[nPhiBins];
+  
+  for (Int_t i = 0 ; i < nPhiBins ; i++)
+    phi[i] = i*90.;
 
+  Float_t  nPhi[nPhiBins];
+  Float_t  nPhiErr[nPhiBins];
+  
   // Theta range 
   Float_t thetaLowEdge  = 0.;
   //thetaLowEdge  = 0.;
@@ -911,7 +918,7 @@ void TLab::GraphAsymmetry(Char_t option){
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
-  Int_t   dPhiDiff = 90;
+  Int_t   dPhiDiff = 180;
   
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
@@ -919,11 +926,12 @@ void TLab::GraphAsymmetry(Char_t option){
   TH1F * hr;
 
   Float_t maxY = 2.5;
+  Float_t minY = 0.5;
   
   if(dPhiDiff==180)
     maxY = 6.0;
   
-  hr = canvas->DrawFrame(thetaLowEdge,0.5,thetaHighEdge,maxY);
+  hr = canvas->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   
   Char_t yAxis[128];
@@ -969,16 +977,26 @@ void TLab::GraphAsymmetry(Char_t option){
       CalculateAsymmetry(dPhiDiff,thetaRange[i][0],
 			 thetaRange[i][1]);
       
+      
       As090[i] = Asym;
-	
       Ae090[i] = AsymErr;
 
-      if(As090[i] < 1.0 || As090[i] > 2.5)
+      if(As090[i] < 0.5 || As090[i] > maxY)
 	As090[i] = 0.0;
 
       cout << endl;
       cout << " A(90,"<< theta[i] <<")/A(0,"<< theta[i] <<") = "  
 	   << As090[i] << " ± " << Ae090[i] << endl;
+      
+      //!!!!!
+      // in development
+      // if( i!=0 ) 
+      // 	continue;
+      
+      //       for (Int_t j = 0 ; j < nPhiBins ; j++)
+      // 	nPhi[j] =   
+      //!!!!
+
     }   
     
   }// end of: if( option!='t' &...
@@ -994,8 +1012,14 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " alpha1   = " << alpha1*RadToDeg()   << endl;
     
     for(Int_t i = 0 ; i < nThBins ; i++){
+      
+      if( dPhiDiff == 180 ){
+	aTheory[i] = 1.0;
+	continue;
+      }
+      
       theta[i] = theta[i]*DegToRad();
-            
+      
       aTheory[i] = theory->rho2(theta[i],semiSpan,alpha1);
 
       theta[i] = theta[i]*RadToDeg();
