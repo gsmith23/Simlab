@@ -119,6 +119,8 @@ void TTheory::GraphFiniteAsymmetry(Int_t nBins,
   Float_t asymm2[nBins];
   Float_t asymm3[nBins];
   
+  // To Do: determine resolution
+  // of detector system using simulation
   Float_t alpha1   = DegToRad()*1.;
   Float_t alpha2   = DegToRad()*30.;
   Float_t alpha3   = DegToRad()*45.;

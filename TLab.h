@@ -36,8 +36,10 @@ class TLab : public TObject{
   void SetPedestals();
   Float_t GetPedestal(Int_t);
   
-  void SetPhotopeaks();
+  void FitPhotopeaks();
   Float_t GetPhotopeak(Int_t);
+  Int_t DefaultPhotopeakRun(Int_t);
+  
     
   Bool_t GoodTiming(Float_t);
   Bool_t GoodTheta(Float_t);
@@ -49,13 +51,13 @@ class TLab : public TObject{
   Float_t ThetaToPhotonEnergy(Float_t);
   Float_t ThetaToElectronEnergy(Float_t);
 
+  Int_t Chan2ArrayA(Int_t channel);
+  Int_t Chan2ArrayB(Int_t channel);
+  
   void CalculateAsymmetry(Int_t,Float_t,Float_t);
   
   void GraphAsymmetry(Char_t);
   
-  Int_t Chan2ArrayA(Int_t);
-  Int_t Chan2ArrayB(Int_t);
-
   void SetStyle();
   
   //======================
@@ -64,14 +66,43 @@ class TLab : public TObject{
   //======================
   //======================
   
-  static const Int_t nChannels = 10;
+  // crystals per array
   static const Int_t nCrystals = 9;
-
+  
+  // only five per array are recorded
+  static const Int_t nChannels = 10;
+  
+  // OR, AND, OR
   static const Int_t nRuns = 3;
+  
+  // RUN 449 (OR + AND), 450 (OR)
+  // AKA RUN 458
+/*   static const Long64_t nOR1 = 500000; */
+/*   static const Long64_t nAND = 6580429;  */
+/*   static const Long64_t nOR2 = 890963; */
 
-  static const Long64_t nOR1 = 500000;
-  static const Long64_t nAND = 6580429; 
+  // RUN 451 (OR), 452 (AND), 453 (OR) 
+  // AKA RUN 454
+/*   static const Long64_t nOR1 = 1019283; */
+/*   static const Long64_t nAND = 6675453;  */
+/*   static const Long64_t nOR2 = 1360796; */
 
+/*   // RUN 451 (OR), 452 (AND), 450 (OR) */
+/*   // AKA RUN 400  */
+/*   static const Long64_t nOR1 = 1019283; */
+/*   static const Long64_t nAND = 6675453;  */
+/*   static const Long64_t nOR2 = 890963; */
+
+  // RUN 453 (OR), 454 (AND), 456 (OR)
+  // AKA RUN 1454 
+  static const Long64_t nOR1 = 1360796;
+  static const Long64_t nAND = 38528184; 
+  static const Long64_t nOR2 = 1459920;
+
+  
+  // For Graphing
+  static const Int_t nPhiBins = 4;
+  static const Int_t nThBins  = 8;
   
   Int_t runNumberInt;
 
@@ -101,10 +132,10 @@ class TLab : public TObject{
   
   Float_t T[nChannels];
 
+  // Fit Results
   Float_t pedQ[nChannels][nRuns];
-  Float_t phoQ[nChannels];
-
-  Float_t HWHM[nChannels];
+  Float_t phoQ[nChannels][nRuns];
+  Float_t HWHM[nChannels][nRuns];
 
   // Cal data
   TH1F   *hEA[nCrystals];
@@ -127,6 +158,9 @@ class TLab : public TObject{
 
   Float_t Asym;
   Float_t AsymErr;
+  
+  Float_t AsymPhi[nPhiBins];
+  Float_t AsymPhiErr[nPhiBins];
   
   Double_t R000;
   Double_t R090;
