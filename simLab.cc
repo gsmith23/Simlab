@@ -224,7 +224,7 @@ Int_t main(int argc, char **argv){
 	    
 	  if( overwrite=='y' || overwrite=='Y'){
 	    cout << endl;
-	    cout << " Okay, I with overwrite the file  " << endl;
+	    cout << " Okay, I will overwrite the file  " << endl;
 	    data->MakeCalibratedDataTreeFile();
 	  }
 	}// end of: if(strcmp(argv[1],"0")...

@@ -36,8 +36,10 @@ class TLab : public TObject{
   void SetPedestals();
   Float_t GetPedestal(Int_t);
   
-  void SetPhotopeaks();
+  void FitPhotopeaks();
   Float_t GetPhotopeak(Int_t);
+  Int_t DefaultPhotopeakRun(Int_t);
+  
     
   Bool_t GoodTiming(Float_t);
   Bool_t GoodTheta(Float_t);
@@ -72,10 +74,31 @@ class TLab : public TObject{
   
   // OR, AND, OR
   static const Int_t nRuns = 3;
+  
+  // RUN 449 (OR + AND), 450 (OR)
+  // AKA RUN 458
+/*   static const Long64_t nOR1 = 500000; */
+/*   static const Long64_t nAND = 6580429;  */
+/*   static const Long64_t nOR2 = 890963; */
 
-  static const Long64_t nOR1 = 500000;
-  static const Long64_t nAND = 6580429; 
-  static const Long64_t nOR2 = 890963;
+  // RUN 451 (OR), 452 (AND), 453 (OR) 
+  // AKA RUN 454
+/*   static const Long64_t nOR1 = 1019283; */
+/*   static const Long64_t nAND = 6675453;  */
+/*   static const Long64_t nOR2 = 1360796; */
+
+/*   // RUN 451 (OR), 452 (AND), 450 (OR) */
+/*   // AKA RUN 400  */
+/*   static const Long64_t nOR1 = 1019283; */
+/*   static const Long64_t nAND = 6675453;  */
+/*   static const Long64_t nOR2 = 890963; */
+
+  // RUN 453 (OR), 454 (AND), 456 (OR)
+  // AKA RUN 1454 
+  static const Long64_t nOR1 = 1360796;
+  static const Long64_t nAND = 38528184; 
+  static const Long64_t nOR2 = 1459920;
+
   
   // For Graphing
   static const Int_t nPhiBins = 4;
