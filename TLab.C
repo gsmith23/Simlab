@@ -746,9 +746,6 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   
   // !!!???!!!
   Float_t thRes = 3.0;
-  
-  minTh = minTh - thRes;
-  maxTh = maxTh + thRes;
 
   Int_t nDuplicates = 0;
   
@@ -768,8 +765,6 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
 	  ( tHA[j] > minTh - thRes  ) &&
 	  ( tHA[j] < maxTh + thRes )){
 	A[j] = kTRUE;
-	
-	
 	
 	nA[j]++;
       }
@@ -1129,7 +1124,7 @@ void TLab::GraphAsymmetry(Char_t option){
   grAsym[2]->SetLineColor(kGreen+2);
   grAsym[2]->SetMarkerColor(kGreen+2);
 
-  TLegend * leg =  new TLegend(0.6,0.8,0.9,0.85);
+  TLegend * leg =  new TLegend(0.6,0.8,0.9,0.9);
  
   TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 22.5^{o}";
   
