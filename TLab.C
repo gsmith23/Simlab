@@ -1127,8 +1127,10 @@ void TLab::GraphAsymmetry(Char_t option){
 
   TLegend * leg =  new TLegend(0.6,0.8,0.9,0.9);
  
-  TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 22.5^{o}";
+  TString theoryLegendTitle = " "
+    theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %f^{o}", alpha1);
   
+  tempString.Form("Q[%d]/F",nChannels);
   Char_t yAxis[128];
   
   // Ratio Plot
