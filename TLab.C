@@ -572,7 +572,7 @@ void TLab::FitPhotopeaks(){
       phoQfit->SetLineColor(2);
       phoQfit->SetParameters(10.,3000.,100.,0.,0.);
       phoQfit->SetParLimits(1.,2700.,3700.);
-      phoQfit->SetParLimits(2.,100.,300.);
+      //phoQfit->SetParLimits(2.,100.,300.);
       
       hQ[i][run]->Fit("phoQfit","RQ");
     
@@ -745,7 +745,7 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
        << minTh << " < #theta < " << maxTh << endl;
   
   // !!!???!!!
-  Float_t thRes = 3.0;
+  Float_t thRes = 0.0;
 
   Int_t nDuplicates = 0;
   
@@ -955,6 +955,7 @@ void TLab::GraphAsymmetry(Char_t option){
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
   Float_t alpha1   = DegToRad()*22.5;
+  alpha1   = DegToRad()*26.0;
   // half resolution in theta
   
   //!!!!!!!
