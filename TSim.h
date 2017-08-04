@@ -2,6 +2,8 @@
 #define TSim_h
 
 #include "./includes.h"
+#include "TComplex.h"
+#include "TRandom.h"
 
 //--------------------------------------------------------------------------------------
 
@@ -19,14 +21,10 @@ class TSim : public TObject{
   //======================
   
   //==================================
-  // convert text file to root file
-  // containing tree
-  Int_t Hits2Tree(TString,Int_t);
-  
-  //==================================
   // convert raw root file to root file
   // containing sorted events
-  Int_t SortEvents(TString,Int_t);
+  Int_t SortEvents(TString);
+  Bool_t SortedROOTFileExists();
 
   //==================================
   // 
@@ -34,8 +32,8 @@ class TSim : public TObject{
   
   //==================================
     
-  Float_t PhotonEnergyToTheta(Float_t);  
-  Float_t ElectronEnergyToTheta(Float_t);
+  Float_t PhotonEnergyToTheta(Double_t);  
+  Float_t ElectronEnergyToTheta(Double_t);
   Float_t ThetaToPhotonEnergy(Float_t);
   Float_t ThetaToElectronEnergy(Float_t);
 
@@ -47,24 +45,13 @@ class TSim : public TObject{
   //=====================
   //====== Getters ======
 
-  Int_t   GetDPhiBin(Float_t, Float_t);
-  Int_t   GetThetaBin(Float_t,Int_t);
+  Int_t   GetThetaBin(Float_t);
+  void    GetThetaBinValues();
   
-  Float_t GetAverageEnergy();
-  
-  Float_t GetHitAngle(Float_t,Float_t);  
+  Float_t CrystalToPhi(Int_t); 
   //=====================
   //==== conditions =====
   
-  Bool_t GoodNumHits(Int_t);
-  Bool_t GoodLOR(Float_t,Char_t);
-  Bool_t GoodHitAngle(Float_t,Float_t);
-  Bool_t GoodHitSeparation(Float_t);
-  Bool_t GoodDTheta(Float_t,Float_t,Float_t);
-  Bool_t GoodE(UInt_t,Float_t,Float_t);
-  Bool_t GoodScatterDistance(Float_t);
-  Bool_t GoodScatterDistances(Float_t,Float_t);
-  Bool_t BadDPhi(Float_t);
   Bool_t GoodTheta(Float_t);
 
   //====================================
@@ -75,17 +62,16 @@ class TSim : public TObject{
     Float_t gamma  = 2 - Cos(theta) + 1/(2-Cos(theta));
     return p[0] + 2*sintsq*sintsq/(gamma*gamma - 2*gamma*sintsq);
   }
-  
-  void PlotTF1();
+
 
   void SetAsymmetry(TString);
   
   Float_t GetAsymm(Int_t bin){
-    return asymmCr90[bin];
+    return 0 /*asymmCr90[bin]*/;
   }
   
   Float_t GetAsymErr(Int_t bin){
-    return asyerCr90[bin];
+    return 0 /* asyerCr90[bin]*/;
   }
   
   //======================
@@ -93,16 +79,54 @@ class TSim : public TObject{
   //==== Data Members ====
   //======================
   //======================
+
+  //bin sizes
+  static const Int_t nCrystals = 9;
+
+  Double_t EA[nCrystals];
+  Double_t EB[nCrystals];
+  
+  Float_t etHA[nCrystals];
+  Float_t etHB[nCrystals];
+  Float_t ltHA[nCrystals];
+  Float_t ltHB[nCrystals];
+
+  Float_t mintHAErr[nCrystals];
+  Float_t mintHBErr[nCrystals];
+  Float_t maxtHAErr[nCrystals];
+  Float_t maxtHBErr[nCrystals];
+
+  Float_t simtHA[nCrystals];
+  Float_t simtHB[nCrystals];
+  Int_t centrFirst[nCrystals];
+
+  static const Int_t nThbins = 8;
+  static const Int_t nPhibins = 4;
+  
+  Float_t ThMin[nThbins];
+  Float_t ThMax[nThbins];
+  Float_t plotTheta[nThbins]; 
+  Float_t AsymMatrix[nThbins][nPhibins];
+
+  Int_t n000;
+  Int_t n090;
+  Int_t n180;
+  Int_t n270;
+
+  Double_t sigmaA[nCrystals];
+  Double_t sigmaB[nCrystals];
   
   // filename without extensions 
   // or folder
-  TString rootFile;
+  TString rootFileRawName;
+  TString rootFileSortName;
   
   // corresponding file
   TFile  *theFile;
   
   // corresponding tree
-  TTree  *theTree;
+  TTree *sortDataTree;
+  TTree  *simDataTree;
   
   // 
   void Initialise();
@@ -110,106 +134,52 @@ class TSim : public TObject{
   // 
   void Loop();
   
-  // Branch Leaves
-  Int_t           nHits;
-  Int_t           nParticles;
-  Long64_t        eventNumber[32];
-  Char_t          detector[32];
-  Int_t           detectorUnitID[32];
-  Float_t         energy[32]; 
-  Float_t         x[32];
-  Float_t         y[32];
-  Float_t         z[32];
-  Float_t         minTime[32];
-  Float_t         maxTime[32];
-  Int_t           nOriginalTracks[32];  
-  Int_t           originalParticleNumber[32]; 
-  Int_t           nTracks[32];
-  Int_t           particleNumber[32][16];
-  Int_t           nHitsC;
-  Int_t           nHitsW;
-  Int_t           eventType;
-  Float_t         iC[32];
-  Float_t         iW[32];
-  Int_t           i1P1;
-  Int_t           i1P2;
-  Float_t         sinogramR;
-  Float_t         sinogramPhi;
-  Float_t         meanHitAngle;
-  Float_t         energy1P1;
-  Float_t         energy1P2;
-  Int_t           i2P1;
-  Int_t           i2P2;
-  Float_t         energy2P1;
-  Float_t         energy2P2;
-  Float_t         thetaP1E;
-  Float_t         thetaP2E;
-  Float_t         thetaP1V;
-  Float_t         thetaP2V;
-  Float_t         thetaP1VTrue;
-  Float_t         thetaP2VTrue;
-  Float_t         phiP1;
-  Float_t         phiP2;
-  Float_t         dPhi;
+ // Declaration of leaf types
+  Double_t        crystal0;
+  Double_t        crystal1;
+  Double_t        crystal2;
+  Double_t        crystal3;
+  Double_t        crystal4;
+  Double_t        crystal5;
+  Double_t        crystal6;
+  Double_t        crystal7;
+  Double_t        crystal8;
+  Double_t        crystal9;
+  Double_t        crystal10;
+  Double_t        crystal11;
+  Double_t        crystal12;
+  Double_t        crystal13;
+  Double_t        crystal14;
+  Double_t        crystal15;
+  Double_t        crystal16;
+  Double_t        crystal17;
+  Int_t           TrueEvent;
+  Double_t        cosA;
+  Double_t        cosB;
 
-  TVector3        p3P1Lab;
-  TVector3        p3P2Lab;
-  TVector3        LOR;
-  TVector3        LORXY;
-  TVector3        v3P1Lab;
-  TVector3        v3P2Lab;
-  TVector2        midpointXY;
-  TVector3        midpoint;
-  TVector3        v3ScP1Lab;
-  TVector3        v3ScP2Lab;
-  TVector3        v3P1Event;
-  TVector3        v3P2Event;
-  
   // List of branches
-  TBranch        *b_nHits;
-  TBranch        *b_nParticles;
-  TBranch        *b_eventNumber;
-  TBranch        *b_detector;
-  TBranch        *b_detectorUnitID;
-  TBranch        *b_energy;
-  TBranch        *b_x;
-  TBranch        *b_y;
-  TBranch        *b_z;
-  TBranch        *b_nOriginalTracks;
-  TBranch        *b_originalParticleNumber;
-  TBranch        *b_nTracks;
-  TBranch        *b_nHitsC;
-  TBranch        *b_nHitsW;
-  TBranch        *b_eventType; 
-  TBranch        *b_iC; 
-  TBranch        *b_iW;
-  TBranch        *b_i1P1;
-  TBranch        *b_i1P2;
-  TBranch        *b_sinogramR;
-  TBranch        *b_sinogramPhi;
-  TBranch        *b_meanHitAngle;
-  TBranch        *b_energy1P1;
-  TBranch        *b_energy1P2;
-  TBranch        *b_i2P1;   
-  TBranch        *b_i2P2;   
-  TBranch        *b_energy2P1;
-  TBranch        *b_energy2P2;
-  TBranch        *b_thetaP1E; 
-  TBranch        *b_thetaP2E; 
-  TBranch        *b_thetaP1V; 
-  TBranch        *b_thetaP2V;
-  TBranch        *b_thetaP1VTrue;
-  TBranch        *b_thetaP2VTrue;
-  TBranch        *b_phiP1;   
-  TBranch        *b_phiP2;  
-  TBranch        *b_dPhi;   
+  TBranch        *b_crystal0;   
+  TBranch        *b_crystal1;   
+  TBranch        *b_crystal2;   
+  TBranch        *b_crystal3;   
+  TBranch        *b_crystal4;
+  TBranch        *b_crystal5;   
+  TBranch        *b_crystal6;   
+  TBranch        *b_crystal7;   
+  TBranch        *b_crystal8;   
+  TBranch        *b_crystal9;   
+  TBranch        *b_crystal10;   
+  TBranch        *b_crystal11;   
+  TBranch        *b_crystal12;   
+  TBranch        *b_crystal13;   
+  TBranch        *b_crystal14;   
+  TBranch        *b_crystal15;   
+  TBranch        *b_crystal16;   
+  TBranch        *b_crystal17;   
+  TBranch        *b_TrueEvent;   
+  TBranch        *b_cosA;   
+  TBranch        *b_cosB;   
 
-  //  
-  Float_t asymm90[32];
-  Float_t asyer90[32];
-
-  Float_t asymmCr90[32];
-  Float_t asyerCr90[32];
 
    ClassDef(TSim,1);
 };
