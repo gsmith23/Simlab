@@ -294,7 +294,7 @@ Int_t main(int argc, char **argv){
     
     TSim * simData = new TSim(argv[2]);
     
-    Char_t raw = 'n';
+    /*Char_t raw = 'n';
     cout << endl;
     cout << " Create/Recreate raw ROOT file ? " << endl;
     cout << " n (default)/ y " << endl;
@@ -307,7 +307,7 @@ Int_t main(int argc, char **argv){
       cout << " Making ROOT file from text file " << endl;
       
       simData->Hits2Tree(argv[2],0);
-    }
+      }*/
     
     Char_t sort = 'n';
     cout << endl;
@@ -321,7 +321,7 @@ Int_t main(int argc, char **argv){
       cout << endl;
       cout << " Sorting data " << endl;
 	
-      simData->SortEvents(argv[2],0);
+      simData->SortEvents(argv[2]);
     }
     
     cout << endl;

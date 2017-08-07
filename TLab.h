@@ -4,6 +4,7 @@
 #include "./includes.h"
 #include "TTheory.h"
 #include "TSim.h"
+#include <TComplex.h>
 
 //------------------------------------------------------------------------------------------------
 
@@ -54,7 +55,9 @@ class TLab : public TObject{
   Int_t Chan2ArrayA(Int_t channel);
   Int_t Chan2ArrayB(Int_t channel);
   
-  void CalculateAsymmetry(Int_t,Float_t,Float_t);
+  void CalculateAsymmetry();
+
+  void GetThetaBinValues();
   
   void GraphAsymmetry(Char_t);
   
@@ -95,12 +98,23 @@ class TLab : public TObject{
 
   // RUN 453 (OR), 454 (AND), 456 (OR)
   // AKA RUN 1454 
+  /*  static const Long64_t nOR1 = 1360796;
+  static const Long64_t nAND = 38528184; 
+  static const Long64_t nOR2 = 1459920;*/
+
+  // RUN 456 (OR), 457 (AND), 458 (OR)
+  // AKA RUN 1457   
   /* static const Long64_t nOR1 = 1360796; */
   /* static const Long64_t nAND = 38528184;  */
   /* static const Long64_t nOR2 = 1459920; */
 
   /* // RUN 456 (OR), 457 (AND), 458 (OR) */
   /* // AKA RUN 1457  */
+  /*
+  static const Long64_t nOR1 = 1524550;
+  static const Long64_t nAND = 65734400;
+  static const Long64_t nOR2 = 1572198;
+  */
   /* static const Long64_t nOR1 = 1524550; */
   /* static const Long64_t nAND = 65734400;  */
   /* static const Long64_t nOR2 = 1572198; */
@@ -110,10 +124,16 @@ class TLab : public TObject{
   static const Long64_t nOR1 = 2791754;
   static const Long64_t nAND = 47142893;
   static const Long64_t nOR2 = 1228535;
+
   
   // For Graphing
   static const Int_t nPhiBins = 4;
   static const Int_t nThBins  = 8;
+
+  Float_t ThMin[nThBins];
+  Float_t ThMax[nThBins];
+  Float_t plotTheta[nThBins]; 
+  Float_t AsymMatrix[nThBins][nPhiBins];
   
   Int_t runNumberInt;
 
