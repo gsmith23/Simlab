@@ -66,6 +66,12 @@ Float_t TTheory::rho2(Float_t theta, Float_t semiSpan, Float_t alpha){
   return ( (Z(alpha) + rho1(theta,semiSpan) )/( 1 + Z(alpha)*rho1(theta,semiSpan)) ); 
 }  
 
+//working stage
+Float_t TTheory::modFactor(Float_t theta){
+  Float_t m = Power(Power(Sin(theta),2.)*(2. - Cos(theta))/(2. + Power((1.- Cos(theta)),3.)),2.);
+  return m;
+}
+  
 //--------------------------------------------------
 
 // Compton scattering variable conversions
