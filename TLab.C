@@ -616,10 +616,12 @@ Float_t TLab::GetPhotopeak(Int_t channel){
 
 Int_t TLab::DefaultPhotopeakRun(Int_t channel){
   
+  
   if(channel == 2 || channel == 7 )
     return 1;
-  else
-    return 2;
+  // temporary change for run 460
+  else 
+    return 0;
 }
 
 Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
@@ -1152,6 +1154,7 @@ void TLab::GraphAsymmetry(Char_t option){
   TString theoryLegendTitle = " ";
   
   alpha1 = alpha1*RadToDeg();
+
   theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %f^{o}", alpha1);
 
   
