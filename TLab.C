@@ -746,6 +746,7 @@ void TLab::CalculateAsymmetry(){
   cout << endl;
   cout << " Calculating Asymmetry  " << endl;
 
+
   Int_t nDuplicates = 0;
   
   for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
@@ -969,7 +970,9 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aTheory[nThBins];
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
+
   Float_t alpha1   = DegToRad()*26.0;
+
   // half resolution in theta
 
   Float_t semiSpan = thetaBinWidth/2.*DegToRad();
@@ -1141,9 +1144,16 @@ void TLab::GraphAsymmetry(Char_t option){
   grAsym[2]->SetLineColor(kGreen+2);
   grAsym[2]->SetMarkerColor(kGreen+2);
 
-  TLegend * leg =  new TLegend(0.6,0.8,0.9,0.85);
+  TLegend * leg =  new TLegend(0.6,0.8,0.9,0.9);
  
+
   TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 26^{o}";
+
+  TString theoryLegendTitle = " ";
+  
+  alpha1 = alpha1*RadToDeg();
+  theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %f^{o}", alpha1);
+
   
   Char_t yAxis[128];
   
