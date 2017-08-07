@@ -24,7 +24,6 @@ TSim::TSim(TString fileNumber){
   //!! temporary 
   // SetAsymmetry(fileNumber);
   
-
 }
 
 TSim::~TSim(){
@@ -454,7 +453,7 @@ Int_t TSim::GetAsymmetry(TString inputFileNumber){
   GetThetaBinValues();
 
   //difference 'sim theta' - 'energy theta'
-  TH2F* histThD = new TH2F("histThD","theta difference",100,50,150,250,-120,130);
+  TH2F* histThD = new TH2F("histThD","sim - energy #theta difference",100,50,150,150,-120,130);
 
   //difference 'lab theta' - 'energy theta'
   TH2F* hLEdiff = new TH2F("hLEdiff","lab - energy theta",100,50,150,120,-50,70);
@@ -509,7 +508,7 @@ Int_t TSim::GetAsymmetry(TString inputFileNumber){
 
   for(Int_t j = 0 ; j <nThbins; j++){
     for(Int_t k = 0 ; k < 4; k++){
-      AsymMatrix[j][k] =0;}
+      AsymMatrix[j][k] = 0;}
   }
 
   Long64_t nEntries = sortDataTree->GetEntries();
@@ -587,6 +586,7 @@ Int_t TSim::GetAsymmetry(TString inputFileNumber){
   for (Int_t i = 0 ; i < nThbins ; i++){
     if (AsymMatrix[i][0] != 0){
       if (dPhiDiff  == 90){
+	//using average 90 and 270
 	AsPhiDiff[i] = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
 	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
       }
@@ -636,7 +636,7 @@ Int_t TSim::GetAsymmetry(TString inputFileNumber){
   canvas->SaveAs(plotN);
    
   histThD->Draw("colz");
-  histThD->GetXaxis()->SetTitle("energy #theta (deg)");
+  histThD->GetXaxis()->SetTitle("#theta (deg)");
   histThD->GetYaxis()->SetTitle("sim #theta - energy #theta (deg)");
   
   sprintf(plotN,"../Plots/histThDiff_%d.pdf",inputFileInt);
