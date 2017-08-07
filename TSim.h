@@ -2,7 +2,6 @@
 #define TSim_h
 
 #include "./includes.h"
-#include "TComplex.h"
 #include "TRandom.h"
 
 //--------------------------------------------------------------------------------------

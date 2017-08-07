@@ -1,6 +1,5 @@
 #include "TLab.h"
 #include "./includes.h"
-#include "TComplex.h"
 
 #if !defined(__CINT__)
 ClassImp(TLab)

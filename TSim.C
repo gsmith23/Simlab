@@ -453,7 +453,7 @@ Int_t TSim::GetAsymmetry(TString inputFileNumber){
   GetThetaBinValues();
 
   //difference 'sim theta' - 'energy theta'
-  TH2F* histThD = new TH2F("histThD","sim - energy #theta difference",100,50,150,150,-120,130);
+  TH2F* histThD = new TH2F("histThD","sim - energy #theta difference",100,50,150,250,-120,130);
 
   //difference 'lab theta' - 'energy theta'
   TH2F* hLEdiff = new TH2F("hLEdiff","lab - energy theta",100,50,150,120,-50,70);
