@@ -66,6 +66,12 @@ Float_t TTheory::rho2(Float_t theta, Float_t semiSpan, Float_t alpha){
   return ( (Z(alpha) + rho1(theta,semiSpan) )/( 1 + Z(alpha)*rho1(theta,semiSpan)) ); 
 }  
 
+//working stage
+Float_t TTheory::modFactor(Float_t theta){
+  Float_t m = Power(Power(Sin(theta),2.)*(2. - Cos(theta))/(2. + Power((1.- Cos(theta)),3.)),2.);
+  return m;
+}
+  
 //--------------------------------------------------
 
 // Compton scattering variable conversions
@@ -86,7 +92,7 @@ void TTheory::GraphFiniteAsymmetry(Int_t nBins,
 				   Char_t xVariable){
   
   
-  semiSpan = DegToRad()*semiSpan;
+  
   
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
@@ -119,10 +125,36 @@ void TTheory::GraphFiniteAsymmetry(Int_t nBins,
   Float_t asymm2[nBins];
   Float_t asymm3[nBins];
   
-  Float_t alpha1   = DegToRad()*1.;
-  Float_t alpha2   = DegToRad()*30.;
-  Float_t alpha3   = DegToRad()*45.;
+  // To Do: determine resolution
+  // of detector system using simulation
+  Float_t alpha1   = 0.1;
+  Float_t alpha2   = 5.;
+  Float_t alpha3   = 20.;
+  
+  TLegend * leg =  new TLegend(0.6,0.7,0.8,0.85);
+  
+  TString legTit;
+  legTit.Form("#sigma_{ #theta }  = %.1f ^{o}",
+	      semiSpan);
+  
+  leg->AddEntry((TObject*)0,legTit, "");
 
+  TString legStr[3];
+  
+  legStr[0].Form("#sigma_{#Delta #phi} = %.1f ^{o}",
+		 alpha1);
+  legStr[1].Form("#sigma_{#Delta #phi} = %.1f ^{o}",
+		 alpha2);
+  legStr[2].Form("#sigma_{#Delta #phi} = %.1f ^{o}",
+		 alpha3);
+  
+  
+  alpha1 = alpha1 * DegToRad();
+  alpha2 = alpha2 * DegToRad();
+  alpha3 = alpha3 * DegToRad();
+  
+  semiSpan = DegToRad()*semiSpan;
+  
   for(Int_t i = 0 ; i < nBins ; i++){
     
     // symmetric bins around 90 deg
@@ -160,7 +192,7 @@ void TTheory::GraphFiniteAsymmetry(Int_t nBins,
   gr[0]->SetMarkerColor(kRed+1);
   gr[0]->SetMarkerStyle(20);
   gr[0]->SetLineStyle(2);
-
+  
   if( xVariable=='e'){  
     gr2[0]->SetLineColor(kRed-2);
     gr2[0]->SetMarkerColor(kRed-2);
@@ -213,6 +245,13 @@ void TTheory::GraphFiniteAsymmetry(Int_t nBins,
   else if( xVariable=='e')
     sprintf(plotName,"../Plots/FiniteAsymmetry_%d_energy.pdf", nBins);
   
+
+  leg->AddEntry(gr[0],legStr[0],plotStyle);
+  leg->AddEntry(gr[1],legStr[1],plotStyle);
+  leg->AddEntry(gr[2],legStr[2],plotStyle);
+  
+  leg->Draw();
+
   canvas->SaveAs(plotName);
   
 }

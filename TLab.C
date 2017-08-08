@@ -1,5 +1,6 @@
 #include "TLab.h"
 #include "./includes.h"
+#include "TComplex.h"
 
 #if !defined(__CINT__)
 ClassImp(TLab)
@@ -146,19 +147,22 @@ void TLab::MakeRawDataTreeFile(){
   
   TString nameHist;
   TString titleHist;
-    
+
+  
   for(Int_t i = 0 ; i < nChannels ; i++ ){
-    
-    nameHist.Form("hQ%d",i);
-    titleHist.Form("hQ%d;QDC bin;Counts",i);
-    hQ[i] = new TH1F(nameHist,titleHist,4096,0,4096);
-    
+
+    for(Int_t run = 0 ; run < nRuns ; run++ ){    
+
+      nameHist.Form("hQ%d_%d",i,run);
+      titleHist.Form("hQ%d_%d;QDC bin;Counts",i,run);
+      hQ[i][run] = new TH1F(nameHist,titleHist,4096,0,4096);
+      
+    }
+
     nameHist.Form("hT%d",i);
     titleHist.Form("hT%d;TDC bin;Counts",i);
     hT[i] = new TH1F(nameHist,titleHist,5200,0,5200);
-  
   }
-  
   cout << endl;
   cout << " Making tree " << endl;
   
@@ -198,12 +202,21 @@ void TLab::MakeRawDataTreeFile(){
 	   << T[4+index] << " " 
 	   << endl;
     }
-  
+    
     for(Int_t i = index ; i < (index+5) ; i++ ){
-      hQ[i]->Fill(Q[i]);
+      
+      if      ( eventNumber < nOR1 )
+	hQ[i][0]->Fill(Q[i]);
+      else if ( eventNumber > (nOR1+nAND)){
+	hQ[i][2]->Fill(Q[i]);
+      }
+      else
+      hQ[i][1]->Fill(Q[i]);
+      
       hT[i]->Fill(T[i]);
+      
     } // end of: for(Int_t i = 0 ; i < 16 ; i++ ...
-        
+    
     if(index==5){
       rawDataTree->Fill();
       eventNumber++;
@@ -218,7 +231,9 @@ void TLab::MakeRawDataTreeFile(){
   
   cout << endl;
   cout << " Making " << rootFile << endl;
+  cout << " " << eventNumber << " events " << endl;
   
+
   rawDataTree->Write();
   
   // writes the histograms
@@ -233,6 +248,42 @@ Bool_t TLab::CalibratedROOTFileExists(){
   return file;
 }
 
+Int_t TLab::Chan2ArrayA(Int_t channel){
+  
+  Int_t crystal = -1;
+  
+  if     (channel == 0)
+    crystal = 1;
+  else if(channel == 1)
+    crystal = 3;
+  else if(channel == 2)
+    crystal = 4;
+  else if(channel == 3)
+    crystal = 5;
+  else if(channel == 4)
+    crystal = 7;
+  
+  return crystal;
+}
+
+Int_t TLab::Chan2ArrayB(Int_t channel){
+  
+  Int_t crystal = -1;
+  
+  if     (channel == 5)
+    crystal = 1;
+  else if(channel == 6)
+    crystal = 5;
+  else if(channel == 7)
+    crystal = 4;
+  else if(channel == 8)
+    crystal = 3;
+  else if(channel == 9)
+    crystal = 7;
+  
+  return crystal;
+}
+
 void TLab::MakeCalibratedDataTreeFile(){
   
   cout << endl;
@@ -241,12 +292,30 @@ void TLab::MakeCalibratedDataTreeFile(){
   SetPedestals();
   
   // To Do 
-  // - fit photopeaks and hardcode mean
-  // in the function, or even better...
-  // - automate the fitting
-  // at present all the photopeaks are set 
-  // to 3000.
-  SetPhotopeaks();
+  // - automate the fitting,
+  // at present all the photopeaks 
+  // are hardcoded from manual fits
+  
+  FitPhotopeaks();
+
+  Float_t temp_phoQ = 0.;
+  
+  // HWHM QDC to energy
+  for (Int_t run = 0 ; run < nRuns ; run++){
+      cout << endl;
+      
+      for (Int_t i=0; i<nChannels; i++){
+      
+      // Set to use OR data after AND data
+      temp_phoQ = GetPhotopeak(i) - GetPedestal(i);
+      HWHM[i][run] = HWHM[i][run]*511./temp_phoQ;
+
+      cout << "HWHM["<< i 
+	   << "]["   << run 
+	   << "] = " << HWHM[i][run] 
+	   << endl;
+    }
+  }
   
   cout << endl;
   cout << "Post photopeak setting rootFileRawName is " 
@@ -255,7 +324,7 @@ void TLab::MakeCalibratedDataTreeFile(){
   // read from this
   rootFileRawData = new TFile(rootFileRawName);
   rawDataTree     = (TTree*)rootFileRawData->Get("rawDataTree");
-
+  
   // write to this
   rootFileCalData = new TFile(rootFileCalName,
 			      "RECREATE","Calibrated LYSO data");
@@ -271,22 +340,28 @@ void TLab::MakeCalibratedDataTreeFile(){
 
   rawDataTree->SetBranchAddress("eventNumber",&eventNumber);
   
-  tempString.Form("EA[%d]/F",nChannels);
+  tempString.Form("EA[%d]/F",nCrystals);
   calDataTree->Branch("EA",EA,tempString);
 
-  tempString.Form("EB[%d]/F",nChannels);
+  tempString.Form("EB[%d]/F",nCrystals);
   calDataTree->Branch("EB",EB,tempString);
 
-  tempString.Form("tHA[%d]/F",nChannels);
+  tempString.Form("tHA[%d]/F",nCrystals);
   calDataTree->Branch("tHA",tHA,tempString);
+
+  tempString.Form("tHAErr[%d]/F",nCrystals);
+  calDataTree->Branch("tHAErr",tHAErr,tempString);
   
-  tempString.Form("tHB[%d]/F",nChannels);
+  tempString.Form("tHB[%d]/F",nCrystals);
   calDataTree->Branch("tHB",tHB,tempString);
 
-  tempString.Form("TA[%d]/F",nChannels);
+  tempString.Form("tHBErr[%d]/F",nCrystals);
+  calDataTree->Branch("tHBErr",tHBErr,tempString);
+  
+  tempString.Form("TA[%d]/F",nCrystals);
   calDataTree->Branch("TA",TA,tempString);
 
-  tempString.Form("TB[%d]/F",nChannels);
+  tempString.Form("TB[%d]/F",nCrystals);
   calDataTree->Branch("TB",TB,tempString);
   
   TString plotNameA  = "";
@@ -297,7 +372,7 @@ void TLab::MakeCalibratedDataTreeFile(){
   Float_t min = 0;
   Float_t max = 1300;
 
-  for( Int_t i = 0 ; i < nChannels ; i++ ){
+  for( Int_t i = 0 ; i < nCrystals ; i++ ){
     plotNameA.Form("hEA%d",i);
     plotTitleA.Form("hEA%d;Energy (keV);Counts",i);
     hEA[i] = new TH1F(plotNameA,plotTitleA,512,min,max);
@@ -310,58 +385,102 @@ void TLab::MakeCalibratedDataTreeFile(){
   cout << " rawDataTree->GetEntries() = " << 
     rawDataTree->GetEntries() << endl;
   
+  Long64_t maxEntries = rawDataTree->GetEntries();
 
+  for (Int_t i = 0 ; i < nCrystals ; i++){
+    EA[i]  = 0.;
+    EB[i]  = 0.;
+    tHA[i] = 0.;
+    tHAErr[i] = 0.;
+    tHB[i] = 0.;
+    tHBErr[i] = 0.;
+    TA[i]  = 0.;
+    TB[i]  = 0.;
+    
+    // not used
+    QA[i]  = 0.;
+    QB[i]  = 0.;
+  }
+  
+  Int_t chaA, chaB, cryA, cryB;
+  
+  Float_t QA_temp    = 0.;
+  Float_t QB_temp    = 0.;
+      
+  Float_t phoQA_temp = 0.;
+  Float_t phoQB_temp = 0.;
   
   // Calculate E,T,theta
-  for( Int_t i = 0 ; i < rawDataTree->GetEntries() ; i++ ){
+  for( Long64_t i = 0 ; i <  maxEntries ; i++ ){
     
     rawDataTree->GetEntry(i);
     
-    // To Do: map channels to 
-    // crystal number scheme
-    // for ease of use in 
-    // asymmetry calculation
-    
-    Int_t kA, kB;
-    
-    for (Int_t k = 0 ; k < 5 ; k ++){ 
+    for (Int_t k = 0 ; k < 5 ; k++){ 
+
+      QA_temp    = 0.;
+      QB_temp    = 0.;
       
-      kA = k;
-      kB = (k+5);
+      phoQA_temp = 0.;
+      phoQB_temp = 0.;
       
-      QA[k]  = Q[kA];
-      QB[k]  = Q[kB];
+      // channels for A go from 0 - 4
+      chaA = k;
+      // channels for B go from 5 - 9
+      chaB = (k+5);
       
-      TA[k]  = T[kA];
-      TB[k]  = T[kB];
+      // crytals for A 
+      cryA = Chan2ArrayA(chaA);
+      // crytals for B 
+      cryB = Chan2ArrayB(chaB);
       
-      // Array A
-      EA[k]  = (Q[kA]-pedQ[kA])*511./(phoQ[kA]-pedQ[kA]) ;
-      EB[k]  = (Q[kB]-pedQ[kB])*511./(phoQ[kB]-pedQ[kB]) ; ;
+      // to do: time calibration
+      TA[cryA]  = T[chaA];
+      TB[cryB]  = T[chaB];
+      
+      // Energy Arrays 
+      // Set to use OR data after AND data
+      QA_temp   = Q[chaA]-GetPedestal(chaA);
+      QB_temp   = Q[chaB]-GetPedestal(chaB);
+
+      // pedestal subtracted
+      QA[cryA]  = QA_temp;
+      QB[cryB]  = QB_temp;
+      
+      // Set to use OR data after AND data
+      phoQA_temp = GetPhotopeak(chaA) - GetPedestal(chaA);
+      phoQB_temp = GetPhotopeak(chaB) - GetPedestal(chaB);
+      
+      EA[cryA]  = QA_temp * 511./phoQA_temp;
+      EB[cryB]  = QB_temp * 511./phoQB_temp;
+      
+      // We presume the photons interacted 
+      // in the central crystal first
       
       // for all apart from centre crystal
-      tHA[k] = PhotonEnergyToTheta(EA[kA]);
-      tHB[k] = PhotonEnergyToTheta(EB[kB]);
-      
-      // !!!!!!  check these    !!!!!!!!
-      // !!!!!! are the correct !!!!!!!!
-      // !!!!!!   channels     !!!!!!!!
-      // central crystals
-      tHA[4] = ElectronEnergyToTheta(EA[4]);
-      tHB[4] = ElectronEnergyToTheta(EB[4]);
-      
+      tHA[cryA] = PhotonEnergyToTheta(EA[cryA]);
+      tHB[cryB] = PhotonEnergyToTheta(EB[cryB]);
+
+
+      tHAErr[cryA] = ThetaToThetaError(tHA[cryA],chaA);
+      tHBErr[cryB] = ThetaToThetaError(tHB[cryB],chaB);
     }
-    
+
+    // central crystals
+    tHA[4] = ElectronEnergyToTheta(EA[4]);
+    tHB[4] = ElectronEnergyToTheta(EB[4]);
+
+    tHAErr[4] = ThetaToThetaError(tHA[4],2);
+    tHBErr[4] = ThetaToThetaError(tHB[4],7);
     
     // Create Energy Histos
-    for( Int_t j = 0 ; j < nChannels ; j++ ) {
+    for( Int_t j = 0 ; j < nCrystals ; j++ ) {
       
       hEA[j]->Fill(EA[j]);
       hEB[j]->Fill(EB[j]);
       
     }
-    calDataTree->Fill();
     
+    calDataTree->Fill();
   }
   
   calDataTree->Write();
@@ -391,34 +510,160 @@ void TLab::SetPedestals(){
   TString histName = "";
   
   cout << endl;
-  for( Int_t i = 0 ; i < nChannels ; i++ ){
-    histName.Form("hQ%d",i);
-    hQ[i] = (TH1F*)rootFileRawData->Get(histName);
-    pedQ[i] = hQ[i]->GetXaxis()->GetBinCenter(hQ[i]->GetMaximumBin());
+  for(Int_t run = 0 ; run < nRuns ; run++ ){    
+    for( Int_t i = 0 ; i < nChannels ; i++ ){
+      histName.Form("hQ%d_%d",i,run);
+      hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
+      pedQ[i][run] = hQ[i][run]->GetXaxis()->
+	GetBinCenter(hQ[i][run]->GetMaximumBin());
+    }
   }
   
-  for( Int_t i = 0 ; i < nChannels ; i++ )
-    cout << " pedQ["<< i << "] =  " << pedQ[i] << endl;
-  
+  cout << endl;
+  for(Int_t run = 0 ; run < nRuns ; run++ ){
+    cout << endl;
+    for( Int_t i = 0 ; i < nChannels ; i++ )
+      cout << " pedQ["<< i << "][" << run 
+	   << "] =  " << pedQ[i][run] << endl;
+  }
+  cout << endl;
+
   rootFileRawData->Close();
   
 }
 
 Float_t TLab::GetPedestal(Int_t channel){
-  return pedQ[channel]; 
+  return pedQ[channel][2]; 
 }
 
-void TLab::SetPhotopeaks(){
+void TLab::FitPhotopeaks(){
 
-  for (Int_t i = 0 ; i < nChannels ; i++)
-    phoQ[i] = 3000.;
+  cout << endl;
+  cout << " Setting Photopeaks " << endl;
+  
+  TString rawFileName;
+  
+  cout << endl;
+  cout << " Reading " << rootFileRawName << endl;
+  rootFileRawData = new TFile(rootFileRawName);
+  
+  SetStyle();
+	       
+  TCanvas *canvas = new TCanvas("canvas","canvas",
+				10,10,1200,800);
+  TString histName = "";
+  Char_t plotName[128];
 
+  Double_t maxv = 0.;
+
+  TF1 *phoQfit = nullptr;
+  
+  for(Int_t run = 0 ; run < nRuns ; run++){
+    for( Int_t i = 0 ; i < nChannels ; i++ ){
+      
+      histName.Form("hQ%d_%d",i,run);
+      hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
+      
+      hQ[i][run]->GetXaxis()->SetRangeUser(2800,4000);
+      
+      maxv = hQ[i][run]->GetXaxis()->
+	GetBinCenter(hQ[i][run]->GetMaximumBin());
+      
+      phoQfit = new TF1("phoQfit",
+			"[0]*exp(-0.5*(((x-[1])/[2])^2))",
+			maxv-200,maxv+200);
+      
+      phoQfit->SetLineColor(2);
+      phoQfit->SetParameters(10.,3000.,100.);
+      phoQfit->SetParLimits(1.,2700.,3700.);
+      //phoQfit->SetParLimits(2.,100.,300.);
+      
+      hQ[i][run]->Fit("phoQfit","RQ");
+    
+      sprintf(plotName,"../Plots/Run_%d_hQ%d_%d.pdf",
+	      runNumberInt,
+	      i,run);
+      
+
+      canvas->SaveAs(plotName);
+      
+      phoQ[i][run] = phoQfit->GetParameter(1.);
+
+      HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
+    
+    }
+  }
+  
+  
+  for( Int_t run = 0 ; run < nRuns ; run++ ){
+    cout << endl;  
+    for( Int_t i = 0 ; i < nChannels ; i++ ){
+      cout << " phoQ["<< i << "][" << run 
+	   << "] =  " << phoQ[i][run] << endl;
+    }
+  }
+
+  cout << endl;
+
+  rootFileRawData->Close();
+  
 }
 
 Float_t TLab::GetPhotopeak(Int_t channel){
-  return phoQ[channel]; 
+  return phoQ[channel][DefaultPhotopeakRun(channel)]; 
 }
 
+
+Int_t TLab::DefaultPhotopeakRun(Int_t channel){
+  
+  
+  if(channel == 2 || channel == 7 )
+    return 1;
+  // temporary change for run 460
+  else 
+    return 0;
+}
+
+Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
+  return (511./(2 - Cos(TMath::DegToRad()*theta)));
+}
+
+Float_t TLab::ThetaToElectronEnergy(Float_t theta){
+  return (511. - (511./(2. - Cos(TMath::DegToRad()*theta))));
+}
+
+Float_t TLab::ThetaToThetaError(Float_t theta,
+				Int_t channel){
+  
+  // !! Use the post AND data result for now
+  // ie use HWHM[channel][2]
+
+  Float_t EnergyRes = HWHM[channel][2]/Sqrt(511.);
+  Float_t energy = 0.;
+  Float_t energy_max = 0.;
+  Float_t energy_min = 0.;
+  Float_t theta_min = 0.;
+  Float_t theta_max = 0.;
+  
+  //Channels 2 and 7 correspond to central crystals
+
+  // This function calculates the theta difference
+  // at energy +- HWHM and returns the largest value as theta error
+  if ((channel!=2)&&(channel!=7)){
+    energy = ThetaToPhotonEnergy(theta);
+    energy_max = energy + EnergyRes*Sqrt(energy);
+    theta_min = theta -  PhotonEnergyToTheta(energy_max);
+    energy_min = energy - EnergyRes*Sqrt(energy);
+    theta_max = PhotonEnergyToTheta(energy_min)- theta;}
+  else{
+    energy = ThetaToElectronEnergy(theta);
+    energy_max = energy + EnergyRes*Sqrt(energy);
+    theta_max = ElectronEnergyToTheta(energy_max) - theta;
+    energy_min = energy - EnergyRes*Sqrt(energy);
+    theta_min = theta - ElectronEnergyToTheta(energy_min);
+  }
+  return (theta_max>theta_min? theta_max : theta_min);
+}
 
 Bool_t TLab::GoodTiming(Float_t time){
   
@@ -455,15 +700,17 @@ Bool_t TLab::GoodTheta(Float_t theta){
   return goodTheta;
 }
 
-void TLab::CalculateAsymmetry(Int_t   dPhi,
-			      Float_t minTh,
-			      Float_t maxTh
-			      ){
+void TLab::CalculateAsymmetry(){
+
+  GetThetaBinValues();
   
   // this function will calculate values
   // for the following data members:
-  Asym    = 1.0;
-  AsymErr = 0.0;
+ for(Int_t j = 0 ; j <nThBins; j++){
+    for(Int_t k = 0 ; k < nPhiBins; k++){
+      AsymMatrix[j][k] = 0;}
+ }
+  
   
   rootFileCalData = new TFile(rootFileCalName);
   
@@ -475,61 +722,161 @@ void TLab::CalculateAsymmetry(Int_t   dPhi,
   calDataTree->SetBranchAddress("tHA",tHA);
   calDataTree->SetBranchAddress("tHB",tHB);
   
+  calDataTree->SetBranchAddress("tHAErr",tHAErr);
+  calDataTree->SetBranchAddress("tHBErr",tHBErr);
+  
   calDataTree->SetBranchAddress("TA",&TA);
   calDataTree->SetBranchAddress("TB",&TB);
   
-  // example variables to use for checking
-  // hits 
-  Bool_t A[nChannels];
-  Bool_t B[nChannels];
+  // 
+  Bool_t A[nCrystals];
+  Bool_t B[nCrystals];
   
-  for ( Int_t i = 0 ; i < nChannels ; i++ ){
-    A[i] = kFALSE;
-    B[i] = kFALSE;
+  Long64_t nA[nCrystals], nB[nCrystals];
+  
+  for ( Int_t i = 0 ; i < nCrystals ; i++ ){
+    A[i]  = kFALSE;
+    B[i]  = kFALSE;
+    nA[i] = 0.;
+    nB[i] = 0.;
   }
+  Bool_t AB000 = kFALSE, AB090 = kFALSE,
+    AB180 = kFALSE, AB270 = kFALSE;
   
-  
-  
-  // To Do:
-  // Implement routine to calculate 
-  // Asymmetry A(dPhi) = N(dPhi)/N(0)
-  // in a given theta range
-  // by counting four hit combinations
-  
-  
-  cout << endl;
-  cout << " entries = " << calDataTree->GetEntries() << endl;
-  
-  Int_t nA4 = 0; 
+  Long64_t maxEntry = calDataTree->GetEntries();
 
-  for(Int_t i = 0 ; i < calDataTree->GetEntries(); i++ ){
+  cout << endl;
+  cout << " Calculating Asymmetry  " << endl;
+
+
+  Int_t nDuplicates = 0;
+  
+  for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
     
-    calDataTree->GetEvent(i);
-    
-    A[4] = kFALSE;  
-    
-    //cout << " EA[4] = " << EA[4] << endl;
-    
-    if( ( EA[4] > 200.  ) &&
-	( EA[4] < 400.  )){
-      
-      A[4] = kTRUE;
-      
-      nA4++;
-      
-      //cout << " A[4] = " << A[4] << endl;    
+    calDataTree->GetEvent(nEntry);
+    Float_t totEA = 0.;
+    Float_t totEB = 0.;
+    Int_t thBin = -1.;
+
+    for (Int_t i = 0 ; i < nCrystals; i++){
+      totEA += EA[i];
+      totEB += EB[i];
     }
     
-  }
-  
-  cout << " nA4 = " << nA4 << endl;     
+    AB000 = kFALSE, AB090 = kFALSE, 
+      AB180 = kFALSE, AB270 = kFALSE;
 
-  cout << endl;
-  cout << " Here is where the Asymmetry be calculated " << endl;
-  cout << " A(" << dPhi << ") in the range " 
-       << minTh << " < #theta < " << maxTh << endl;
-  cout << endl;
+    //check total energy deposited per array
+    //check if theta A and theta B are in the same bin
+    if ((totEA > 450)&&(totEA < 550)&&(totEB > 450)&&(totEB < 550)){
+ 
+      A[4] = kFALSE;
+      B[4] = kFALSE;
+    for (Int_t k=0 ; k < nThBins; k++){
+      if( ( GoodTheta(tHA[4]) ) &&
+	  ( tHA[4] > ThMin[k] ) &&
+	  ( tHA[4] < ThMax[k] )){
+	A[4] = kTRUE;
+	nA[4]++;
+	thBin = k;
+      }
+    }
+
+    if((A[4]) &&
+       ( GoodTheta(tHB[4]) ) &&
+       ( tHB[4] > ThMin[thBin] ) &&
+       ( tHB[4] < ThMax[thBin] )){
+      B[4] = kTRUE;
+      nB[4]++;
+    }
+
+   
+    for (Int_t j = 0 ; j < nCrystals ; j++){
+      
+      A[j] = kFALSE;  
+      B[j] = kFALSE;
+
+      if( ( GoodTheta(tHA[j]) ) &&
+	  ( tHA[j] > ThMin[thBin] ) &&
+	  ( tHA[j] < ThMax[thBin] )){
+	A[j] = kTRUE;
+	nA[j]++;
+	    
+      }
+      
+      if( ( GoodTheta(tHB[j]) ) &&
+	  ( tHB[j] > ThMin[thBin] ) &&
+	  ( tHB[j] < ThMax[thBin] )){
+	B[j] = kTRUE;
+	nB[j]++;
+	
+      }
+    } // end of: for (Int_t j = 0 ; j < nCrystals  
+   
+    // Central Crystals are always required
+      if( !A[4] || !B[4] )
+	continue;
+    
+      if((A[1]&&B[1])||
+	 (A[3]&&B[3])||
+	 (A[5]&&B[5])||
+	 (A[7]&&B[7]))
+	AB000 = kTRUE;
+
+    
+      if((A[1]&&B[3])||
+	 (A[3]&&B[7])||
+	 (A[7]&&B[5])||
+	 (A[5]&&B[1]))
+	AB090 = kTRUE;
+    
+      if((A[1]&&B[7])||
+	 (A[3]&&B[5])||
+	 (A[7]&&B[1])||
+	 (A[5]&&B[3]))
+	AB180 = kTRUE;
+      
+      if((A[1]&&B[5])||
+	 (A[5]&&B[7])||
+	 (A[7]&&B[3])||
+	 (A[3]&&B[1]))
+	AB270 = kTRUE;
+      
+      // check that only one combination
+      // is satisfied
+      if( (AB000 && AB090) || 
+	  (AB000 && AB180) ||
+	  (AB000 && AB270) ||
+	  (AB090 && AB180) ||
+	  (AB090 && AB270) ||
+	  (AB180 && AB270) ){
+	nDuplicates++;
+	continue;
+      }
+    
+      if     (AB000)
+	AsymMatrix[thBin][0] +=1.;
+      else if(AB090)
+	AsymMatrix[thBin][1]+=1.;
+      else if(AB180)
+	AsymMatrix[thBin][2]+=1.;
+      else if(AB270)
+	AsymMatrix[thBin][3]+=1.;
+    }//end of : if (totEA...
+  } // end of : for(Int_t i = 0 ; i < calDa...
+
   
+  cout << " nDuplicates = " << nDuplicates << endl;
+
+  cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
+  cout<<plotTheta[0]<<" - "<<AsymMatrix[0][0]<<" - "<<AsymMatrix[0][1]<<" - "<<AsymMatrix[0][2]<<" - "<<AsymMatrix[0][3]<<endl;
+  cout<<plotTheta[1]<<" - "<<AsymMatrix[1][0]<<" - "<<AsymMatrix[1][1]<<" - "<<AsymMatrix[1][2]<<" - "<<AsymMatrix[1][3]<<endl;
+  cout<<plotTheta[2]<<" - "<<AsymMatrix[2][0]<<" - "<<AsymMatrix[2][1]<<" - "<<AsymMatrix[2][2]<<" - "<<AsymMatrix[2][3]<<endl;
+  cout<<plotTheta[3]<<" - "<<AsymMatrix[3][0]<<" - "<<AsymMatrix[3][1]<<" - "<<AsymMatrix[3][2]<<" - "<<AsymMatrix[3][3]<<endl;
+  cout<<plotTheta[4]<<" - "<<AsymMatrix[4][0]<<" - "<<AsymMatrix[4][1]<<" - "<<AsymMatrix[4][2]<<" - "<<AsymMatrix[4][3]<<endl;
+  cout<<plotTheta[5]<<" - "<<AsymMatrix[5][0]<<" - "<<AsymMatrix[5][1]<<" - "<<AsymMatrix[5][2]<<" - "<<AsymMatrix[5][3]<<endl;
+  cout<<plotTheta[6]<<" - "<<AsymMatrix[6][0]<<" - "<<AsymMatrix[6][1]<<" - "<<AsymMatrix[6][2]<<" - "<<AsymMatrix[6][3]<<endl;
+  cout<<plotTheta[7]<<" - "<<AsymMatrix[7][0]<<" - "<<AsymMatrix[7][1]<<" - "<<AsymMatrix[7][2]<<" - "<<AsymMatrix[7][3]<<endl;
 }
 
 Float_t TLab::ElectronEnergyToTheta(Float_t energy){
@@ -543,8 +890,8 @@ Float_t TLab::ElectronEnergyToTheta(Float_t energy){
   // cos(theta)
   theta = 2 - m/energy;
 
-  theta = TMath::ACos(theta);
-  theta = TMath::RadToDeg()*theta;
+  theta = ACos(theta);
+  theta = RadToDeg()*theta;
 
   return theta;
 }
@@ -558,54 +905,78 @@ Float_t TLab::PhotonEnergyToTheta(Float_t energy){
   // cos(theta)
   theta = 2 - m/energy;
 
-  theta = TMath::ACos(theta);
-  theta = TMath::RadToDeg()*theta;
-
+  theta = ACos(theta);
+  theta = RadToDeg()*theta;
+  
   return theta;
 }
 
+void TLab::GetThetaBinValues(){
+  Float_t thetaLowEdge  = 10.;
+  Float_t thetaHighEdge = 170.;
+
+  Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
+
+  for (Int_t i = 0 ; i < nThBins ; i++){
+    ThMin[i] = thetaLowEdge + i*thetaBinWidth;
+    ThMax[i] = ThMin[i] + thetaBinWidth;
+    plotTheta[i] = ThMin[i] + (ThMax[i] - ThMin[i])/2.;
+  }
+}
 
 void TLab::GraphAsymmetry(Char_t option){
 
   SetStyle();
+  GetThetaBinValues();
 
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
 
-  //const Int_t nBins = 10;
-  const Int_t nBins = 4;
-
+  
+  Float_t  AsPhiDiff[nThBins];
+  Float_t  AePhiDiff[nThBins];
+  
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
   Int_t   dPhiDiff = 90;
-  
-  Float_t  theta[nBins];
-  Float_t  thetaRange[nBins][2];
-  Float_t  As090[nBins];
-  Float_t  Ae090[nBins];
+
+  Float_t  phi[nPhiBins];
+
+  for (Int_t i = 0 ; i < nPhiBins ; i++)
+    phi[i] = i*90.;
   
   // Theta range 
-  Float_t thetaLowEdge  = 30.;
-  thetaLowEdge  = 0.;
-  Float_t thetaHighEdge = 130.;
-  thetaHighEdge = 360.;
+  Float_t thetaLowEdge  = 10.;
+  Float_t thetaHighEdge = 170.;
   
-  Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nBins;
+  Float_t phiLowEdge  = -45.0;
+  Float_t phiHighEdge = 315.0;
+
+  Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
   // Axis
   TH1F * hr;
-  hr = canvas->DrawFrame(thetaLowEdge,0.5,thetaHighEdge,2.5);
-  hr->GetXaxis()->SetTitle("#theta (deg)");
   
-  hr->GetYaxis()->SetTitle("P(90^{o})/P(0^{o})");
+  Float_t maxY = 2.5;
+  Float_t minY = 0.5;
+
+  //Float_t maxY = 0.6;
+  //Float_t minY = 0.0;
+
+  if(dPhiDiff==180)
+    maxY = 6.0;
+  
   
   // Theory curve
-  Float_t aTheory[nBins];
+  Float_t aTheory[nThBins];
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
-  Float_t alpha1   = DegToRad()*22.5;
+
+  Float_t alpha1   = DegToRad()*26.0;
+
   // half resolution in theta
+
   Float_t semiSpan = thetaBinWidth/2.*DegToRad();
   
   cout << endl;
@@ -616,14 +987,8 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // Simulation results
   
-  Float_t aSim[nBins];
-  Float_t aSimE[nBins];
-  
-  for(Int_t i = 0 ; i < nBins ; i++){
-    thetaRange[i][0]  = thetaLowEdge + thetaBinWidth*i;
-    thetaRange[i][1]  = thetaRange[i][0] + thetaBinWidth;
-    theta[i] = (thetaRange[i][0] + thetaRange[i][1])/2.;
-  }
+  Float_t aSim[nThBins];
+  Float_t aSimE[nThBins];
 
   // lab only
   if( option!='t' && option!='T'){
@@ -631,22 +996,46 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << endl;
     cout << " Calculating asymmetry values and " << endl;
     cout << " associated errors for lab data ... " << endl;
-    
-    for(Int_t i = 0 ; i < nBins ; i++){
       
-      CalculateAsymmetry(dPhiDiff,thetaRange[i][0],
-			 thetaRange[i][1]);
-      
-      As090[i] = Asym;
-	
-      Ae090[i] = AsymErr;
+    CalculateAsymmetry();
 
-      cout << endl;
-      cout << " A(90,"<< theta[i] <<")/A(0,"<< theta[i] <<") = "  
-	   << As090[i] << " ± " << Ae090[i] << endl;
-    }   
-    
+    for (Int_t i = 0 ; i < nThBins ; i++){
+      if (AsymMatrix[i][0] != 0){
+	if (dPhiDiff  == 90){
+	  AsPhiDiff[i] =
+	    AsymMatrix[i][1]/AsymMatrix[i][0];
+	  AePhiDiff[i] =
+	    AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
+       
+	  //using average 90 and 270
+	  //comment out if only dPhi = 90 needed
+	  AsPhiDiff[i] =
+	    (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
+	  AePhiDiff[i] =
+	  AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
+	}
+	if (dPhiDiff  == 180){
+	  AsPhiDiff[i] =
+	    AsymMatrix[i][2]/AsymMatrix[i][0];
+	  AePhiDiff[i] =
+	    AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][2])+(1/AsymMatrix[i][0]));
+	}
+	if (dPhiDiff  == 270){
+	  AsPhiDiff[i] =
+	    AsymMatrix[i][3]/AsymMatrix[i][0];
+	  AePhiDiff[i] =
+	    AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][3])+(1/AsymMatrix[i][0]));
+	}
+      }
+      
+    // Only plot points in axis range
+      if(AsPhiDiff[i] < 0.5 || AsPhiDiff[i] > maxY)
+      	AsPhiDiff[i] = 0.0;
+            
+    }
+ 
   }// end of: if( option!='t' &...
+
 
   // theory and lab
   if( option=='t' || option=='T' ||
@@ -654,19 +1043,20 @@ void TLab::GraphAsymmetry(Char_t option){
     
     cout << endl;
     cout << " Calculating theory curve ... " << endl;
+    cout << endl;
+    cout << " semiSpan = " << semiSpan*RadToDeg() << endl;
+    cout << " alpha1   = " << alpha1*RadToDeg()   << endl;
     
-    for(Int_t i = 0 ; i < nBins ; i++){
-      theta[i] = theta[i]*DegToRad();
+    for(Int_t i = 0 ; i < nThBins ; i++){
       
-      
-      aTheory[i] = theory->rho2(theta[i],semiSpan,alpha1);
-
-      theta[i] = theta[i]*RadToDeg();
-      
-      cout << " theta[" << i << "] = " << theta[i]  << endl;
-      cout << " semiSpan = " << semiSpan*RadToDeg() << endl;
-      cout << " alpha1   = " << alpha1*RadToDeg()   << endl;
-    
+      if( dPhiDiff == 180 ){
+	aTheory[i] = 1.0;
+	continue;
+      }
+      plotTheta[i] = plotTheta[i]*DegToRad();
+      aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);
+      plotTheta[i] = plotTheta[i]*RadToDeg();
+ 
     }
     
   }// end of:  if( option=='t' || option=='T'
@@ -680,15 +1070,15 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " Calculating theory curve " << endl;
     cout << " and simulation results ... " << endl;
     
-    for(Int_t i = 0 ; i < nBins ; i++){
-      theta[i] = theta[i]*DegToRad();
+    for(Int_t i = 0 ; i < nThBins ; i++){
+      plotTheta[i] = plotTheta[i]*DegToRad();
       
-      aTheory[i] = theory->rho2(theta[i],semiSpan,alpha1);
+      aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);
       
       aSim[i]    = simData->GetAsymm(i);
       aSimE[i]   = simData->GetAsymErr(i);
             
-      theta[i] = theta[i]*RadToDeg();
+      plotTheta[i] = plotTheta[i]*RadToDeg();
     }
     
   }// end of:  if( option=='t' || option=='T'
@@ -697,11 +1087,57 @@ void TLab::GraphAsymmetry(Char_t option){
   cout << " ... done.  " << endl;
   cout << " Plotting the results.  " << endl;
     
-  TGraphErrors *grAsym[3];
-  grAsym[0] =  new TGraphErrors(nBins,theta,As090,0,Ae090);
-  grAsym[1] =  new TGraphErrors(nBins,theta,aTheory,0,0);
+  Float_t AsInt[nPhiBins], AeInt[nPhiBins];
+  Float_t maxCountsPhi = 0;
   
-  grAsym[2] =  new TGraphErrors(nBins,theta,aSim,0,aSimE);
+  for ( Int_t j = 0 ; j < nPhiBins ; j++){
+    
+    AsInt[j] = 0.0;
+    AeInt[j] = 0.0;
+      
+    for ( Int_t i = 0 ; i < nThBins ; i++ ){
+      
+      AsInt[j] += AsymMatrix[i][j];
+      AeInt[j] += AsymMatrix[i][j];  
+      
+      }
+    
+    AeInt[j] = Sqrt(AeInt[j]);
+    
+    cout << endl;
+    cout << " AsInt[" << j << "] = " << AsInt[j] << endl;
+    cout << " AeInt[" << j << "] = " << AeInt[j] << endl;
+    
+    if( (AsInt[j]*1.1) > maxCountsPhi)
+      maxCountsPhi = AsInt[j]*1.1;;
+    
+  }
+
+  // Graph counts vs dPhi integrated over theta
+  TGraphErrors * grDPhi = new TGraphErrors(nPhiBins,
+					   phi,
+					   AsInt,
+					   0,
+					   AeInt);
+  
+  // dPhi Plot
+  hr = canvas->DrawFrame(phiLowEdge,0,phiHighEdge,maxCountsPhi);
+  hr->GetXaxis()->SetTitle("#phi (deg)");
+  hr->GetYaxis()->SetTitle("N(#Delta#phi)");
+  
+  grDPhi->Draw("P E");
+  
+  Char_t plotName[128];
+  
+  sprintf(plotName,"../Plots/DeltaPhi_%d.pdf",runNumberInt);
+  canvas->SaveAs(plotName);
+  
+  
+  TGraphErrors *grAsym[3];
+  grAsym[0] =  new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
+  grAsym[1] =  new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
+  
+  grAsym[2] =  new TGraphErrors(nThBins,plotTheta,aSim,0,aSimE);
   
   grAsym[0]->SetLineColor(kBlue);
   grAsym[0]->SetMarkerColor(kBlue);
@@ -710,14 +1146,32 @@ void TLab::GraphAsymmetry(Char_t option){
   grAsym[2]->SetLineColor(kGreen+2);
   grAsym[2]->SetMarkerColor(kGreen+2);
 
-  TLegend * leg =  new TLegend(0.6,0.8,0.9,0.85);
+  TLegend * leg =  new TLegend(0.6,0.8,0.9,0.9);
  
-  TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 22.5^{o}";
+
+  TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 26^{o}";
+
+  TString theoryLegendTitle = " ";
+  
+  alpha1 = alpha1*RadToDeg();
+
+  theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %f^{o}", alpha1);
+
+  
+  Char_t yAxis[128];
+  
+  // Ratio Plot
+  hr = canvas->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
+  hr->GetXaxis()->SetTitle("#theta (deg)");
+
+  sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
+  hr->GetYaxis()->SetTitle(yAxis);
+
   
   if     (option=='b' || option=='B'){
     leg->AddEntry(grAsym[0],"laboratory","E P");
     leg->AddEntry(grAsym[1],
-		  "theoryLegendTitle","L P");
+		  theoryLegendTitle,"L P");
     grAsym[0]->Draw("P E");
     grAsym[1]->Draw("same P L");
   }
@@ -760,16 +1214,14 @@ void TLab::GraphAsymmetry(Char_t option){
   
   leg->Draw();
   
-  Char_t plotName[128];
-  
-  sprintf(plotName,"../Plots/A_%d.pdf",runNumberInt);
+  sprintf(plotName,"../Plots/A_%d_%d.pdf",runNumberInt,dPhiDiff);
   
   canvas->SaveAs(plotName);
   
   // beep
   cout << '\a' << endl;
   
-}
+  }
 
 void TLab::SetStyle(){
   
@@ -818,7 +1270,6 @@ void TLab::SetStyle(){
   
   //Histos
   garyStyle->SetHistLineWidth(2);
-  garyStyle->SetHistLineWidth(2);
   garyStyle->SetMarkerStyle(20);
   
   //  FILL CONTOURS LINE BAR 
@@ -848,7 +1299,7 @@ void TLab::SetStyle(){
   
   //----------  Stats
   garyStyle->SetOptStat(0);
-  garyStyle->SetOptFit(0);
+  garyStyle->SetOptFit(1);
 
   //----------  Legend
   garyStyle->SetLegendBorderSize(0);

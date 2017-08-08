@@ -224,7 +224,7 @@ Int_t main(int argc, char **argv){
 	    
 	  if( overwrite=='y' || overwrite=='Y'){
 	    cout << endl;
-	    cout << " Okay, I with overwrite the file  " << endl;
+	    cout << " Okay, I will overwrite the file  " << endl;
 	    data->MakeCalibratedDataTreeFile();
 	  }
 	}// end of: if(strcmp(argv[1],"0")...
@@ -294,7 +294,7 @@ Int_t main(int argc, char **argv){
     
     TSim * simData = new TSim(argv[2]);
     
-    Char_t raw = 'n';
+    /*Char_t raw = 'n';
     cout << endl;
     cout << " Create/Recreate raw ROOT file ? " << endl;
     cout << " n (default)/ y " << endl;
@@ -307,7 +307,7 @@ Int_t main(int argc, char **argv){
       cout << " Making ROOT file from text file " << endl;
       
       simData->Hits2Tree(argv[2],0);
-    }
+      }*/
     
     Char_t sort = 'n';
     cout << endl;
@@ -321,7 +321,7 @@ Int_t main(int argc, char **argv){
       cout << endl;
       cout << " Sorting data " << endl;
 	
-      simData->SortEvents(argv[2],0);
+      simData->SortEvents(argv[2]);
     }
     
     cout << endl;

@@ -38,6 +38,7 @@ class TTheory : public TObject{
   Float_t ThetaToPhotonEnergy(Float_t);
   Float_t ThetaToElectronEnergy(Float_t);
 
+  Float_t modFactor(Float_t);
   //======================
   //======================
   //==== Data Members ====
