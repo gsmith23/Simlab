@@ -66,7 +66,7 @@ Int_t main(int argc, char **argv){
     cout <<                                              endl;
     cout << " ------------------------------------- " << endl;
     cout << " Option 3 - two further arguments      " << endl; 
-    cout << "        raw lab run number             " << endl;
+    cout << "        run lab run number             " << endl;
     cout << "    simulated data file number         " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
@@ -312,7 +312,8 @@ Int_t main(int argc, char **argv){
     cout << endl;
     cout << " Calculating & Plotting Asymmetry " << endl;
     
-    simData->GetAsymmetry(argv[2]);
+    simData->CalculateAsymmetryLab(argv[2]);
+    simData->GraphAsymmetryLab(argv[2]);
         
     delete simData;
   
@@ -320,9 +321,69 @@ Int_t main(int argc, char **argv){
   else if( strcmp(argv[1],"3")==0 ) {
     
     cout << endl;
-    cout << "      --------------------" << endl;
-    cout << "      | work in progress |" << endl;
-    cout << "      --------------------" << endl;
+    cout << "     --------------------" << endl;
+    cout << "    | lab and simulation |" << endl;
+    cout << "     --------------------" << endl;
+
+    cout << "Analysing: " << argv[2] << " and " << argv[3] << endl;
+    cout << " Calculating & Plotting Asymmetry " << endl;
+    
+    TLab *data;
+
+    data = new TLab(argv[2],argv[3]);
+
+    Char_t overwrite = 'n';
+    Char_t option    = 'b';
+    
+    cout << endl;
+    cout << " Checking if ROOT file exists " << endl; 
+    
+    if(!(data->RawROOTFileExists())){
+      cout << endl;
+      cout << " ...                                   " << endl;
+      cout << " ROOT file of raw data does not exist. " << endl;
+      cout << " I will therefore create one ...       " << endl;
+      data->MakeRawDataTreeFile();
+    }
+    else{
+      cout << endl;
+      cout << " ROOT file of raw data does exist   " << endl;
+      
+      if(strcmp(argv[1],"0")==0){
+	cout << " Would you like me to overwrite it? " << endl;
+	cout << " [answer (y/n)]                     " << endl;
+	cout << endl;
+	cout << " ";
+	cin  >> overwrite;
+	
+	if( overwrite=='y' || overwrite=='Y'){
+	  cout << endl;
+	  cout << " Okay, I will overwrite the file. " << endl;
+	  data->MakeRawDataTreeFile();
+	}
+	
+      } // end of: if(strcmp(argv[1],"0")=...
+    } // end of: else{....
+
+    cout << endl;
+    cout << " Graphing Asymmetry " << endl;
+    cout << endl;
+    cout << " Enter plot type:   " << endl;
+    cout << " a - Lab, Theory and Simulation (default)" << endl;
+    cout << " ";
+    cin  >> option;
+
+    if(option!='a' && option!='A' ){
+	  
+      cout << endl;
+      cout << " invalid choice, setting to default " << endl;
+	  
+      option = 'a';
+    }
+	
+    data->GraphAsymmetry(option);
+    
+    delete data;
   } 
   
   cout << endl;

@@ -2,6 +2,7 @@
 #define TSim_h
 
 #include "./includes.h"
+#include "TTheory.h"
 #include "TRandom.h"
 
 //--------------------------------------------------------------------------------------
@@ -27,7 +28,8 @@ class TSim : public TObject{
 
   //==================================
   // 
-  Int_t GetAsymmetry(TString);
+  Int_t CalculateAsymmetryLab(TString);
+  void GraphAsymmetryLab(TString);
   
   //==================================
     
@@ -47,11 +49,19 @@ class TSim : public TObject{
   Int_t   GetThetaBin(Float_t);
   void    GetThetaBinValues();
   
-  Float_t CrystalToPhi(Int_t); 
+  Float_t CrystalToPhi(Int_t);
+
+  Float_t GetAsymLab(Int_t,Int_t);
+  Float_t GetAsymLabErr(Int_t,Int_t);
+  Float_t GetAsymLabTrue(Int_t,Int_t);
+  Float_t GetAsymLabTrueErr(Int_t,Int_t);
+  
   //=====================
   //==== conditions =====
   
   Bool_t GoodTheta(Float_t);
+  Bool_t CentralY(Double_t);
+  Bool_t CentralZ(Double_t);
 
   //====================================
   // overload operator to use with TF1
@@ -65,13 +75,13 @@ class TSim : public TObject{
 
   void SetAsymmetry(TString);
   
-  Float_t GetAsymm(Int_t bin){
-    return 0 /*asymmCr90[bin]*/;
-  }
+  //Float_t GetAsymm(Int_t bin){
+  //  return 0 /*asymmCr90[bin]*/;
+  // }
   
-  Float_t GetAsymErr(Int_t bin){
-    return 0 /* asyerCr90[bin]*/;
-  }
+  // Float_t GetAsymErr(Int_t bin){
+  // return 0 /* asyerCr90[bin]*/;
+  //}
   
   //======================
   //======================
@@ -103,15 +113,28 @@ class TSim : public TObject{
   Int_t nb_ComptA[nCrystals];
   Int_t nb_ComptB[nCrystals];
 
-  
+  Double_t XposA[nCrystals];
+  Double_t YposA[nCrystals];
+  Double_t ZposA[nCrystals];
+
+  Double_t XposB[nCrystals];
+  Double_t YposB[nCrystals];
+  Double_t ZposB[nCrystals];
 
   static const Int_t nThbins = 8;
   static const Int_t nPhibins = 4;
+  static const Int_t nPhibinsSim = 8;
   
   Float_t ThMin[nThbins];
   Float_t ThMax[nThbins];
   Float_t plotTheta[nThbins]; 
   Float_t AsymMatrix[nThbins][nPhibins];
+  Float_t AsymTrue[nThbins][nPhibins];
+
+  Float_t AsPhiDiff[nThbins];
+  Float_t AePhiDiff[nThbins];
+  Float_t AsTrue[nThbins];
+  Float_t AeTrue[nThbins];
 
   Int_t n000;
   Int_t n090;
