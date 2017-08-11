@@ -133,8 +133,11 @@ class TLab : public TObject{
   Float_t ThMax[nThBins];
   Float_t plotTheta[nThBins]; 
   Float_t AsymMatrix[nThBins][nPhiBins];
+
+  Float_t muMatrix[nThBins][nPhiBins];
   
   Int_t runNumberInt;
+  TString simRun;
 
   ifstream *inData;
 
@@ -148,7 +151,7 @@ class TLab : public TObject{
   
   TString rootFileRawName;
   TString rootFileCalName;
-  
+
   TCanvas *canvas1;
   TCanvas *canvas2;
   
@@ -200,9 +203,11 @@ class TLab : public TObject{
 
   Char_t type;
 
-  TSim * simData;
+  TSim *simData;
 
   Int_t npeaks;
+
+  TH1F *hr;
   
   ClassDef(TLab,1);
 };
