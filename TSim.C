@@ -1188,7 +1188,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   Float_t aTheory[nThbins];
 
   //half resolution in dPhi
-  Float_t alpha1 = DegToRad()*26.0;
+  Float_t alpha1 = DegToRad()*47.0;
 
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
@@ -1416,9 +1416,9 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   }
   
   
-  TGraphErrors *grAsym1 =
-    new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
-  
+  TGraphErrors *grAsym1 = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+ 
+
   
   CalculateAsymmetrySim(inputFileNumber2);
   
@@ -1447,20 +1447,54 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
     new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
    
 
+    //theory curve
+  Float_t aTheory[nThbins];
+
+  //half resolution in dPhi
+  Float_t alpha1 = DegToRad()*40.0;
+
+  //half resolution in theta
+  Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
+
+  TTheory *theory = new TTheory();
+
+  //calculating theory curve
+  cout << endl;
+  cout << " Calculating theory curve ... " << endl;
+  cout << endl;
+  cout << " semiSpan = " << semiSpan*RadToDeg() << endl;
+  cout << " alpha1   = " << alpha1*RadToDeg()   << endl;
+  
+  for (Int_t i = 0; i<nThbins; i++){
+    if( dPhiDiff == 180 ){
+	aTheory[i] = 1.0;
+	continue;
+      }
+    plotTheta[i] = plotTheta[i]*DegToRad();
+    aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);
+    plotTheta[i] = plotTheta[i]*RadToDeg();
+  }
+
+    TGraphErrors* grThe = new TGraphErrors(nThbins,plotTheta,aTheory,0,0);
+
+
   grAsym1->SetLineColor(kBlue);
   grAsym1->SetMarkerColor(kBlue);
 
-   grAsym2->SetLineColor(kRed);
-   grAsym2->SetMarkerColor(kRed);
+  grAsym2->SetLineColor(kGreen);
+  grAsym2->SetMarkerColor(kGreen);
+
+  grThe->SetLineColor(kRed);
+  grThe->SetMarkerColor(kRed);
 
 
   TH1F *hr;
 
-  hr = canvas->DrawFrame(10,0.5,170,3);
-  hr->GetXaxis()->SetTitle("#theta (deg)");
-
   Char_t plotN[128];
   Char_t yAxis[128];
+
+  hr = canvas->DrawFrame(10,0.5,170,3);
+  hr->GetXaxis()->SetTitle("#theta (deg)");
   
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
@@ -1468,6 +1502,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
 
   grAsym1->Draw("P E");
   grAsym2->Draw("same P E");
+  grThe->Draw("same P L");
 
   sprintf(plotN,"../Plots/A_%d_%d_%d.pdf",inputFileInt1, inputFileInt2, dPhiDiff);
   

@@ -124,8 +124,6 @@ class TSim : public TObject{
   static const Int_t nPhibins = 4;
   static const Int_t nPhibinsSim = 4;
 
-  Float_t AsPhiDiff[nThbins];
-  Float_t AePhiDiff[nThbins];
 
 
   Double_t XposA[nCrystals];
