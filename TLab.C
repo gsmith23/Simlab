@@ -866,98 +866,7 @@ void TLab::CalculateAsymmetry(){
       else if(AB270)
 	AsymMatrix[thBin][3]+=1.;
 
-      //Modulation factor for theta1 in bin 80, theta2
-      //for nThBins = 8
-
-      A[4] = kFALSE;
-      B[4] = kFALSE;
-
-      if ( (tHA[4] > ThMin[3]) &&
-	   (tHA[4] < ThMax[3]) ){
-	A[4] = kTRUE;
-	nA[4]++;}
       
-      for (Int_t k=0 ; k < nThBins; k++){
-	if( ( A[4] ) &&
-	    ( tHB[4] > ThMin[k] ) &&
-	    ( tHB[4] < ThMax[k] )){
-	  B[4] = kTRUE;
-	  nB[4]++;
-	  thBin = k;
-	}
-      }
-   
-      for (Int_t j = 0 ; j < nCrystals ; j++){
-      
-	A[j] = kFALSE;  
-	B[j] = kFALSE;
-
-	if( ( GoodTheta(tHA[j]) ) &&
-	    ( tHA[j] > ThMin[3] ) &&
-	    ( tHA[j] < ThMax[3] )){
-	  A[j] = kTRUE;
-	  nA[j]++;
-	    
-	}
-      
-	if( ( GoodTheta(tHB[j]) ) &&
-	    ( tHB[j] > ThMin[thBin] ) &&
-	    ( tHB[j] < ThMax[thBin] )){
-	  B[j] = kTRUE;
-	  nB[j]++;
-	
-	}
-      } // end of: for (Int_t j = 0 ; j < nCrystals  
-   
-      // Central Crystals are always required
-      if( !A[4] || !B[4] )
-	continue;
-    
-      if((A[1]&&B[1])||
-	 (A[3]&&B[3])||
-	 (A[5]&&B[5])||
-	 (A[7]&&B[7]))
-	AB000 = kTRUE;
-
-    
-      if((A[1]&&B[3])||
-	 (A[3]&&B[7])||
-	 (A[7]&&B[5])||
-	 (A[5]&&B[1]))
-	AB090 = kTRUE;
-    
-      if((A[1]&&B[7])||
-	 (A[3]&&B[5])||
-	 (A[7]&&B[1])||
-	 (A[5]&&B[3]))
-	AB180 = kTRUE;
-      
-      if((A[1]&&B[5])||
-	 (A[5]&&B[7])||
-	 (A[7]&&B[3])||
-	 (A[3]&&B[1]))
-	AB270 = kTRUE;
-      
-      // check that only one combination
-      // is satisfied
-      if( (AB000 && AB090) || 
-	  (AB000 && AB180) ||
-	  (AB000 && AB270) ||
-	  (AB090 && AB180) ||
-	  (AB090 && AB270) ||
-	  (AB180 && AB270) ){
-	nDuplicates++;
-	continue;
-      }
-    
-      if     (AB000)
-        muMatrix[thBin][0] +=1.;
-      else if(AB090)
-        muMatrix[thBin][1]+=1.;
-      else if(AB180)
-        muMatrix[thBin][2]+=1.;
-      else if(AB270)
-        muMatrix[thBin][3]+=1.;
     }//end of : if (totEA...
   } // end of : for(Int_t i = 0 ; i < calDa...
 
@@ -974,15 +883,6 @@ void TLab::CalculateAsymmetry(){
   cout<<plotTheta[6]<<" - "<<AsymMatrix[6][0]<<" - "<<AsymMatrix[6][1]<<" - "<<AsymMatrix[6][2]<<" - "<<AsymMatrix[6][3]<<endl;
   cout<<plotTheta[7]<<" - "<<AsymMatrix[7][0]<<" - "<<AsymMatrix[7][1]<<" - "<<AsymMatrix[7][2]<<" - "<<AsymMatrix[7][3]<<endl;
 
-  cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
-  cout<<plotTheta[0]<<" - "<<muMatrix[0][0]<<" - "<<muMatrix[0][1]<<" - "<<muMatrix[0][2]<<" - "<<muMatrix[0][3]<<endl;
-  cout<<plotTheta[1]<<" - "<<muMatrix[1][0]<<" - "<<muMatrix[1][1]<<" - "<<muMatrix[1][2]<<" - "<<muMatrix[1][3]<<endl;
-  cout<<plotTheta[2]<<" - "<<muMatrix[2][0]<<" - "<<muMatrix[2][1]<<" - "<<muMatrix[2][2]<<" - "<<muMatrix[2][3]<<endl;
-  cout<<plotTheta[3]<<" - "<<muMatrix[3][0]<<" - "<<muMatrix[3][1]<<" - "<<muMatrix[3][2]<<" - "<<muMatrix[3][3]<<endl;
-  cout<<plotTheta[4]<<" - "<<muMatrix[4][0]<<" - "<<muMatrix[4][1]<<" - "<<muMatrix[4][2]<<" - "<<muMatrix[4][3]<<endl;
-  cout<<plotTheta[5]<<" - "<<muMatrix[5][0]<<" - "<<muMatrix[5][1]<<" - "<<muMatrix[5][2]<<" - "<<muMatrix[5][3]<<endl;
-  cout<<plotTheta[6]<<" - "<<muMatrix[6][0]<<" - "<<muMatrix[6][1]<<" - "<<muMatrix[6][2]<<" - "<<muMatrix[6][3]<<endl;
-  cout<<plotTheta[7]<<" - "<<muMatrix[7][0]<<" - "<<muMatrix[7][1]<<" - "<<muMatrix[7][2]<<" - "<<muMatrix[7][3]<<endl;
 }
 
 Float_t TLab::ElectronEnergyToTheta(Float_t energy){
@@ -1038,8 +938,6 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t  AsPhiDiff[nThBins];
   Float_t  AePhiDiff[nThBins];
 
-  Float_t muFactor[nThBins];
-  Float_t muErr[nThBins];
   
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
@@ -1070,7 +968,7 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // Theory curve
   Float_t aTheory[nThBins];
-  Float_t mTheory[nThBins];
+
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
   Float_t alpha1   = DegToRad()*26.0;
@@ -1131,45 +1029,8 @@ void TLab::GraphAsymmetry(Char_t option){
       
     // Only plot points in axis range
       if(AsPhiDiff[i] < 0.5 || AsPhiDiff[i] > maxY)
-      	AsPhiDiff[i] = 0.0;
+      	AsPhiDiff[i] = 0.0; 
       
-       if (dPhiDiff  == 90){
-	Float_t n90 = AsymMatrix[i][1];
-	Float_t n00 = AsymMatrix[i][0];
-        muFactor[i] = (n90-n00)/(n90+n00);
-        muErr[i] = 2*Sqrt(n90+n00)/(Power((n90+n00)*(n90+n00),1.5));
-      }
-      if (dPhiDiff  == 180){
-	Float_t n90 = AsymMatrix[i][2];
-	Float_t n00 = AsymMatrix[i][0];
-        muFactor[i] = (n90-n00)/(n90+n00);
-        muErr[i] = 2*Sqrt(n90*n00)/(Power((n90+n00)*(n90+n00),1.5));
-      }
-      if (dPhiDiff  == 270){
-	Float_t n90 = AsymMatrix[i][3];
-	Float_t n00 = AsymMatrix[i][0];
-        muFactor[i] = (n90-n00)/(n90+n00);
-        muErr[i] = 2*Sqrt(n90*n00)/(Power((n90+n00)*(n90+n00),1.5));
-      }
-     
-      if (dPhiDiff  == 90){
-	Float_t n90 = muMatrix[i][1];
-	Float_t n00 = muMatrix[i][0];
-        muFactor[i] = (n90-n00)/(n90+n00);
-        muErr[i] = 2*Sqrt(n90+n00)/(Power((n90+n00)*(n90+n00),1.5));
-      }
-      if (dPhiDiff  == 180){
-	Float_t n90 = muMatrix[i][2];
-	Float_t n00 = muMatrix[i][0];
-        muFactor[i] = (n90-n00)/(n90+n00);
-        muErr[i] = 2*Sqrt(n90*n00)/(Power((n90+n00)*(n90+n00),1.5));
-      }
-      if (dPhiDiff  == 270){
-	Float_t n90 = muMatrix[i][3];
-	Float_t n00 = muMatrix[i][0];
-        muFactor[i] = (n90-n00)/(n90+n00);
-        muErr[i] = 2*Sqrt(n90*n00)/(Power((n90+n00)*(n90+n00),1.5));
-      }
     }
  
   }// end of: if( option!='t' &...
@@ -1193,7 +1054,6 @@ void TLab::GraphAsymmetry(Char_t option){
       }
       plotTheta[i] = plotTheta[i]*DegToRad();
       aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);
-      mTheory[i] = theory->modFactor(80,plotTheta[i]);
       plotTheta[i] = plotTheta[i]*RadToDeg();
  
     }
@@ -1224,7 +1084,6 @@ void TLab::GraphAsymmetry(Char_t option){
 
     }
 
-    //delete simData;
   }// end of:  if( option=='t' || option=='T'
   
   cout << endl;
@@ -1298,14 +1157,18 @@ void TLab::GraphAsymmetry(Char_t option){
   grAsym[0]->SetMarkerColor(kBlue);
   grAsym[1]->SetLineColor(kRed);
   grAsym[1]->SetMarkerColor(kRed);
-  grAsym[2]->SetLineColor(kGreen+1.9);
-  grAsym[2]->SetMarkerColor(kGreen+1.9);
+  grAsym[2]->SetLineColor(kGreen+2.7);
+  grAsym[2]->SetMarkerColor(kGreen+2.7);
   grAsym[3]->SetLineColor(kGreen);
   grAsym[3]->SetMarkerColor(kGreen);
 
   TLegend *leg =  new TLegend(0.6,0.75,0.9,0.85);
- 
-  TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 26^{o}";
+
+  TString theoryLegendTitle = " ";
+  
+  alpha1 = alpha1*RadToDeg();
+
+  theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %.1f^{o}", alpha1);
   
   Char_t yAxis[128];
   
@@ -1373,83 +1236,6 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // beep
   cout << '\a' << endl;
-
-  //mu factor plot
-  /*TGraphErrors *grMu[3];
-  grMu[0] =  new TGraphErrors(nThBins,plotTheta,muFactor,0,muErr);
-  grMu[1] =  new TGraphErrors(nThBins,plotTheta,mTheory,0,0);
-  
-  //grMu[2] =  new TGraphErrors(nThBins,plotTheta,aSim,0,aSimE);
-  
-  grMu[0]->SetLineColor(kBlue);
-  grMu[0]->SetMarkerColor(kBlue);
-  grMu[1]->SetLineColor(kRed);
-  grMu[1]->SetMarkerColor(kRed);
-  grMu[2]->SetLineColor(kGreen+2);
-  grMu[2]->SetMarkerColor(kGreen+2);
-
-  TLegend *legM =  new TLegend(0.6,0.8,0.9,0.85);
-  theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 26^{o}";
-  
-  minY = 0.0;
-  maxY = 0.6;
-  
-  hr = canvas->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
-  hr->GetXaxis()->SetTitle("#theta (deg)");
-
-  sprintf(yAxis,"Modulation Factor(%d^{o})",dPhiDiff);
-  hr->GetYaxis()->SetTitle(yAxis);
-
-  
-  if     (option=='b' || option=='B'){
-    legM->AddEntry(grMu[0],"laboratory","E P");
-    legM->AddEntry(grMu[1],
-		  theoryLegendTitle,"L P");
-    grMu[0]->Draw("P E");
-    grMu[1]->Draw("same P L");
-  }
-  else if(option=='l' || option=='L'){
-    legM->AddEntry(grMu[0],"laboratory","E P");
-    grMu[0]->Draw("P E");
-  }
-  else if(option == 't' || option == 'T'){
-    legM->AddEntry(grMu[1],
-		  theoryLegendTitle,"L P");
-    grMu[1]->Draw("L P");
-  }
-  else if(option=='a' || option=='A'){
-    legM->AddEntry(grMu[0],
-		  "laboratory","E P");
-    legM->AddEntry(grMu[1],
-		  theoryLegendTitle,"L P");
-    legM->AddEntry(grMu[2],
-		  "simulation (no entanglement)","P E");
-    grMu[0]->Draw("P E");
-    grMu[1]->Draw("same L P");
-    grMu[2]->Draw("same P");
-  }
-  else if(option=='c' || option=='C'){
-    legM->AddEntry(grMu[0],
-		  "laboratory","E P");
-    legM->AddEntry(grMu[2],
-		  "simulation (no entanglement)","P E");
-    grMu[0]->Draw("P E");
-    grMu[2]->Draw("same P");
-  }
-  else if(option=='s' || option=='S'){
-    legM->AddEntry(grMu[1],
-		  theoryLegendTitle,"L P");
-    legM->AddEntry(grMu[2],
-		  "simulation (no entanglement)","P E");
-    grMu[1]->Draw("P L");
-    grMu[2]->Draw("same P L");
-  }
-  
-  legM->Draw();
-  
-  sprintf(plotName,"../Plots/ModF_%d_%d.pdf",runNumberInt,dPhiDiff);
-  
-  canvas->SaveAs(plotName);*/
   
   }
 

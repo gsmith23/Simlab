@@ -19,7 +19,6 @@ TSim::TSim(TString fileNumber){
   rootFileRawName = rootFileRawName + ".root";
   rootFileSortName = rootFileSortName + ".root";
 
-  //Initialise();
   
   //!! temporary 
   // SetAsymmetry(fileNumber);
@@ -82,8 +81,6 @@ Int_t TSim::GetThetaBin(Float_t theta){
   
   return bin;
 }
-
-
 
 
 void TSim::Initialise(){
@@ -384,7 +381,6 @@ TRandom *rand = new TRandom();
  Float_t sigmaPar = 2.5;
 
   Long64_t nEvents = simDataTree->GetEntries();
-  //nEvents = 15000000;
   
   for(Int_t i = 0 ; i < nEvents ; i++){ 
     simDataTree->GetEvent(i);
@@ -496,6 +492,7 @@ Bool_t TSim::GoodTheta(Float_t theta){
 Bool_t TSim::CentralY(Double_t posY){
   
   Bool_t centralY = kFALSE;
+  
   //! works only for this particular detector geometry
   posY = Abs(posY);
 
@@ -508,6 +505,7 @@ Bool_t TSim::CentralY(Double_t posY){
 Bool_t TSim::CentralZ(Double_t posZ){
   
   Bool_t centralZ = kFALSE;
+  
   //! works only for this particular detector geometry
   posZ = Abs(posZ);
 
@@ -518,7 +516,9 @@ Bool_t TSim::CentralZ(Double_t posZ){
 }
 
 Float_t TSim::CrystalToPhi(Int_t crystal){
-  
+
+  //!! using only 5 crystals
+  //works only for a particular detector geometry
   Float_t crystalToPhi[9] = {-1.,0.,-1.,270.,-1.,90.,-1.,180.,-1.};
 
   Float_t phi = crystalToPhi[crystal];
@@ -689,13 +689,13 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   sortDataTree->SetBranchAddress("nb_ComptA",&nb_ComptA);
   sortDataTree->SetBranchAddress("nb_ComptB",&nb_ComptB);
 
-  /*sortDataTree->SetBranchAddress("XposA",&XposA);
+  sortDataTree->SetBranchAddress("XposA",&XposA);
   sortDataTree->SetBranchAddress("YposA",&YposA);
   sortDataTree->SetBranchAddress("ZposA",&ZposA);
 
   sortDataTree->SetBranchAddress("XposB",&XposB);
   sortDataTree->SetBranchAddress("YposB",&YposB);
-  sortDataTree->SetBranchAddress("ZposB",&ZposB);*/
+  sortDataTree->SetBranchAddress("ZposB",&ZposB);
 
   n000 = 0;
   n090 = 0;
@@ -779,10 +779,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	n270++;}
 
       if ((simtHA[4]<ThMax[thBin])&&(simtHA[4]>ThMin[thBin])&&
-	  (simtHB[4]<ThMax[thBin])&&(simtHB[4]>ThMin[thBin])/*&&
+	  (simtHB[4]<ThMax[thBin])&&(simtHB[4]>ThMin[thBin])&&
 	  (CentralY(YposA[4]))&&(CentralZ(ZposA[4]))&&
 	  (CentralY(YposB[4]))&&(CentralZ(ZposB[4]))&&
-						      (nb_ComptA[4] == 1.)&&(nb_ComptB[4] == 1.)*/){
+	  (nb_ComptA[4] == 1.)&&(nb_ComptB[4] == 1.)){
 	if (phiDiff == 0.)
 	  AsymTrue[thBin][0] += 1;
 	if ((phiDiff == 90)||(phiDiff == -270))
@@ -1199,31 +1199,25 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
 
   grAsym[2] = new TGraphErrors(nThbins,plotTheta,AsTrue,0,AeTrue);
   
-  grAsym[0]->SetLineColor(kBlue);
-  grAsym[0]->SetMarkerColor(kBlue);
+  grAsym[0]->SetLineColor(kGreen+2.7);
+  grAsym[0]->SetMarkerColor(kGreen+2.7);
   grAsym[1]->SetLineColor(kRed);
   grAsym[1]->SetMarkerColor(kRed);
-  grAsym[2]->SetLineColor(kGreen+1.5);
-  grAsym[2]->SetMarkerColor(kGreen+1.5);
+  grAsym[2]->SetLineColor(kGreen);
+  grAsym[2]->SetMarkerColor(kGreen);
 
-  TLegend *leg = new TLegend(0.6,0.8,0.9,0.85);
+  TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
   
-  
-  /*grAsTrue[0] = new TGraphErrors(nThbins,plotTheta,AsTrue,0,AeTrue);
-  grAsTrue[1] = new TGraphErrors(nThbins,plotTheta,aTheory,0,0);
-  grAsTrue[0]->SetLineColor(kGreen+1);
-  grAsTrue[0]->SetMarkerColor(kGreen+1);
-  grAsTrue[1]->SetLineColor(kRed);
-  grAsTrue[1]->SetMarkerColor(kRed);
-
-  TLegend *leg1 = new TLegend(0.6,0.8,0.9,0.85);*/
   
   TH1F *hr;
 
   hr = canvas->DrawFrame(10,0.5,170,3);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   
-  TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 26^{o}";
+  TString theoryLegendTitle = " ";
+  alpha1 = alpha1*RadToDeg();
+  theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %.1f^{o}", alpha1);
+  
   Char_t plotN[128];
   Char_t yAxis[128];
   
@@ -1241,22 +1235,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   sprintf(plotN,"../Plots/A_%d_%d.pdf",inputFileInt,dPhiDiff);
   
   canvas->SaveAs(plotN);
-  
-  /*hr = canvas->DrawFrame(10,0.5,170,3);
-  hr->GetXaxis()->SetTitle("#theta (deg)");
-  sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
-  hr->GetYaxis()->SetTitle(yAxis);
-
-  leg1->AddEntry(grAsTrue[0],"true lab events", "E P");
-  leg1->AddEntry(grAsTrue[1],
-		  theoryLegendTitle,"L P");
-  grAsTrue[0]->Draw("P E");
-  grAsTrue[1]->Draw("P L SAME");
-  leg1->Draw();
-
-  sprintf(plotN,"../Plots/ATrue_%d_%d.pdf",inputFileInt,dPhiDiff);
-  
-  canvas->SaveAs(plotN);*/
 
 }
 
