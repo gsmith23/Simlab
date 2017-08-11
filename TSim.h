@@ -11,7 +11,8 @@ class TSim : public TObject{
   
  public :
   TSim( ); 
-  TSim( TString); 
+  TSim( TString);
+  TSim( TString, TString);
   ~TSim();
 
   //======================
@@ -28,6 +29,10 @@ class TSim : public TObject{
 
   //==================================
   // 
+
+ 
+  Int_t CalculateAsymmetrySim(TString);
+  Int_t GraphAsymmetrySim(TString, TString);
   Int_t CalculateAsymmetryLab(TString);
   void GraphAsymmetryLab(TString);
   
@@ -113,6 +118,14 @@ class TSim : public TObject{
   Int_t nb_ComptA[nCrystals];
   Int_t nb_ComptB[nCrystals];
 
+  
+
+  static const Int_t nThbins = 8;
+  static const Int_t nPhibins = 4;
+  static const Int_t nPhibinsSim = 4;
+
+
+
   Double_t XposA[nCrystals];
   Double_t YposA[nCrystals];
   Double_t ZposA[nCrystals];
@@ -120,14 +133,12 @@ class TSim : public TObject{
   Double_t XposB[nCrystals];
   Double_t YposB[nCrystals];
   Double_t ZposB[nCrystals];
-
-  static const Int_t nThbins = 8;
-  static const Int_t nPhibins = 4;
-  static const Int_t nPhibinsSim = 8;
   
   Float_t ThMin[nThbins];
   Float_t ThMax[nThbins];
   Float_t plotTheta[nThbins]; 
+  
+  Float_t AsymMatrix_sim[nThbins][nPhibinsSim];
   Float_t AsymMatrix[nThbins][nPhibins];
   Float_t AsymTrue[nThbins][nPhibins];
 
@@ -135,6 +146,7 @@ class TSim : public TObject{
   Float_t AePhiDiff[nThbins];
   Float_t AsTrue[nThbins];
   Float_t AeTrue[nThbins];
+
 
   Int_t n000;
   Int_t n090;
@@ -148,6 +160,11 @@ class TSim : public TObject{
   // or folder
   TString rootFileRawName;
   TString rootFileSortName;
+
+  TString rootFileRawName1;
+  TString rootFileSortName1;
+  TString rootFileRawName2;
+  TString rootFileSortName2;
   
   // corresponding file
   TFile  *theFile;

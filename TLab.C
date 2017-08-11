@@ -616,10 +616,12 @@ Float_t TLab::GetPhotopeak(Int_t channel){
 
 Int_t TLab::DefaultPhotopeakRun(Int_t channel){
   
+  
   if(channel == 2 || channel == 7 )
     return 1;
-  else
-    return 2;
+  // temporary change for run 460
+  else 
+    return 0;
 }
 
 Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
@@ -750,6 +752,7 @@ void TLab::CalculateAsymmetry(){
 
   cout << endl;
   cout << " Calculating Asymmetry  " << endl;
+
 
   Int_t nDuplicates = 0;
   
@@ -971,7 +974,9 @@ void TLab::GraphAsymmetry(Char_t option){
 
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
+
   Float_t alpha1   = DegToRad()*26.0;
+
   // half resolution in theta
 
   Float_t semiSpan = thetaBinWidth/2.*DegToRad();
@@ -1169,6 +1174,7 @@ void TLab::GraphAsymmetry(Char_t option){
   alpha1 = alpha1*RadToDeg();
 
   theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %.1f^{o}", alpha1);
+
   
   Char_t yAxis[128];
   
