@@ -1188,7 +1188,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   Float_t aTheory[nThbins];
 
   //half resolution in dPhi
-  Float_t alpha1 = DegToRad()*47.0;
+  Float_t alpha1 = DegToRad()*26.0;
 
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
@@ -1294,8 +1294,6 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   cout << " Getting asymmetry sim " << endl;
   
   this->SetStyle();
-
-  Int_t inputFileInt = inputFileNumber.Atoi();
   
   TString plotName;
   plotName = "../Plots/Asym_sim_" + inputFileNumber;
@@ -1327,7 +1325,7 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
 
    Long64_t nEntries = simDataTree->GetEntries();
 
-Float_t binsize = 45;//180/nPhibinsSim; //45
+Float_t binsize = 180/nPhibinsSim; 
   //Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     simDataTree->GetEvent(ientry);
@@ -1359,12 +1357,12 @@ Float_t binsize = 45;//180/nPhibinsSim; //45
       }//end of: for(Int_t ientry...
   
   //printing out the asym matrix 
-    for(Int_t j = 0 ; j <nThbins; j++){
+  /* for(Int_t j = 0 ; j <nThbins; j++){
       for(Int_t k = 0 ; k < nPhibinsSim; k++){
 	cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;}
-    }
+	}*/
   
-
+  return 0;
 } //end of CalculateAsymmetrySim
 
 
@@ -1390,7 +1388,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   int bin90 = nPhibinsSim/4;
   int bin180 = nPhibinsSim/4;
   int bin270 = 3*nPhibinsSim/4;
-  
+  Float_t binsize = 180/nPhibinsSim;
   
   
   CalculateAsymmetrySim(inputFileNumber1);
@@ -1439,8 +1437,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
 	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix_sim[i][bin270])+(1/AsymMatrix_sim[i][0]));
 	
       }	
-    }
-    cout<<AePhiDiff[i]<<endl;
+    }    
   }
    
   TGraphErrors *grAsym2 =
@@ -1451,7 +1448,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   Float_t aTheory[nThbins];
 
   //half resolution in dPhi
-  Float_t alpha1 = DegToRad()*40.0;
+  Float_t alpha1 = DegToRad()*binsize;
 
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
@@ -1487,26 +1484,39 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   grThe->SetLineColor(kRed);
   grThe->SetMarkerColor(kRed);
 
-
   TH1F *hr;
 
+  Char_t theoryLegendTitle[128];
   Char_t plotN[128];
   Char_t yAxis[128];
 
-  hr = canvas->DrawFrame(10,0.5,170,3);
-  hr->GetXaxis()->SetTitle("#theta (deg)");
+
+  sprintf(theoryLegendTitle, "theory curve #alpha_{#Delta#phi} = %.1f^{o}", binsize);  
   
+  
+
+  hr = canvas->DrawFrame(10,0.5,170,3);
+  hr->SetTitle("Assymetry plot for Theory and True Simulation Data");
+  hr->GetXaxis()->SetTitle("#theta (deg)");
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
+
+  TLegend *leg = new TLegend(0.6,0.8,0.9,0.85);
+  leg->AddEntry(grThe,theoryLegendTitle,"L P");
+  leg->AddEntry(grAsym1,"Quantum Entangled Photons - True Simulated Data", "E P");
+  leg->AddEntry(grAsym2,"Polarised Photons - True Simulated Data","E P");
+  leg->Draw();
 
 
   grAsym1->Draw("P E");
   grAsym2->Draw("same P E");
   grThe->Draw("same P L");
 
-  sprintf(plotN,"../Plots/A_%d_%d_%d.pdf",inputFileInt1, inputFileInt2, dPhiDiff);
+  sprintf(plotN,"../Plots/A_%d_Inputs%d&%d_%dPhiBins.pdf", dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
   
   canvas->SaveAs(plotN);
+
+  return 0;
  
 }//end of GraphAsymmetrySim
 
