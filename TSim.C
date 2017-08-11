@@ -842,16 +842,16 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
       if (dPhiDiff  == 90){
 	//using average 90 and 270
 	AsPhiDiff[i] = (AsymMatrix_sim[i][bin90]+AsymMatrix_sim[i][bin270])/(2*AsymMatrix_sim[i][0]);
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][bin90]+AsymMatrix[i][bin270]))+(1/AsymMatrix[i][0]));
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix_sim[i][bin90]+AsymMatrix_sim[i][bin270]))+(1/AsymMatrix_sim[i][0]));
 	  	}
       
       if (dPhiDiff  == 180){
 	AsPhiDiff[i] = AsymMatrix_sim[i][bin180]/AsymMatrix_sim[i][0];
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][bin180])+(1/AsymMatrix[i][0]));
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix_sim[i][bin180])+(1/AsymMatrix_sim[i][0]));
       }
       if (dPhiDiff  == 270){
 	AsPhiDiff[i] = AsymMatrix_sim[i][bin270]/AsymMatrix_sim[i][0];
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][bin270])+(1/AsymMatrix[i][0]));
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix_sim[i][bin270])+(1/AsymMatrix_sim[i][0]));
 	
       }	
     }
@@ -869,19 +869,20 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
       if (dPhiDiff  == 90){
 	//using average 90 and 270
 	AsPhiDiff[i] = (AsymMatrix_sim[i][bin90]+AsymMatrix_sim[i][bin270])/(2*AsymMatrix_sim[i][0]);
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][bin90]+AsymMatrix[i][bin270]))+(1/AsymMatrix[i][0]));
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix_sim[i][bin90]+AsymMatrix_sim[i][bin270]))+(1/AsymMatrix_sim[i][0]));
 	  	}
       
       if (dPhiDiff  == 180){
 	AsPhiDiff[i] = AsymMatrix_sim[i][bin180]/AsymMatrix_sim[i][0];
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][bin180])+(1/AsymMatrix[i][0]));
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix_sim[i][bin180])+(1/AsymMatrix_sim[i][0]));
       }
       if (dPhiDiff  == 270){
 	AsPhiDiff[i] = AsymMatrix_sim[i][bin270]/AsymMatrix_sim[i][0];
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][bin270])+(1/AsymMatrix[i][0]));
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix_sim[i][bin270])+(1/AsymMatrix_sim[i][0]));
 	
       }	
     }
+    cout<<AePhiDiff[i]<<endl;
   }
    
   TGraphErrors *grAsym2 =
