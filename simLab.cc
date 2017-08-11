@@ -37,7 +37,8 @@ Int_t main(int argc, char **argv){
     cout << " Options:                              " << endl; 
     cout << " 1 - lab data analysis                 " << endl; 
     cout << " 2 - sim data analysis                 " << endl; 
-    cout << " 3 - lab and sim data analysis         " << endl; 
+    cout << " 3 - lab and sim data analysis         " << endl;
+    cout << " 4 - multiple sim data analysis        " << endl;
     cout << " 5 - plot theory curve only            " << endl; 
     cout << " 0 - lab data analysis (overwrite)     " << endl; 
     cout << " 8 - lab data - make raw trees only..  " << endl;
@@ -73,6 +74,15 @@ Int_t main(int argc, char **argv){
     cout << " Example:                              " << endl; 
     cout << " ./simLab 3 026 4                      " << endl;
     cout << " ------------------------------------- " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " Option 2 - two further arguments      " << endl;
+    cout << "    simulated data file number         " << endl;
+    cout << "    simulated data file number         " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " Examples:                             " << endl; 
+    cout << " ./simLab 4 2 3;                       " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Option 0 - one further argument       " << endl;
@@ -324,6 +334,34 @@ Int_t main(int argc, char **argv){
     cout << "      | work in progress |" << endl;
     cout << "      --------------------" << endl;
   } 
+
+
+   else if( strcmp(argv[1],"4")==0 ) {
+
+     
+    cout << endl;
+    cout << "       ----------------------" << endl; 
+    cout << "       | simulation analysis |" << endl;
+    cout << "       | for two simulations |" << endl;
+    cout << "       ----------------------" << endl; 
+    cout << endl;
+
+    cout << endl;
+    cout << " Analysing : " << argv[2] << " and "<< argv[3] << endl;
+    
+    TSim * simData = new TSim(argv[2], argv[3]);
+
+
+    cout << endl;
+    cout << " Calculating & Plotting Asymmetry " << endl;
+    
+    simData->GraphAsymmetrySim(argv[2], argv[3]);
+        
+    delete simData;
+
+
+    
+   }
   
   cout << endl;
   cout << " -----------------------------------" << endl;

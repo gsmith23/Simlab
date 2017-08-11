@@ -1150,7 +1150,7 @@ void TLab::GraphAsymmetry(Char_t option){
 
   TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 26^{o}";
 
-  TString theoryLegendTitle = " ";
+  //TString theoryLegendTitle = " ";
   
   alpha1 = alpha1*RadToDeg();
 

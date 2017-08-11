@@ -26,6 +26,32 @@ TSim::TSim(TString fileNumber){
   
 }
 
+//option for use with two input files
+TSim::TSim(TString fileNumber1, TString fileNumber2){
+  
+  cout << endl;
+  cout << " Constructing TSim object " << endl;
+    
+  rootFileRawName1 = "../Data/sim" + fileNumber1;
+  rootFileSortName1 = "../Data/sort" + fileNumber1;
+  
+  rootFileRawName1 = rootFileRawName1 + ".root";
+  rootFileSortName1 = rootFileSortName1 + ".root";
+
+  rootFileRawName2 = "../Data/sim" + fileNumber2;
+  rootFileSortName2 = "../Data/sort" + fileNumber2;
+  
+  rootFileRawName2 = rootFileRawName2 + ".root";
+  rootFileSortName2 = rootFileSortName2 + ".root";
+
+  //  Initialise();
+  
+  //!! temporary 
+  // SetAsymmetry(fileNumber);
+  
+}
+
+
 TSim::~TSim(){
 }
 
@@ -152,7 +178,7 @@ void TSim::Initialise(){
   simDataTree->SetBranchAddress("PhiA_2nd", &PhiA_2nd, &b_PhiA_2nd);
   simDataTree->SetBranchAddress("ThetaB_2nd", &ThetaB_2nd, &b_ThetaB_2nd);
   simDataTree->SetBranchAddress("PhiB_2nd", &PhiB_2nd, &b_PhiB_2nd);
-  simDataTree->SetBranchAddress("dPhi_2nd", &dPhi_2nd, &b_dPhi_2nd);
+  // simDataTree->SetBranchAddress("dPhi_2nd", &dPhi_2nd, &b_dPhi_2nd);
 
 }
 
@@ -249,7 +275,7 @@ Int_t  TSim::SortEvents(TString fileNumber){
   simDataTree->SetBranchAddress("PhiA_2nd", &PhiA_2nd, &b_PhiA_2nd);
   simDataTree->SetBranchAddress("ThetaB_2nd", &ThetaB_2nd, &b_ThetaB_2nd);
   simDataTree->SetBranchAddress("PhiB_2nd", &PhiB_2nd, &b_PhiB_2nd);
-  simDataTree->SetBranchAddress("dPhi_2nd", &dPhi_2nd, &b_dPhi_2nd);
+  // simDataTree->SetBranchAddress("dPhi_2nd", &dPhi_2nd, &b_dPhi_2nd);
   
   //write to
 
@@ -701,6 +727,199 @@ Int_t TSim::GetAsymmetry(TString inputFileNumber){
   return 0;
 
 }
+//-----------------------------------------------------------------------
+Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
+
+  GetThetaBinValues();
+
+  cout << endl;
+  cout << " Getting asymmetry sim " << endl;
+  
+  this->SetStyle();
+
+  Int_t inputFileInt = inputFileNumber.Atoi();
+  
+  TString plotName;
+  plotName = "../Plots/Asym_sim_" + inputFileNumber;
+
+  plotName = plotName + ".pdf";
+
+  TString inputFileName = "../Data/sim" + inputFileNumber;
+  inputFileName  = inputFileName + ".root";
+    
+  cout << endl;
+  cout << " Input File : " << inputFileName  << endl;
+  cout << endl;
+
+  TFile* inputFile = new TFile(inputFileName);
+
+  TTree* simDataTree=(TTree*)inputFile->Get("Tangle2");
+
+  simDataTree->SetBranchAddress("ThetaA_1st",&ThetaA_1st);
+  simDataTree->SetBranchAddress("ThetaB_1st",&ThetaB_1st);
+  simDataTree->SetBranchAddress("PhiA_1st",&PhiA_1st);
+  simDataTree->SetBranchAddress("PhiB_1st",&PhiB_1st);
+
+ 
+
+   for(Int_t j = 0 ; j <nThbins; j++){
+    for(Int_t k = 0 ; k < nPhibinsSim; k++){
+      AsymMatrix_sim[j][k] = 0;}
+  }
+
+   Long64_t nEntries = simDataTree->GetEntries();
+
+Float_t binsize = 45;//180/nPhibinsSim; //45
+  //Event loop
+  for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
+    simDataTree->GetEvent(ientry);
+     Float_t dPhi_1st = PhiA_1st + PhiB_1st;
+  if(dPhi_1st<0){
+    dPhi_1st = dPhi_1st + 360; }
+    
+
+    Int_t thBin = -1;
+    
+    if (GetThetaBin(ThetaA_1st) == GetThetaBin(ThetaB_1st)){
+	thBin = GetThetaBin(ThetaA_1st);
+      }
+
+
+      if(thBin>-1){
+	
+	//fill matrix for dphi=0 bin
+	if((dPhi_1st<binsize)||(dPhi_1st>360-binsize)){
+	 
+	    AsymMatrix_sim[thBin][0] += 1;}
+	//fill the rest of the matrix 
+	for (Int_t i = 1 ; i < nPhibinsSim ; i++){
+	  if((dPhi_1st>2*i*binsize-binsize)&&(dPhi_1st<2*i*binsize+binsize)){
+	    AsymMatrix_sim[thBin][i] += 1;}
+	}
+      }
+
+      }//end of: for(Int_t ientry...
+  
+  //printing out the asym matrix 
+    for(Int_t j = 0 ; j <nThbins; j++){
+      for(Int_t k = 0 ; k < nPhibinsSim; k++){
+	cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;}
+    }
+  
+
+} //end of CalculateAsymmetrySim
+
+
+
+
+Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2){
+  
+  // The ratio to be calculated for the
+  // lab data:  90 e.g corresponds to 
+  // A(90) = P(90)/P(0) 
+  Int_t   dPhiDiff = 90;
+    
+  //Calculating ratios for desired dPhiDiff
+  Float_t AsPhiDiff[nThbins] = {0.};
+  Float_t AePhiDiff[nThbins] = {0.};
+
+  Int_t inputFileInt1 = inputFileNumber1.Atoi();
+  Int_t inputFileInt2 = inputFileNumber2.Atoi();
+  
+  TCanvas *canvas = new TCanvas("canvas","canvas",
+				10,10,1200,800);
+
+  int bin90 = nPhibinsSim/4;
+  int bin180 = nPhibinsSim/4;
+  int bin270 = 3*nPhibinsSim/4;
+  
+  
+  
+  CalculateAsymmetrySim(inputFileNumber1);
+
+  for (Int_t i = 0 ; i < nThbins ; i++){
+    if (AsymMatrix_sim[i][0] != 0){
+      if (dPhiDiff  == 90){
+	//using average 90 and 270
+	AsPhiDiff[i] = (AsymMatrix_sim[i][bin90]+AsymMatrix_sim[i][bin270])/(2*AsymMatrix_sim[i][0]);
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][bin90]+AsymMatrix[i][bin270]))+(1/AsymMatrix[i][0]));
+	  	}
+      
+      if (dPhiDiff  == 180){
+	AsPhiDiff[i] = AsymMatrix_sim[i][bin180]/AsymMatrix_sim[i][0];
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][bin180])+(1/AsymMatrix[i][0]));
+      }
+      if (dPhiDiff  == 270){
+	AsPhiDiff[i] = AsymMatrix_sim[i][bin270]/AsymMatrix_sim[i][0];
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][bin270])+(1/AsymMatrix[i][0]));
+	
+      }	
+    }
+  }
+  
+  
+  TGraphErrors *grAsym1 =
+    new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+  
+  
+  CalculateAsymmetrySim(inputFileNumber2);
+  
+  for (Int_t i = 0 ; i < nThbins ; i++){
+    if (AsymMatrix_sim[i][0] != 0){
+      if (dPhiDiff  == 90){
+	//using average 90 and 270
+	AsPhiDiff[i] = (AsymMatrix_sim[i][bin90]+AsymMatrix_sim[i][bin270])/(2*AsymMatrix_sim[i][0]);
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][bin90]+AsymMatrix[i][bin270]))+(1/AsymMatrix[i][0]));
+	  	}
+      
+      if (dPhiDiff  == 180){
+	AsPhiDiff[i] = AsymMatrix_sim[i][bin180]/AsymMatrix_sim[i][0];
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][bin180])+(1/AsymMatrix[i][0]));
+      }
+      if (dPhiDiff  == 270){
+	AsPhiDiff[i] = AsymMatrix_sim[i][bin270]/AsymMatrix_sim[i][0];
+	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][bin270])+(1/AsymMatrix[i][0]));
+	
+      }	
+    }
+  }
+   
+  TGraphErrors *grAsym2 =
+    new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+   
+
+  grAsym1->SetLineColor(kBlue);
+  grAsym1->SetMarkerColor(kBlue);
+
+   grAsym2->SetLineColor(kRed);
+   grAsym2->SetMarkerColor(kRed);
+
+
+  TH1F *hr;
+
+  hr = canvas->DrawFrame(10,0.5,170,3);
+  hr->GetXaxis()->SetTitle("#theta (deg)");
+
+  Char_t plotN[128];
+  Char_t yAxis[128];
+  
+  sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
+  hr->GetYaxis()->SetTitle(yAxis);
+
+
+  grAsym1->Draw("P E");
+  grAsym2->Draw("same P E");
+
+  sprintf(plotN,"../Plots/A_%d_%d_%d.pdf",inputFileInt1, inputFileInt2, dPhiDiff);
+  
+  canvas->SaveAs(plotN);
+ 
+}//end of GraphAsymmetrySim
+
+
+
+    
+//-----------------------------------------------------------------------
 
 void TSim::SetStyle(){
 
