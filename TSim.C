@@ -19,7 +19,6 @@ TSim::TSim(TString fileNumber){
   rootFileRawName = rootFileRawName + ".root";
   rootFileSortName = rootFileSortName + ".root";
 
-  //Initialise();
   
   //!! temporary 
   // SetAsymmetry(fileNumber);
@@ -108,8 +107,6 @@ Int_t TSim::GetThetaBin(Float_t theta){
   
   return bin;
 }
-
-
 
 
 void TSim::Initialise(){
@@ -410,7 +407,6 @@ TRandom *rand = new TRandom();
  Float_t sigmaPar = 2.5;
 
   Long64_t nEvents = simDataTree->GetEntries();
-  //nEvents = 15000000;
   
   for(Int_t i = 0 ; i < nEvents ; i++){ 
     simDataTree->GetEvent(i);
@@ -522,6 +518,7 @@ Bool_t TSim::GoodTheta(Float_t theta){
 Bool_t TSim::CentralY(Double_t posY){
   
   Bool_t centralY = kFALSE;
+  
   //! works only for this particular detector geometry
   posY = Abs(posY);
 
@@ -534,6 +531,7 @@ Bool_t TSim::CentralY(Double_t posY){
 Bool_t TSim::CentralZ(Double_t posZ){
   
   Bool_t centralZ = kFALSE;
+  
   //! works only for this particular detector geometry
   posZ = Abs(posZ);
 
@@ -544,7 +542,9 @@ Bool_t TSim::CentralZ(Double_t posZ){
 }
 
 Float_t TSim::CrystalToPhi(Int_t crystal){
-  
+
+  //!! using only 5 crystals
+  //works only for a particular detector geometry
   Float_t crystalToPhi[9] = {-1.,0.,-1.,270.,-1.,90.,-1.,180.,-1.};
 
   Float_t phi = crystalToPhi[crystal];
@@ -715,13 +715,13 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   sortDataTree->SetBranchAddress("nb_ComptA",&nb_ComptA);
   sortDataTree->SetBranchAddress("nb_ComptB",&nb_ComptB);
 
-  /*sortDataTree->SetBranchAddress("XposA",&XposA);
+  sortDataTree->SetBranchAddress("XposA",&XposA);
   sortDataTree->SetBranchAddress("YposA",&YposA);
   sortDataTree->SetBranchAddress("ZposA",&ZposA);
 
   sortDataTree->SetBranchAddress("XposB",&XposB);
   sortDataTree->SetBranchAddress("YposB",&YposB);
-  sortDataTree->SetBranchAddress("ZposB",&ZposB);*/
+  sortDataTree->SetBranchAddress("ZposB",&ZposB);
 
   n000 = 0;
   n090 = 0;
@@ -805,10 +805,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	n270++;}
 
       if ((simtHA[4]<ThMax[thBin])&&(simtHA[4]>ThMin[thBin])&&
-	  (simtHB[4]<ThMax[thBin])&&(simtHB[4]>ThMin[thBin])/*&&
+	  (simtHB[4]<ThMax[thBin])&&(simtHB[4]>ThMin[thBin])&&
 	  (CentralY(YposA[4]))&&(CentralZ(ZposA[4]))&&
 	  (CentralY(YposB[4]))&&(CentralZ(ZposB[4]))&&
-						      (nb_ComptA[4] == 1.)&&(nb_ComptB[4] == 1.)*/){
+	  (nb_ComptA[4] == 1.)&&(nb_ComptB[4] == 1.)){
 	if (phiDiff == 0.)
 	  AsymTrue[thBin][0] += 1;
 	if ((phiDiff == 90)||(phiDiff == -270))
@@ -820,256 +820,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       }
     }
   }
-  /*Bool_t A[nCrystals];
-  Bool_t B[nCrystals];
-  
-  for ( Int_t i = 0 ; i < nCrystals ; i++ ){
-    A[i]  = kFALSE;
-    B[i]  = kFALSE;
-  }
-  Bool_t AB000 = kFALSE, AB090 = kFALSE,
-    AB180 = kFALSE, AB270 = kFALSE;
-  
-  Long64_t maxEntry = sortDataTree->GetEntries();
 
-  cout << endl;
-  cout << " Calculating Asymmetry  " << endl;
-
-  Int_t nDuplicates = 0;
-  
-  for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
-    
-    sortDataTree->GetEvent(nEntry);
-    Float_t totEA = 0.;
-    Float_t totEB = 0.;
-    Int_t thBin = -1.;
-
-    for (Int_t i = 0 ; i < nCrystals; i++){
-      totEA += EA[i];
-      totEB += EB[i];
-    }
-    
-    AB000 = kFALSE, AB090 = kFALSE, 
-      AB180 = kFALSE, AB270 = kFALSE;
-
-    //check total energy deposited per array
-    //check if theta A and theta B are in the same bin
-    if ((totEA > 450)&&(totEA < 550)&&(totEB > 450)&&(totEB < 550)){
- 
-      A[4] = kFALSE;
-      B[4] = kFALSE;
-      for (Int_t k=0 ; k < nThbins; k++){
-	if( ( GoodTheta(etHA[4]) ) &&
-	    ( etHA[4] > ThMin[k] ) &&
-	    ( etHA[4] < ThMax[k] )){
-	  A[4] = kTRUE;
-	  thBin = k;
-	}
-      }
-
-      if((A[4]) &&
-	 ( GoodTheta(etHB[4]) ) &&
-	 ( etHB[4] > ThMin[thBin] ) &&
-	 ( etHB[4] < ThMax[thBin] )){
-	B[4] = kTRUE;
-      }
-
-   
-      for (Int_t j = 0 ; j < nCrystals ; j++){
-      
-	A[j] = kFALSE;  
-	B[j] = kFALSE;
-
-	if( ( GoodTheta(etHA[j]) ) &&
-	    ( etHA[j] > ThMin[thBin] ) &&
-	    ( etHA[j] < ThMax[thBin] )){
-	  A[j] = kTRUE;
-	    
-	}
-      
-	if( ( GoodTheta(etHB[j]) ) &&
-	    ( etHB[j] > ThMin[thBin] ) &&
-	    ( etHB[j] < ThMax[thBin] )){
-	  B[j] = kTRUE;
-	
-	}
-      } // end of: for (Int_t j = 0 ; j < nCrystals  
-   
-      // Central Crystals are always required
-      if( !A[4] || !B[4] )
-	continue;
-    
-      if((A[1]&&B[1])||
-	 (A[3]&&B[3])||
-	 (A[5]&&B[5])||
-	 (A[7]&&B[7]))
-	AB000 = kTRUE;
-
-    
-      if((A[1]&&B[3])||
-	 (A[3]&&B[7])||
-	 (A[7]&&B[5])||
-	 (A[5]&&B[1]))
-	AB090 = kTRUE;
-    
-      if((A[1]&&B[7])||
-	 (A[3]&&B[5])||
-	 (A[7]&&B[1])||
-	 (A[5]&&B[3]))
-	AB180 = kTRUE;
-      
-      if((A[1]&&B[5])||
-	 (A[5]&&B[7])||
-	 (A[7]&&B[3])||
-	 (A[3]&&B[1]))
-	AB270 = kTRUE;
-      
-      // check that only one combination
-      // is satisfied
-      if( (AB000 && AB090) || 
-	  (AB000 && AB180) ||
-	  (AB000 && AB270) ||
-	  (AB090 && AB180) ||
-	  (AB090 && AB270) ||
-	  (AB180 && AB270) ){
-	nDuplicates++;
-	continue;
-      }
-    
-      if     (AB000)
-	AsymMatrix[thBin][0]+=1.;
-      else if(AB090)
-	AsymMatrix[thBin][1]+=1.;
-      else if(AB180)
-	AsymMatrix[thBin][2]+=1.;
-      else if(AB270)
-	AsymMatrix[thBin][3]+=1.;
-
-      if ((simtHA[4]<ThMax[thBin])&&(simtHA[4]>ThMin[thBin])&&
-	  (simtHB[4]<ThMax[thBin])&&(simtHB[4]>ThMin[thBin])){
-	if     (AB000)
-	  AsymTrue[thBin][0]+=1.;
-	else if(AB090)
-	  AsymTrue[thBin][1]+=1.;
-	else if(AB180)
-	  AsymTrue[thBin][2]+=1.;
-	else if(AB270)
-	  AsymTrue[thBin][3]+=1.;
-      }
-	
-    }
-  }//end of: for(Int_t nEntry...
-
-  for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
-    
-    sortDataTree->GetEvent(nEntry);
-    Float_t totEA = 0.;
-    Float_t totEB = 0.;
-    Int_t thBin = -1.;
-
-    for (Int_t i = 0 ; i < nCrystals; i++){
-      totEA += EA[i];
-      totEB += EB[i];
-    }
-    
-    AB000 = kFALSE, AB090 = kFALSE, 
-      AB180 = kFALSE, AB270 = kFALSE;
-
-    //check total energy deposited per array
-    //check if theta A and theta B are in the same bin
-    if ((totEA > 450)&&(totEA < 550)&&(totEB > 450)&&(totEB < 550)){
- 
-      A[4] = kFALSE;
-      B[4] = kFALSE;
-      for (Int_t k=0 ; k < nThbins; k++){
-	if( ( GoodTheta(simtHA[4]) ) &&
-	    ( simtHA[4] > ThMin[k] ) &&
-	    ( simtHA[4] < ThMax[k] )){
-	  A[4] = kTRUE;
-	  thBin = k;
-	}
-      }
-
-      if((A[4]) &&
-	 ( GoodTheta(simtHB[4]) ) &&
-	 ( simtHB[4] > ThMin[thBin] ) &&
-	 ( simtHB[4] < ThMax[thBin] )){
-	B[4] = kTRUE;
-      }
-
-   
-      for (Int_t j = 0 ; j < nCrystals ; j++){
-      
-	A[j] = kFALSE;  
-	B[j] = kFALSE;
-
-	if( ( GoodTheta(etHA[j]) ) &&
-	    ( etHA[j] > ThMin[thBin] ) &&
-	    ( etHA[j] < ThMax[thBin] )){
-	  A[j] = kTRUE;
-	    
-	}
-      
-	if( ( GoodTheta(etHB[j]) ) &&
-	    ( etHB[j] > ThMin[thBin] ) &&
-	    ( etHB[j] < ThMax[thBin] )){
-	  B[j] = kTRUE;
-	
-	}
-      } // end of: for (Int_t j = 0 ; j < nCrystals  
-   
-      // Central Crystals are always required
-      if( !A[4] || !B[4] )
-	continue;
-    
-      if((A[1]&&B[1])||
-	 (A[3]&&B[3])||
-	 (A[5]&&B[5])||
-	 (A[7]&&B[7]))
-	AB000 = kTRUE;
-
-    
-      if((A[1]&&B[3])||
-	 (A[3]&&B[7])||
-	 (A[7]&&B[5])||
-	 (A[5]&&B[1]))
-	AB090 = kTRUE;
-    
-      if((A[1]&&B[7])||
-	 (A[3]&&B[5])||
-	 (A[7]&&B[1])||
-	 (A[5]&&B[3]))
-	AB180 = kTRUE;
-      
-      if((A[1]&&B[5])||
-	 (A[5]&&B[7])||
-	 (A[7]&&B[3])||
-	 (A[3]&&B[1]))
-	AB270 = kTRUE;
-      
-      // check that only one combination
-      // is satisfied
-      if( (AB000 && AB090) || 
-	  (AB000 && AB180) ||
-	  (AB000 && AB270) ||
-	  (AB090 && AB180) ||
-	  (AB090 && AB270) ||
-	  (AB180 && AB270) ){
-	nDuplicates++;
-	continue;
-      }
-    
-      if     (AB000)
-	AsymTrue[thBin][0]+=1.;
-      else if(AB090)
-	AsymTrue[thBin][1]+=1.;
-      else if(AB180)
-	AsymTrue[thBin][2]+=1.;
-      else if(AB270)
-	AsymTrue[thBin][3]+=1.;
-    }
-  }*/
-
+  cout<<"Lab Asymmetry"<<endl;
   cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
   cout<<plotTheta[0]<<" - "<<AsymMatrix[0][0]<<" - "<<AsymMatrix[0][1]<<" - "<<AsymMatrix[0][2]<<" - "<<AsymMatrix[0][3]<<endl;
   cout<<plotTheta[1]<<" - "<<AsymMatrix[1][0]<<" - "<<AsymMatrix[1][1]<<" - "<<AsymMatrix[1][2]<<" - "<<AsymMatrix[1][3]<<endl;
@@ -1080,6 +832,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   cout<<plotTheta[6]<<" - "<<AsymMatrix[6][0]<<" - "<<AsymMatrix[6][1]<<" - "<<AsymMatrix[6][2]<<" - "<<AsymMatrix[6][3]<<endl;
   cout<<plotTheta[7]<<" - "<<AsymMatrix[7][0]<<" - "<<AsymMatrix[7][1]<<" - "<<AsymMatrix[7][2]<<" - "<<AsymMatrix[7][3]<<endl;
 
+  cout <<"True Asymmetry"<<endl;
   cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
   cout<<plotTheta[0]<<" - "<<AsymTrue[0][0]<<" - "<<AsymTrue[0][1]<<" - "<<AsymTrue[0][2]<<" - "<<AsymTrue[0][3]<<endl;
   cout<<plotTheta[1]<<" - "<<AsymTrue[1][0]<<" - "<<AsymTrue[1][1]<<" - "<<AsymTrue[1][2]<<" - "<<AsymTrue[1][3]<<endl;
@@ -1188,7 +941,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   Float_t aTheory[nThbins];
 
   //half resolution in dPhi
-  Float_t alpha1 = DegToRad()*26.0;
+
+  Float_t alpha1 = DegToRad()*35.0;
+
 
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
@@ -1225,31 +980,25 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
 
   grAsym[2] = new TGraphErrors(nThbins,plotTheta,AsTrue,0,AeTrue);
   
-  grAsym[0]->SetLineColor(kBlue);
-  grAsym[0]->SetMarkerColor(kBlue);
+  grAsym[0]->SetLineColor(kGreen+2.7);
+  grAsym[0]->SetMarkerColor(kGreen+2.7);
   grAsym[1]->SetLineColor(kRed);
   grAsym[1]->SetMarkerColor(kRed);
-  grAsym[2]->SetLineColor(kGreen+1.5);
-  grAsym[2]->SetMarkerColor(kGreen+1.5);
+  grAsym[2]->SetLineColor(kGreen);
+  grAsym[2]->SetMarkerColor(kGreen);
 
-  TLegend *leg = new TLegend(0.6,0.8,0.9,0.85);
+  TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
   
-  
-  /*grAsTrue[0] = new TGraphErrors(nThbins,plotTheta,AsTrue,0,AeTrue);
-  grAsTrue[1] = new TGraphErrors(nThbins,plotTheta,aTheory,0,0);
-  grAsTrue[0]->SetLineColor(kGreen+1);
-  grAsTrue[0]->SetMarkerColor(kGreen+1);
-  grAsTrue[1]->SetLineColor(kRed);
-  grAsTrue[1]->SetMarkerColor(kRed);
-
-  TLegend *leg1 = new TLegend(0.6,0.8,0.9,0.85);*/
   
   TH1F *hr;
 
   hr = canvas->DrawFrame(10,0.5,170,3);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   
-  TString theoryLegendTitle = "theory curve #alpha_{#Delta#phi} = 26^{o}";
+  TString theoryLegendTitle = " ";
+  alpha1 = alpha1*RadToDeg();
+  theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %.1f^{o}", alpha1);
+  
   Char_t plotN[128];
   Char_t yAxis[128];
   
@@ -1267,22 +1016,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   sprintf(plotN,"../Plots/A_%d_%d.pdf",inputFileInt,dPhiDiff);
   
   canvas->SaveAs(plotN);
-  
-  /*hr = canvas->DrawFrame(10,0.5,170,3);
-  hr->GetXaxis()->SetTitle("#theta (deg)");
-  sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
-  hr->GetYaxis()->SetTitle(yAxis);
-
-  leg1->AddEntry(grAsTrue[0],"true lab events", "E P");
-  leg1->AddEntry(grAsTrue[1],
-		  theoryLegendTitle,"L P");
-  grAsTrue[0]->Draw("P E");
-  grAsTrue[1]->Draw("P L SAME");
-  leg1->Draw();
-
-  sprintf(plotN,"../Plots/ATrue_%d_%d.pdf",inputFileInt,dPhiDiff);
-  
-  canvas->SaveAs(plotN);*/
 
 }
 //-----------------------------------------------------------------------
