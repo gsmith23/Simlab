@@ -590,7 +590,7 @@ void TLab::FitPhotopeaks(){
       phoQ[i][run] = phoQfit->GetParameter(1.);
 
       HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
-    
+
     }
   }
   
@@ -619,9 +619,9 @@ Int_t TLab::DefaultPhotopeakRun(Int_t channel){
   
   if(channel == 2 || channel == 7 )
     return 1;
-  // temporary change for run 460
+
   else 
-    return 0;
+    return 2;
 }
 
 Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
