@@ -975,7 +975,7 @@ void TLab::GraphAsymmetry(Char_t option){
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
 
-  Float_t alpha1   = DegToRad()*26.0;
+  Float_t alpha1   = DegToRad()*26.0*Sqrt(2);
 
   // half resolution in theta
 
@@ -1169,12 +1169,12 @@ void TLab::GraphAsymmetry(Char_t option){
 
   TLegend *leg =  new TLegend(0.6,0.75,0.9,0.85);
 
+
   TString theoryLegendTitle = " ";
   
   alpha1 = alpha1*RadToDeg();
 
   theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %.1f^{o}", alpha1);
-
   
   Char_t yAxis[128];
   
