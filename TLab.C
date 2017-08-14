@@ -575,7 +575,7 @@ void TLab::FitPhotopeaks(){
       
       phoQfit->SetLineColor(2);
       phoQfit->SetParameters(10.,3000.,100.);
-      phoQfit->SetParLimits(1.,2700.,3700.);
+      //phoQfit->SetParLimits(1.,2700.,3700.);
       //phoQfit->SetParLimits(2.,100.,300.);
       
       hQ[i][run]->Fit("phoQfit","RQ");

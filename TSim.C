@@ -1115,8 +1115,8 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   Int_t inputFileInt1 = inputFileNumber1.Atoi();
   Int_t inputFileInt2 = inputFileNumber2.Atoi();
   
-  TCanvas *canvas = new TCanvas("canvas","canvas",
-				10,10,1200,800);
+  TCanvas *canvas5 = new TCanvas("canvas","canvas",
+				200,200,1400,1000);
 
   int bin90 = nPhibinsSim/4;
   int bin180 = nPhibinsSim/4;
@@ -1226,13 +1226,13 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
 
   sprintf(theoryLegendTitle, "theory curve #alpha_{#Delta#phi} = %.1f^{o}", binsize);  
   
-  
 
-  hr = canvas->DrawFrame(10,0.5,170,3);
+  hr = canvas5->DrawFrame(15,0.5,165,2);
   hr->SetTitle("Assymetry plot for Theory and True Simulation Data");
   hr->GetXaxis()->SetTitle("#theta (deg)");
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
+
 
   TLegend *leg = new TLegend(0.6,0.8,0.9,0.85);
   leg->AddEntry(grThe,theoryLegendTitle,"L P");
@@ -1247,7 +1247,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
 
   sprintf(plotN,"../Plots/A_%d_Inputs%d&%d_%dPhiBins.pdf", dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
   
-  canvas->SaveAs(plotN);
+  canvas5->SaveAs(plotN);
 
   return 0;
  
