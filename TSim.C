@@ -1115,13 +1115,13 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   Int_t inputFileInt1 = inputFileNumber1.Atoi();
   Int_t inputFileInt2 = inputFileNumber2.Atoi();
   
-  TCanvas *canvas5 = new TCanvas("canvas","canvas",
+  TCanvas *canvas = new TCanvas("canvas","canvas",
 				200,200,1400,1000);
 
   int bin90 = nPhibinsSim/4;
   int bin180 = nPhibinsSim/4;
   int bin270 = 3*nPhibinsSim/4;
-  Float_t binsize = 180/nPhibinsSim;
+  double binsize = 180.0/(1.0*nPhibinsSim);
   
   
   CalculateAsymmetrySim(inputFileNumber1);
@@ -1226,28 +1226,29 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
 
   sprintf(theoryLegendTitle, "theory curve #alpha_{#Delta#phi} = %.1f^{o}", binsize);  
   
-
-  hr = canvas5->DrawFrame(15,0.5,165,2);
-  hr->SetTitle("Assymetry plot for Theory and True Simulation Data");
+  hr = canvas->DrawFrame(10,0.5,170,3);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
+  hr->GetYaxis()->SetTitleOffset(0.7);
+  
+    
+  TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
 
-
-  TLegend *leg = new TLegend(0.6,0.8,0.9,0.85);
   leg->AddEntry(grThe,theoryLegendTitle,"L P");
-  leg->AddEntry(grAsym1,"Quantum Entangled Photons - True Simulated Data", "E P");
-  leg->AddEntry(grAsym2,"Polarised Photons - True Simulated Data","E P");
+  leg->AddEntry(grAsym1,"Quantum Entangled Photons", "E P");
+  leg->AddEntry(grAsym2,"Polarised Photons","E P");
   leg->Draw();
 
-
+  gStyle->SetTitleH(0.1);
+    
   grAsym1->Draw("P E");
   grAsym2->Draw("same P E");
   grThe->Draw("same P L");
 
   sprintf(plotN,"../Plots/A_%d_Inputs%d&%d_%dPhiBins.pdf", dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
   
-  canvas5->SaveAs(plotN);
+  canvas->SaveAs(plotN);
 
   return 0;
  
