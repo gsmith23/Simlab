@@ -76,9 +76,9 @@ Int_t main(int argc, char **argv){
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
-    cout << " Option 2 - two further arguments      " << endl;
-    cout << "    simulated data file number         " << endl;
-    cout << "    simulated data file number         " << endl;
+    cout << " Option 4 - two further arguments      " << endl;
+    cout << " simulated data file number (entangled)" << endl;
+    cout << " simulated data file number (polarised)" << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Examples:                             " << endl; 

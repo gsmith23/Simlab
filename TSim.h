@@ -122,7 +122,7 @@ class TSim : public TObject{
 
   static const Int_t nThbins = 8;
   static const Int_t nPhibins = 4;
-  static const Int_t nPhibinsSim = 8;
+  static const Int_t nPhibinsSim = 12; //can be changed (to a multiple of 4)
 
 
 
