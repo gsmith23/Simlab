@@ -4,7 +4,6 @@
 #include "./includes.h"
 #include "TTheory.h"
 #include "TSim.h"
-#include <TComplex.h>
 
 //------------------------------------------------------------------------------------------------
 
@@ -121,9 +120,15 @@ class TLab : public TObject{
 
   // RUN 459 (OR), 460 (AND), 461 (OR)
   // AKA RUN 1460
-  static const Long64_t nOR1 = 2791754;
+  /* static const Long64_t nOR1 = 2791754;
   static const Long64_t nAND = 47142893;
-  static const Long64_t nOR2 = 1228535;
+  static const Long64_t nOR2 = 1228535;*/
+
+  // RUN 459 (OR), 460 (AND), 461 (OR)
+  // AKA RUN 1460
+  static const Long64_t nOR1 = 0;
+  static const Long64_t nAND = 46057346;
+  static const Long64_t nOR2 = 1018759;
 
   
   // For Graphing
@@ -134,8 +139,11 @@ class TLab : public TObject{
   Float_t ThMax[nThBins];
   Float_t plotTheta[nThBins]; 
   Float_t AsymMatrix[nThBins][nPhiBins];
+
+  Float_t muMatrix[nThBins][nPhiBins];
   
   Int_t runNumberInt;
+  TString simRun;
 
   ifstream *inData;
 
@@ -149,7 +157,7 @@ class TLab : public TObject{
   
   TString rootFileRawName;
   TString rootFileCalName;
-  
+
   TCanvas *canvas1;
   TCanvas *canvas2;
   
@@ -201,9 +209,11 @@ class TLab : public TObject{
 
   Char_t type;
 
-  TSim * simData;
+  TSim *simData;
 
   Int_t npeaks;
+
+  TH1F *hr;
   
   ClassDef(TLab,1);
 };

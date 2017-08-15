@@ -66,10 +66,11 @@ Float_t TTheory::rho2(Float_t theta, Float_t semiSpan, Float_t alpha){
   return ( (Z(alpha) + rho1(theta,semiSpan) )/( 1 + Z(alpha)*rho1(theta,semiSpan)) ); 
 }  
 
-//working stage
-Float_t TTheory::modFactor(Float_t theta){
-  Float_t m = Power(Power(Sin(theta),2.)*(2. - Cos(theta))/(2. + Power((1.- Cos(theta)),3.)),2.);
-  return m;
+//working stage - no resolution
+Float_t TTheory::modFactor(Float_t theta1, Float_t theta2){
+  Float_t m1 = Power(Sin(theta1),2.)*(2. - Cos(theta1))/(2. + Power((1.- Cos(theta1)),3.));
+  Float_t m2 = Power(Sin(theta2),2.)*(2. - Cos(theta2))/(2. + Power((1.- Cos(theta2)),3.));
+  return m1*m2;
 }
   
 //--------------------------------------------------

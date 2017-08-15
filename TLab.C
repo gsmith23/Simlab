@@ -1,6 +1,5 @@
 #include "TLab.h"
 #include "./includes.h"
-#include "TComplex.h"
 
 #if !defined(__CINT__)
 ClassImp(TLab)
@@ -17,9 +16,10 @@ TLab::TLab(TString runNumber) {
   SetFilenames(runNumber);
 }
 
+//option for use with one raw file and one sim file
 TLab::TLab(TString runNumber,
 	   TString simNumber) {
-  simData = new TSim(simNumber);
+  simRun = simNumber;
   SetFilenames(runNumber);
 }
 
@@ -575,7 +575,7 @@ void TLab::FitPhotopeaks(){
       
       phoQfit->SetLineColor(2);
       phoQfit->SetParameters(10.,3000.,100.);
-      phoQfit->SetParLimits(1.,2700.,3700.);
+      //phoQfit->SetParLimits(1.,2700.,3700.);
       //phoQfit->SetParLimits(2.,100.,300.);
       
       hQ[i][run]->Fit("phoQfit","RQ");
@@ -590,7 +590,7 @@ void TLab::FitPhotopeaks(){
       phoQ[i][run] = phoQfit->GetParameter(1.);
 
       HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
-    
+
     }
   }
   
@@ -619,9 +619,9 @@ Int_t TLab::DefaultPhotopeakRun(Int_t channel){
   
   if(channel == 2 || channel == 7 )
     return 1;
-  // temporary change for run 460
+
   else 
-    return 0;
+    return 2;
 }
 
 Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
@@ -710,6 +710,11 @@ void TLab::CalculateAsymmetry(){
     for(Int_t k = 0 ; k < nPhiBins; k++){
       AsymMatrix[j][k] = 0;}
  }
+
+  for(Int_t j = 0 ; j <nThBins; j++){
+    for(Int_t k = 0 ; k < nPhiBins; k++){
+      muMatrix[j][k] = 0;}
+ }
   
   
   rootFileCalData = new TFile(rootFileCalName);
@@ -772,48 +777,49 @@ void TLab::CalculateAsymmetry(){
  
       A[4] = kFALSE;
       B[4] = kFALSE;
-    for (Int_t k=0 ; k < nThBins; k++){
-      if( ( GoodTheta(tHA[4]) ) &&
-	  ( tHA[4] > ThMin[k] ) &&
-	  ( tHA[4] < ThMax[k] )){
-	A[4] = kTRUE;
-	nA[4]++;
-	thBin = k;
+      for (Int_t k=0 ; k < nThBins; k++){
+	if( ( GoodTheta(tHA[4]) ) &&
+	    ( tHA[4] > ThMin[k] ) &&
+	    ( tHA[4] < ThMax[k] )){
+	  A[4] = kTRUE;
+	  nA[4]++;
+	  thBin = k;
+	}
       }
-    }
 
-    if((A[4]) &&
-       ( GoodTheta(tHB[4]) ) &&
-       ( tHB[4] > ThMin[thBin] ) &&
-       ( tHB[4] < ThMax[thBin] )){
-      B[4] = kTRUE;
-      nB[4]++;
-    }
+      if((A[4]) &&
+	 ( GoodTheta(tHB[4]) ) &&
+	 ( tHB[4] > ThMin[thBin] ) &&
+	 ( tHB[4] < ThMax[thBin] )){
+	B[4] = kTRUE;
+	nB[4]++;
+      }
 
    
-    for (Int_t j = 0 ; j < nCrystals ; j++){
-      
-      A[j] = kFALSE;  
-      B[j] = kFALSE;
+      for (Int_t j = 0 ; j < nCrystals ; j++){
+	if(j!=4){
+	A[j] = kFALSE;  
+	B[j] = kFALSE;
 
-      if( ( GoodTheta(tHA[j]) ) &&
-	  ( tHA[j] > ThMin[thBin] ) &&
-	  ( tHA[j] < ThMax[thBin] )){
-	A[j] = kTRUE;
-	nA[j]++;
+	if( ( GoodTheta(tHA[j]) ) &&
+	    ( tHA[j] > ThMin[thBin] ) &&
+	    ( tHA[j] < ThMax[thBin] )){
+	  A[j] = kTRUE;
+	  nA[j]++;
 	    
-      }
+	}
       
-      if( ( GoodTheta(tHB[j]) ) &&
-	  ( tHB[j] > ThMin[thBin] ) &&
-	  ( tHB[j] < ThMax[thBin] )){
-	B[j] = kTRUE;
-	nB[j]++;
+	if( ( GoodTheta(tHB[j]) ) &&
+	    ( tHB[j] > ThMin[thBin] ) &&
+	    ( tHB[j] < ThMax[thBin] )){
+	  B[j] = kTRUE;
+	  nB[j]++;
 	
-      }
-    } // end of: for (Int_t j = 0 ; j < nCrystals  
+	}
+	}
+      } // end of: for (Int_t j = 0 ; j < nCrystals  
    
-    // Central Crystals are always required
+      // Central Crystals are always required
       if( !A[4] || !B[4] )
 	continue;
     
@@ -862,6 +868,8 @@ void TLab::CalculateAsymmetry(){
 	AsymMatrix[thBin][2]+=1.;
       else if(AB270)
 	AsymMatrix[thBin][3]+=1.;
+
+      
     }//end of : if (totEA...
   } // end of : for(Int_t i = 0 ; i < calDa...
 
@@ -877,6 +885,7 @@ void TLab::CalculateAsymmetry(){
   cout<<plotTheta[5]<<" - "<<AsymMatrix[5][0]<<" - "<<AsymMatrix[5][1]<<" - "<<AsymMatrix[5][2]<<" - "<<AsymMatrix[5][3]<<endl;
   cout<<plotTheta[6]<<" - "<<AsymMatrix[6][0]<<" - "<<AsymMatrix[6][1]<<" - "<<AsymMatrix[6][2]<<" - "<<AsymMatrix[6][3]<<endl;
   cout<<plotTheta[7]<<" - "<<AsymMatrix[7][0]<<" - "<<AsymMatrix[7][1]<<" - "<<AsymMatrix[7][2]<<" - "<<AsymMatrix[7][3]<<endl;
+
 }
 
 Float_t TLab::ElectronEnergyToTheta(Float_t energy){
@@ -928,13 +937,10 @@ void TLab::GraphAsymmetry(Char_t option){
 
   SetStyle();
   GetThetaBinValues();
-
-  TCanvas *canvas = new TCanvas("canvas","canvas",
-				10,10,1200,800);
-
   
   Float_t  AsPhiDiff[nThBins];
   Float_t  AePhiDiff[nThBins];
+
   
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
@@ -954,15 +960,10 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t phiHighEdge = 315.0;
 
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
-  
-  // Axis
-  TH1F * hr;
+
   
   Float_t maxY = 2.5;
   Float_t minY = 0.5;
-
-  //Float_t maxY = 0.6;
-  //Float_t minY = 0.0;
 
   if(dPhiDiff==180)
     maxY = 6.0;
@@ -970,6 +971,7 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // Theory curve
   Float_t aTheory[nThBins];
+
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
 
@@ -987,8 +989,10 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // Simulation results
   
-  Float_t aSim[nThBins];
-  Float_t aSimE[nThBins];
+  Float_t aSim[nThBins]={0};
+  Float_t aSimE[nThBins]={0};
+  Float_t aSimTrue[nThBins]={0};
+  Float_t aSimTrueE[nThBins]={0};
 
   // lab only
   if( option!='t' && option!='T'){
@@ -1030,8 +1034,8 @@ void TLab::GraphAsymmetry(Char_t option){
       
     // Only plot points in axis range
       if(AsPhiDiff[i] < 0.5 || AsPhiDiff[i] > maxY)
-      	AsPhiDiff[i] = 0.0;
-            
+      	AsPhiDiff[i] = 0.0; 
+      
     }
  
   }// end of: if( option!='t' &...
@@ -1069,18 +1073,22 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << endl;
     cout << " Calculating theory curve " << endl;
     cout << " and simulation results ... " << endl;
-    
+    TSim *simData = new TSim(simRun);
+    simData->CalculateAsymmetryLab(simRun);
+;
     for(Int_t i = 0 ; i < nThBins ; i++){
       plotTheta[i] = plotTheta[i]*DegToRad();
       
-      aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);
-      
-      aSim[i]    = simData->GetAsymm(i);
-      aSimE[i]   = simData->GetAsymErr(i);
-            
+      aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);            
       plotTheta[i] = plotTheta[i]*RadToDeg();
+
+      aSim[i]    = simData->GetAsymLab(dPhiDiff,i);
+      aSimE[i]   = simData->GetAsymLabErr(dPhiDiff,i);
+      aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
+      aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
+
     }
-    
+
   }// end of:  if( option=='t' || option=='T'
   
   cout << endl;
@@ -1109,44 +1117,58 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " AeInt[" << j << "] = " << AeInt[j] << endl;
     
     if( (AsInt[j]*1.1) > maxCountsPhi)
-      maxCountsPhi = AsInt[j]*1.1;;
-    
+      maxCountsPhi = AsInt[j]*1.1;
   }
+  TCanvas *canvas1 = new TCanvas("canvas","canvas",
+				10,10,1200,800);
+    
+  // Axis
+  TH1F *hr;
 
   // Graph counts vs dPhi integrated over theta
-  TGraphErrors * grDPhi = new TGraphErrors(nPhiBins,
+  TGraphErrors *grDPhi = new TGraphErrors(nPhiBins,
 					   phi,
 					   AsInt,
 					   0,
 					   AeInt);
   
+  Char_t plotName[128];
   // dPhi Plot
-  hr = canvas->DrawFrame(phiLowEdge,0,phiHighEdge,maxCountsPhi);
+  hr = canvas1->DrawFrame(phiLowEdge,0,phiHighEdge,maxCountsPhi);
   hr->GetXaxis()->SetTitle("#phi (deg)");
   hr->GetYaxis()->SetTitle("N(#Delta#phi)");
-  
+ 
   grDPhi->Draw("P E");
   
-  Char_t plotName[128];
-  
   sprintf(plotName,"../Plots/DeltaPhi_%d.pdf",runNumberInt);
-  canvas->SaveAs(plotName);
+  canvas1->SaveAs(plotName);
+ 
+  // Asymmetry
+  TGraphErrors *grAsym[4];
+  grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
+  grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
+
+   
+  for (Int_t k = 0; k<nThBins; k++)
+    plotTheta[k] -= 2.;
+  grAsym[2] = new TGraphErrors(nThBins,plotTheta,aSim,0,aSimE);
+
+  for (Int_t k = 0; k<nThBins; k++)
+    plotTheta[k] += 4.;
+  grAsym[3] = new TGraphErrors(nThBins,plotTheta,aSimTrue,0,aSimTrueE);
   
-  
-  TGraphErrors *grAsym[3];
-  grAsym[0] =  new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
-  grAsym[1] =  new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
-  
-  grAsym[2] =  new TGraphErrors(nThBins,plotTheta,aSim,0,aSimE);
-  
+    
   grAsym[0]->SetLineColor(kBlue);
   grAsym[0]->SetMarkerColor(kBlue);
   grAsym[1]->SetLineColor(kRed);
   grAsym[1]->SetMarkerColor(kRed);
-  grAsym[2]->SetLineColor(kGreen+2);
-  grAsym[2]->SetMarkerColor(kGreen+2);
+  grAsym[2]->SetLineColor(kGreen+2.7);
+  grAsym[2]->SetMarkerColor(kGreen+2.7);
+  grAsym[3]->SetLineColor(kGreen);
+  grAsym[3]->SetMarkerColor(kGreen);
 
-  TLegend * leg =  new TLegend(0.6,0.8,0.9,0.9);
+  TLegend *leg =  new TLegend(0.6,0.75,0.9,0.85);
+
 
   TString theoryLegendTitle = " ";
   
@@ -1157,12 +1179,13 @@ void TLab::GraphAsymmetry(Char_t option){
   Char_t yAxis[128];
   
   // Ratio Plot
-  hr = canvas->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
+  hr = canvas1->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
+  
   hr->GetXaxis()->SetTitle("#theta (deg)");
 
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
-
+    
   
   if     (option=='b' || option=='B'){
     leg->AddEntry(grAsym[0],"laboratory","E P");
@@ -1186,10 +1209,13 @@ void TLab::GraphAsymmetry(Char_t option){
     leg->AddEntry(grAsym[1],
 		  theoryLegendTitle,"L P");
     leg->AddEntry(grAsym[2],
-		  "simulation (no entanglement)","P E");
+		  "lab simulation","E P");
+    leg->AddEntry(grAsym[3],
+		  "true lab simulation","E P");
     grAsym[0]->Draw("P E");
     grAsym[1]->Draw("same L P");
-    grAsym[2]->Draw("same P");
+    grAsym[2]->Draw("same P E");
+    grAsym[3]->Draw("same P E");
   }
   else if(option=='c' || option=='C'){
     leg->AddEntry(grAsym[0],
@@ -1212,7 +1238,7 @@ void TLab::GraphAsymmetry(Char_t option){
   
   sprintf(plotName,"../Plots/A_%d_%d.pdf",runNumberInt,dPhiDiff);
   
-  canvas->SaveAs(plotName);
+  canvas1->SaveAs(plotName);
   
   // beep
   cout << '\a' << endl;

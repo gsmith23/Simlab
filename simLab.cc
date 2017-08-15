@@ -37,7 +37,8 @@ Int_t main(int argc, char **argv){
     cout << " Options:                              " << endl; 
     cout << " 1 - lab data analysis                 " << endl; 
     cout << " 2 - sim data analysis                 " << endl; 
-    cout << " 3 - lab and sim data analysis         " << endl; 
+    cout << " 3 - lab and sim data analysis         " << endl;
+    cout << " 4 - multiple sim data analysis        " << endl;
     cout << " 5 - plot theory curve only            " << endl; 
     cout << " 0 - lab data analysis (overwrite)     " << endl; 
     cout << " 8 - lab data - make raw trees only..  " << endl;
@@ -66,13 +67,22 @@ Int_t main(int argc, char **argv){
     cout <<                                              endl;
     cout << " ------------------------------------- " << endl;
     cout << " Option 3 - two further arguments      " << endl; 
-    cout << "        raw lab run number             " << endl;
+    cout << "        run lab run number             " << endl;
     cout << "    simulated data file number         " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Example:                              " << endl; 
     cout << " ./simLab 3 026 4                      " << endl;
     cout << " ------------------------------------- " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " Option 4 - two further arguments      " << endl;
+    cout << " simulated data file number (entangled)" << endl;
+    cout << " simulated data file number (polarised)" << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " Examples:                             " << endl; 
+    cout << " ./simLab 4 2 3;                       " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Option 0 - one further argument       " << endl;
@@ -294,21 +304,6 @@ Int_t main(int argc, char **argv){
     
     TSim * simData = new TSim(argv[2]);
     
-    /*Char_t raw = 'n';
-    cout << endl;
-    cout << " Create/Recreate raw ROOT file ? " << endl;
-    cout << " n (default)/ y " << endl;
-    cout << " ";
-    cin  >> raw;
-      
-    if (raw == 'y' || raw == 'Y' ){
-      
-      cout << endl;
-      cout << " Making ROOT file from text file " << endl;
-      
-      simData->Hits2Tree(argv[2],0);
-      }*/
-    
     Char_t sort = 'n';
     cout << endl;
     cout << " Sort/Re-sort ROOT file ? " << endl;
@@ -327,7 +322,8 @@ Int_t main(int argc, char **argv){
     cout << endl;
     cout << " Calculating & Plotting Asymmetry " << endl;
     
-    simData->GetAsymmetry(argv[2]);
+    simData->CalculateAsymmetryLab(argv[2]);
+    simData->GraphAsymmetryLab(argv[2]);
         
     delete simData;
   
@@ -335,10 +331,98 @@ Int_t main(int argc, char **argv){
   else if( strcmp(argv[1],"3")==0 ) {
     
     cout << endl;
-    cout << "      --------------------" << endl;
-    cout << "      | work in progress |" << endl;
-    cout << "      --------------------" << endl;
+    cout << "     --------------------" << endl;
+    cout << "    | lab and simulation |" << endl;
+    cout << "     --------------------" << endl;
+
+    cout << "Analysing: " << argv[2] << " and " << argv[3] << endl;
+    cout << " Calculating & Plotting Asymmetry " << endl;
+    
+    TLab *data;
+
+    data = new TLab(argv[2],argv[3]);
+
+    Char_t overwrite = 'n';
+    Char_t option    = 'b';
+    
+    cout << endl;
+    cout << " Checking if ROOT file exists " << endl; 
+    
+    if(!(data->RawROOTFileExists())){
+      cout << endl;
+      cout << " ...                                   " << endl;
+      cout << " ROOT file of raw data does not exist. " << endl;
+      cout << " I will therefore create one ...       " << endl;
+      data->MakeRawDataTreeFile();
+    }
+    else{
+      cout << endl;
+      cout << " ROOT file of raw data does exist   " << endl;
+      
+      if(strcmp(argv[1],"0")==0){
+	cout << " Would you like me to overwrite it? " << endl;
+	cout << " [answer (y/n)]                     " << endl;
+	cout << endl;
+	cout << " ";
+	cin  >> overwrite;
+	
+	if( overwrite=='y' || overwrite=='Y'){
+	  cout << endl;
+	  cout << " Okay, I will overwrite the file. " << endl;
+	  data->MakeRawDataTreeFile();
+	}
+	
+      } // end of: if(strcmp(argv[1],"0")=...
+    } // end of: else{....
+
+    cout << endl;
+    cout << " Graphing Asymmetry " << endl;
+    cout << endl;
+    cout << " Enter plot type:   " << endl;
+    cout << " a - Lab, Theory and Simulation (default)" << endl;
+    cout << " ";
+    cin  >> option;
+
+    if(option!='a' && option!='A' ){
+	  
+      cout << endl;
+      cout << " invalid choice, setting to default " << endl;
+	  
+      option = 'a';
+    }
+	
+    data->GraphAsymmetry(option);
+    
+    delete data;
   } 
+
+
+   else if( strcmp(argv[1],"4")==0 ) {
+
+     
+    cout << endl;
+    cout << "       ----------------------" << endl; 
+    cout << "       | simulation analysis |" << endl;
+    cout << "       | for two simulations |" << endl;
+    cout << "       ----------------------" << endl; 
+    cout << endl;
+
+    cout << endl;
+    cout << " Analysing : " << argv[2] << " and "<< argv[3] << endl;
+    
+    TSim * simData = new TSim(argv[2], argv[3]);
+
+
+    cout << endl;
+    cout << " Calculating & Plotting Asymmetry " << endl;
+    
+    simData->GraphAsymmetrySim(argv[2], argv[3]);
+        
+    delete simData;
+
+
+    
+   }
   
   cout << endl;
   cout << " -----------------------------------" << endl;
