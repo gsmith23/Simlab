@@ -120,9 +120,9 @@ class TSim : public TObject{
 
   
 
-  static const Int_t nThbins = 8;
+  static const Int_t nThbins = 16;
   static const Int_t nPhibins = 4;
-  static const Int_t nPhibinsSim = 12; //can be changed (to a multiple of 4)
+  static const Int_t nPhibinsSim = 32; //can be changed (to a multiple of 4)
 
 
 
@@ -146,7 +146,6 @@ class TSim : public TObject{
   Float_t AePhiDiff[nThbins];
   Float_t AsTrue[nThbins];
   Float_t AeTrue[nThbins];
-
 
   Int_t n000;
   Int_t n090;

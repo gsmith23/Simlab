@@ -19,7 +19,6 @@ TSim::TSim(TString fileNumber){
   rootFileRawName = rootFileRawName + ".root";
   rootFileSortName = rootFileSortName + ".root";
 
-  
   //  !! temporary 
   //SetAsymmetry(fileNumber);
   
@@ -943,7 +942,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
 
   //half resolution in dPhi
 
-  Float_t alpha1 = DegToRad()*35.0;
+  Float_t alpha1 = DegToRad()*26.0*2.34/2.;
 
 
   //half resolution in theta
@@ -1049,25 +1048,25 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   simDataTree->SetBranchAddress("ThetaB_1st",&ThetaB_1st);
   simDataTree->SetBranchAddress("PhiA_1st",&PhiA_1st);
   simDataTree->SetBranchAddress("PhiB_1st",&PhiB_1st);
-
+  
  
-
-   for(Int_t j = 0 ; j <nThbins; j++){
-    for(Int_t k = 0 ; k < nPhibinsSim; k++){
-      AsymMatrix_sim[j][k] = 0;}
+  
+  for(Int_t j = 0 ; j <nThbins; j++){
+     for(Int_t k = 0 ; k < nPhibinsSim; k++){
+       AsymMatrix_sim[j][k] = 0;}
   }
-
-   Long64_t nEntries = simDataTree->GetEntries();
-
-Float_t binsize = 180/nPhibinsSim; 
+  
+  Long64_t nEntries = simDataTree->GetEntries();
+  
+  Float_t binsize = 180/nPhibinsSim; 
   //Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     simDataTree->GetEvent(ientry);
-     Float_t dPhi_1st = PhiA_1st + PhiB_1st;
-  if(dPhi_1st<0){
-    dPhi_1st = dPhi_1st + 360; }
+    Float_t dPhi_1st = PhiA_1st + PhiB_1st;
+    if(dPhi_1st<0){
+      dPhi_1st = dPhi_1st + 360; }
     
-
+    
     Int_t thBin = -1;
     
     if (GetThetaBin(ThetaA_1st) == GetThetaBin(ThetaB_1st)){
@@ -1181,8 +1180,8 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
     //theory curve
   Float_t aTheory[nThbins];
 
-  //half resolution in dPhi
-  Float_t alpha1 = DegToRad()*binsize;
+  //half resolution in phi
+  Float_t alpha1 = DegToRad()*binsize/2.;
 
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
@@ -1224,8 +1223,9 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   Char_t plotN[128];
   Char_t yAxis[128];
 
-
-  sprintf(theoryLegendTitle, "theory curve #alpha_{#Delta#phi} = %.1f^{o}", binsize);  
+  alpha1 = RadToDeg()*alpha1;
+  
+  sprintf(theoryLegendTitle, "theory curve #alpha_{#phi} = %.1f^{o}", alpha1);  
   
   hr = canvas->DrawFrame(10,0.5,170,3);
   hr->GetXaxis()->SetTitle("#theta (deg)");
