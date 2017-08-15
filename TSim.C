@@ -20,8 +20,8 @@ TSim::TSim(TString fileNumber){
   rootFileSortName = rootFileSortName + ".root";
 
   
-  //!! temporary 
-  // SetAsymmetry(fileNumber);
+  //  !! temporary 
+  //SetAsymmetry(fileNumber);
   
 }
 
@@ -115,9 +115,10 @@ void TSim::Initialise(){
   cout << " Connecting Branches " << endl;
   
   theFile = new TFile(rootFileRawName);
-  //name of the Tree?
+  //  name of the Tree?
   simDataTree = (TTree*)theFile->Get("Tangle2");
   
+
   simDataTree->SetBranchAddress("edep0", &edep0, &b_edep0);
   simDataTree->SetBranchAddress("edep1", &edep1, &b_edep1);
   simDataTree->SetBranchAddress("edep2", &edep2, &b_edep2);
