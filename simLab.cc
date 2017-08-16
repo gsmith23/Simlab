@@ -419,8 +419,6 @@ Int_t main(int argc, char **argv){
     simData->GraphAsymmetrySim(argv[2], argv[3]);
         
     delete simData;
-
-
     
    }
   

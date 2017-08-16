@@ -1058,7 +1058,7 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   
   Long64_t nEntries = simDataTree->GetEntries();
   
-  Float_t binsize = 180/nPhibinsSim; 
+  Float_t halfBinSize = 180/nPhibinsSim; 
   //Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     simDataTree->GetEvent(ientry);
@@ -1077,12 +1077,12 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
       if(thBin>-1){
 	
 	//fill matrix for dphi=0 bin
-	if((dPhi_1st<binsize)||(dPhi_1st>360-binsize)){
+	if((dPhi_1st<halfBinSize)||(dPhi_1st>360-halfBinSize)){
 	 
 	    AsymMatrix_sim[thBin][0] += 1;}
 	//fill the rest of the matrix 
 	for (Int_t i = 1 ; i < nPhibinsSim ; i++){
-	  if((dPhi_1st>2*i*binsize-binsize)&&(dPhi_1st<2*i*binsize+binsize)){
+	  if((dPhi_1st>2*i*halfBinSize-halfBinSize)&&(dPhi_1st<2*i*halfBinSize+halfBinSize)){
 	    AsymMatrix_sim[thBin][i] += 1;}
 	}
       }
@@ -1121,7 +1121,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   int bin90 = nPhibinsSim/4;
   int bin180 = nPhibinsSim/4;
   int bin270 = 3*nPhibinsSim/4;
-  double binsize = 180.0/(1.0*nPhibinsSim);
+  double halfBinSize = 180.0/(1.0*nPhibinsSim);
   
   
   CalculateAsymmetrySim(inputFileNumber1);
@@ -1181,7 +1181,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   Float_t aTheory[nThbins];
 
   //half resolution in phi
-  Float_t alpha1 = DegToRad()*binsize/2.;
+  Float_t alpha1 = DegToRad()*halfBinSize/Sqrt(2);
 
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
@@ -1237,7 +1237,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
 
   leg->AddEntry(grThe,theoryLegendTitle,"L P");
-  leg->AddEntry(grAsym1,"Quantum Entangled Photons", "E P");
+  leg->AddEntry(grAsym1,"Entangled Photons","E P");
   leg->AddEntry(grAsym2,"Polarised Photons","E P");
   leg->Draw();
 
