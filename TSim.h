@@ -165,6 +165,9 @@ class TSim : public TObject{
   TString rootFileRawName2;
   TString rootFileSortName2;
   
+    
+  TH1F * hDPhi[nPhibinsSim]; 
+  
   // corresponding file
   TFile  *theFile;
   

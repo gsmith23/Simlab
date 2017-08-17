@@ -1057,8 +1057,10 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   }
   
   Long64_t nEntries = simDataTree->GetEntries();
-  
+
   Float_t halfBinSize = 180/nPhibinsSim; 
+  
+
   //Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     simDataTree->GetEvent(ientry);
@@ -1070,34 +1072,42 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
     Int_t thBin = -1;
     
     if (GetThetaBin(ThetaA_1st) == GetThetaBin(ThetaB_1st)){
-	thBin = GetThetaBin(ThetaA_1st);
-      }
-
-
-      if(thBin>-1){
+      thBin = GetThetaBin(ThetaA_1st);
+    }
+    
+    if(thBin>-1){      
+      //fill matrix for dphi=0 bin
+      if((dPhi_1st<halfBinSize)||(dPhi_1st>360-halfBinSize)){
 	
-	//fill matrix for dphi=0 bin
-	if((dPhi_1st<halfBinSize)||(dPhi_1st>360-halfBinSize)){
-	 
-	    AsymMatrix_sim[thBin][0] += 1;}
-	//fill the rest of the matrix 
-	for (Int_t i = 1 ; i < nPhibinsSim ; i++){
-	  if((dPhi_1st>2*i*halfBinSize-halfBinSize)&&(dPhi_1st<2*i*halfBinSize+halfBinSize)){
-	    AsymMatrix_sim[thBin][i] += 1;}
+	hDPhi[0]->Fill(dPhi_1st);
+	
+	AsymMatrix_sim[thBin][0] += 1;}
+      //fill the rest of the matrix 
+      for (Int_t i = 1 ; i < nPhibinsSim ; i++){
+	
+	if((dPhi_1st>2*i*halfBinSize-halfBinSize)&&
+	   (dPhi_1st<2*i*halfBinSize+halfBinSize)){
+	
+	  AsymMatrix_sim[thBin][i] += 1;
+		  
+	  hDPhi[i]->Fill(dPhi_1st);
 	}
+	
       }
-
-      }//end of: for(Int_t ientry...
+      
+    }
+    
+  }//end of: for(Int_t ientry...
   
   //printing out the asym matrix 
   /* for(Int_t j = 0 ; j <nThbins; j++){
-      for(Int_t k = 0 ; k < nPhibinsSim; k++){
-	cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;}
-	}*/
+     for(Int_t k = 0 ; k < nPhibinsSim; k++){
+     cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;}
+     }*/
+  
   
   return 0;
 } //end of CalculateAsymmetrySim
-
 
 
 
@@ -1106,7 +1116,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
-  Int_t   dPhiDiff = 90;
+  Int_t   dPhiDiff = 180;
     
   //Calculating ratios for desired dPhiDiff
   Float_t AsPhiDiff[nThbins] = {0.};
@@ -1123,8 +1133,28 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   int bin270 = 3*nPhibinsSim/4;
   double halfBinSize = 180.0/(1.0*nPhibinsSim);
   
+  //----------------------
+  //!!! temporary
+  Char_t plotName[128];
+  for (Int_t i = 0 ; i < nPhibinsSim ; i++){
+    sprintf(plotName,"hDPhi%d", i);
+    hDPhi[i] = new TH1F(plotName,plotName,
+			128,0.,360.);
+    
+  }
+  //------------------
   
   CalculateAsymmetrySim(inputFileNumber1);
+
+  //----------------------
+  //!!! temporary
+
+  for (Int_t i = 0 ; i < nPhibinsSim ; i++){
+    hDPhi[i]->Draw();
+    sprintf(plotName,"../Plots/hDPhi%d.pdf", i);
+    canvas->SaveAs(plotName);
+  }
+  //----------------------
 
   for (Int_t i = 0 ; i < nThbins ; i++){
     if (AsymMatrix_sim[i][0] != 0){
@@ -1247,7 +1277,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   grAsym2->Draw("same P E");
   grThe->Draw("same P L");
 
-  sprintf(plotN,"../Plots/A_%d_Inputs%d&%d_%dPhiBins.pdf", dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
+  sprintf(plotN,"../Plots/A_%d_Inputs%dn%d_%dPhiBins.pdf", dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
   
   canvas->SaveAs(plotN);
 
