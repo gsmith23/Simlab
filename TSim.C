@@ -662,13 +662,17 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   GetThetaBinValues();
 
   //difference 'sim theta' - 'energy theta'
-  TH2F* histThD = new TH2F("histThD","sim - energy #theta difference",160,10,170,250,-120,130);
+  TH2F* histThD = new TH2F("histThD",
+			   "sim - energy #theta difference",
+			   160,10,170,250,-120,130);
 
   //difference 'lab theta' - 'energy theta'
-  TH2F* hLEdiff = new TH2F("hLEdiff","lab - energy theta",160,10,170,120,-50,70);
+  TH2F* hLEdiff = new TH2F("hLEdiff","lab - energy theta",
+			   160,10,170,120,-50,70);
 
   //difference 'max/min lab theta' - 'energy theta'
-  TH2F* hMEdiff = new TH2F("hMEdiff","max/min - energy theta",160,10,170,120,-50,70);
+  TH2F* hMEdiff = new TH2F("hMEdiff","max/min - energy theta",
+			   160,10,170,120,-50,70);
 
   cout << endl;
   cout << " Getting asymmetry " << endl;
@@ -761,10 +765,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       thBin = GetThetaBin(ltHA[4]);
 
       for (Int_t i = 0 ; i < nCrystals ; i++){
-	if ((i!=4)&&(thBin>-1)&&(ltHA[i]<ThMax[thBin])&&(ltHA[i]>ThMin[thBin])){
+	if ((i!=4)&&(thBin>-1)&&(ltHA[i]<ThMax[thBin])&&
+	    (ltHA[i]>ThMin[thBin])){
 	  phiA = CrystalToPhi(i);
 	  indexA = i ;}
-	if ((i!=4)&&(thBin>-1)&&(ltHB[i]<ThMax[thBin])&&(ltHB[i]>ThMin[thBin])){
+	if ((i!=4)&&(thBin>-1)&&(ltHB[i]<ThMax[thBin])&&
+	    (ltHB[i]>ThMin[thBin])){
 	  phiB = CrystalToPhi(i);
 	  indexB = i;}	
       }
@@ -971,6 +977,16 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
 
+  TH1F *hr;
+  
+  Float_t maxY = 3.0;
+
+  if(dPhiDiff==180)
+    maxY = 6.0;
+  
+  hr = canvas->DrawFrame(10,0.5,170,maxY);
+  hr->GetXaxis()->SetTitle("#theta (deg)");
+
   TGraphErrors *grAsym[3];
   grAsym[0] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
   grAsym[1] = new TGraphErrors(nThbins,plotTheta,aTheory,0,0);
@@ -990,15 +1006,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
   
   
-  TH1F *hr;
-  
-  Float_t maxY = 3.0;
-
-  if(dPhiDiff==180)
-    maxY = 6.0;
-  
-  hr = canvas->DrawFrame(10,0.5,170,maxY);
-  hr->GetXaxis()->SetTitle("#theta (deg)");
   
   TString theoryLegendTitle = " ";
   alpha1 = alpha1*RadToDeg();
@@ -1119,7 +1126,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
-  Int_t   dPhiDiff = 180;
+  Int_t   dPhiDiff = 90;
     
   //Calculating ratios for desired dPhiDiff
   Float_t AsPhiDiff[nThbins] = {0.};
@@ -1260,7 +1267,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   
   sprintf(theoryLegendTitle, "theory curve #alpha_{#phi} = %.1f^{o}", alpha1);  
   
-  hr = canvas->DrawFrame(10,0.5,170,3);
+  hr = canvas->DrawFrame(10,0.5,170,3.0);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
