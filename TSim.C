@@ -991,7 +991,12 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   
   
   TH1F *hr;
+  
+  Float_t maxY = 3.0;
 
+  if(dPhiDiff==180)
+    maxY = 6.0;
+  
   hr = canvas->DrawFrame(10,0.5,170,3);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   
