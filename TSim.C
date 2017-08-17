@@ -997,7 +997,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   if(dPhiDiff==180)
     maxY = 6.0;
   
-  hr = canvas->DrawFrame(10,0.5,170,3);
+  hr = canvas->DrawFrame(10,0.5,170,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   
   TString theoryLegendTitle = " ";
