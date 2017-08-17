@@ -1110,11 +1110,11 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   }//end of: for(Int_t ientry...
   
   //printing out the asym matrix 
-  /* for(Int_t j = 0 ; j <nThbins; j++){
+  for(Int_t j = 0 ; j <nThbins; j++){
      for(Int_t k = 0 ; k < nPhibinsSim; k++){
-     cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;}
-     }*/
-  
+     cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;
+     }
+  }
   
   return 0;
 } //end of CalculateAsymmetrySim
