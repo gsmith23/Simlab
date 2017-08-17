@@ -1,13 +1,18 @@
 #include "TROOT.h"
-#include <TChain.h>
+//#include <TChain.h>
 #include "TFile.h"
+
+#include "TTheory.h"
+//#include "TTheory.h"
+#include "TSim.h"
+
 
 #include "TObject.h"
 #include "TApplication.h"
 #include "TVector3.h"
 #include "TVector2.h"
 #include "TString.h"
-#include "TChain.h"
+//#include "TChain.h"
 #include "TGraphErrors.h"
 #include "TLorentzVector.h"
 
@@ -29,6 +34,7 @@
 
 #include "TFile.h"
 #include "TTree.h"
+#include "TClass.h"
 
 #include <stdio.h>
 #include <iostream>

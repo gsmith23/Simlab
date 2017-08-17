@@ -2,8 +2,8 @@
 #define TSim_h
 
 #include "./includes.h"
-#include "TTheory.h"
-#include "TRandom.h"
+//#include "TTheory.h"
+
 
 //--------------------------------------------------------------------------------------
 

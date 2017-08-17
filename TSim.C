@@ -1,5 +1,4 @@
 #include "TSim.h"
-#include "./includes.h"
 
 #if !defined(__CINT__)
 ClassImp(TSim)
@@ -804,6 +803,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	AsymMatrix[thBin][3] += 1;
 	n270++;}
 
+      // check that first hits were in central
       if ((simtHA[4]<ThMax[thBin])&&(simtHA[4]>ThMin[thBin])&&
 	  (simtHB[4]<ThMax[thBin])&&(simtHB[4]>ThMin[thBin])&&
 	  (CentralY(YposA[4]))&&(CentralZ(ZposA[4]))&&
@@ -887,7 +887,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
-  Int_t   dPhiDiff = 90;
+  Int_t   dPhiDiff = 180;
 
   //Calculating ratios for desired dPhiDiff
   Float_t AsPhiDiff[nThbins] = {0.};
@@ -997,7 +997,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   
   TString theoryLegendTitle = " ";
   alpha1 = alpha1*RadToDeg();
-  theoryLegendTitle.Form("theory curve #alpha_{#Delta#phi} = %.1f^{o}", alpha1);
+  theoryLegendTitle.Form("theory curve #alpha_{#phi} = %.1f^{o}", alpha1);
   
   Char_t plotN[128];
   Char_t yAxis[128];
@@ -1048,8 +1048,6 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   simDataTree->SetBranchAddress("ThetaB_1st",&ThetaB_1st);
   simDataTree->SetBranchAddress("PhiA_1st",&PhiA_1st);
   simDataTree->SetBranchAddress("PhiB_1st",&PhiB_1st);
-  
- 
   
   for(Int_t j = 0 ; j <nThbins; j++){
      for(Int_t k = 0 ; k < nPhibinsSim; k++){
@@ -1129,7 +1127,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
 				200,200,1400,1000);
 
   int bin90 = nPhibinsSim/4;
-  int bin180 = nPhibinsSim/4;
+  int bin180 = nPhibinsSim/2;
   int bin270 = 3*nPhibinsSim/4;
   double halfBinSize = 180.0/(1.0*nPhibinsSim);
   
