@@ -1089,8 +1089,6 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
       //fill matrix for dphi=0 bin
       if((dPhi_1st<halfBinSize)||(dPhi_1st>360-halfBinSize)){
 	
-	hDPhi[0]->Fill(dPhi_1st);
-	
 	AsymMatrix_sim[thBin][0] += 1;}
       //fill the rest of the matrix 
       for (Int_t i = 1 ; i < nPhibinsSim ; i++){
@@ -1100,7 +1098,6 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
 	
 	  AsymMatrix_sim[thBin][i] += 1;
 		  
-	  hDPhi[i]->Fill(dPhi_1st);
 	}
 	
       }
@@ -1143,28 +1140,9 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
   int bin270 = 3*nPhibinsSim/4;
   double halfBinSize = 180.0/(1.0*nPhibinsSim);
   
-  //----------------------
-  //!!! temporary
-  Char_t plotName[128];
-  for (Int_t i = 0 ; i < nPhibinsSim ; i++){
-    sprintf(plotName,"hDPhi%d", i);
-    hDPhi[i] = new TH1F(plotName,plotName,
-			128,0.,360.);
-    
-  }
-  //------------------
   
   CalculateAsymmetrySim(inputFileNumber1);
 
-  //----------------------
-  //!!! temporary
-
-  for (Int_t i = 0 ; i < nPhibinsSim ; i++){
-    hDPhi[i]->Draw();
-    sprintf(plotName,"../Plots/hDPhi%d.pdf", i);
-    canvas->SaveAs(plotName);
-  }
-  //----------------------
 
   for (Int_t i = 0 ; i < nThbins ; i++){
     if (AsymMatrix_sim[i][0] != 0){
