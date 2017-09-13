@@ -118,13 +118,9 @@ class TSim : public TObject{
   Int_t nb_ComptA[nCrystals];
   Int_t nb_ComptB[nCrystals];
 
-  
-
-  static const Int_t nThbins = 32;
+  static const Int_t nThbins = 8;
   static const Int_t nPhibins = 4;
-  static const Int_t nPhibinsSim = 32; //can be changed (to a multiple of 4)
-
-
+  static const Int_t nPhibinsSim = 8; //can be changed (to a multiple of 4)
 
   Double_t XposA[nCrystals];
   Double_t YposA[nCrystals];

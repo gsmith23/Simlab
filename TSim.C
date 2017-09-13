@@ -1106,12 +1106,12 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
     
   }//end of: for(Int_t ientry...
   
-  //printing out the asym matrix 
-  for(Int_t j = 0 ; j <nThbins; j++){
-     for(Int_t k = 0 ; k < nPhibinsSim; k++){
-     cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;
-     }
-  }
+  // //printing out the asym matrix 
+  // for(Int_t j = 0 ; j <nThbins; j++){
+  //    for(Int_t k = 0 ; k < nPhibinsSim; k++){
+  //    cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;
+  //    }
+  // }
   
   return 0;
 } //end of CalculateAsymmetrySim
@@ -1169,6 +1169,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
  
 
   
+    
   CalculateAsymmetrySim(inputFileNumber2);
   
   for (Int_t i = 0 ; i < nThbins ; i++){
@@ -1223,7 +1224,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
     plotTheta[i] = plotTheta[i]*RadToDeg();
   }
 
-    TGraphErrors* grThe = new TGraphErrors(nThbins,plotTheta,aTheory,0,0);
+  TGraphErrors* grThe = new TGraphErrors(nThbins,plotTheta,aTheory,0,0);
 
 
   grAsym1->SetLineColor(kBlue);
@@ -1256,15 +1257,21 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1, TString inputFileNumber2
 
   leg->AddEntry(grThe,theoryLegendTitle,"L P");
   leg->AddEntry(grAsym1,"Entangled Photons","E P");
-  leg->AddEntry(grAsym2,"Polarised Photons","E P");
-  leg->Draw();
 
+  
   gStyle->SetTitleH(0.1);
     
   grAsym1->Draw("P E");
-  grAsym2->Draw("same P E");
+
+  if (inputFileNumber2!=inputFileNumber1){
+    leg->AddEntry(grAsym2,"Polarised Photons","E P");
+    grAsym2->Draw("same P E");
+  }
+  
   grThe->Draw("same P L");
 
+  leg->Draw();
+    
   sprintf(plotN,"../Plots/A_%d_Inputs%dn%d_%dPhiBins.pdf", dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
   
   canvas->SaveAs(plotN);
