@@ -564,17 +564,23 @@ void TLab::FitPhotopeaks(){
       histName.Form("hQ%d_%d",i,run);
       hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
       
-      hQ[i][run]->GetXaxis()->SetRangeUser(2800,4000);
+      hQ[i][run]->GetXaxis()->SetRangeUser(2400,4000);
       
       maxv = hQ[i][run]->GetXaxis()->
 	GetBinCenter(hQ[i][run]->GetMaximumBin());
       
       phoQfit = new TF1("phoQfit",
 			"[0]*exp(-0.5*(((x-[1])/[2])^2))",
-			maxv-200,maxv+200);
+			maxv-250,maxv+250);
       
       phoQfit->SetLineColor(2);
       phoQfit->SetParameters(10.,3000.,100.);
+
+      if(i == 9)
+	phoQfit->SetParameters(10.,2800.,100.);
+      else if (i==2)
+	phoQfit->SetParameters(10.,3200.,100.);
+      
       //phoQfit->SetParLimits(1.,2700.,3700.);
       //phoQfit->SetParLimits(2.,100.,300.);
       
@@ -621,7 +627,7 @@ Int_t TLab::DefaultPhotopeakRun(Int_t channel){
     return 1;
 
   else 
-    return 2;
+    return 0;
 }
 
 Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
@@ -945,7 +951,8 @@ void TLab::GraphAsymmetry(Char_t option){
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
-  Int_t   dPhiDiff = 90;
+  //!!!!
+  Int_t   dPhiDiff = 180;
 
   Float_t  phi[nPhiBins];
 

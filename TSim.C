@@ -893,7 +893,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
-  Int_t   dPhiDiff = 180;
+  Int_t   dPhiDiff = 90;
 
   //Calculating ratios for desired dPhiDiff
   Float_t AsPhiDiff[nThbins] = {0.};
