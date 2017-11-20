@@ -9,9 +9,9 @@ Int_t main(int argc, char **argv){
   cout << endl;
   cout << endl;
   cout << " -----------------------------------" << endl;
-  cout << " ----- Paired Compton Analysis -----" << endl; 
+  cout << " ---------  QET Analysis ------------" << endl; 
   cout << " -----------------------------------" << endl;
-  cout << " ---------- Version 5.5 ------------" << endl; 
+  cout << " ---------- Version 6.0 ------------" << endl; 
   cout << " -----------------------------------" << endl;
   cout << " ---- Lab and/or Simulated data ----" << endl;
   cout << " --------  and/or Theory  ----------" << endl; 
@@ -21,12 +21,12 @@ Int_t main(int argc, char **argv){
   
   // check that the program is exectued with the correct
   // arguments and give examples if it is not
-  if( ( argc < 2 ) || ( argc > 5 ) ||
+  if( ( argc < 2 ) || ( argc > 6 ) ||
       ( strcmp(argv[1],"0")==0 && argc != 3) ||
       ( strcmp(argv[1],"1")==0 && argc != 3) ||
       ( strcmp(argv[1],"2")==0 && argc != 3) ||
       ( strcmp(argv[1],"3")==0 && argc != 4) ||
-      ( strcmp(argv[1],"5")==0 && argc != 2) ||
+      ( strcmp(argv[1],"6")==0 && argc != 2) ||
       ( strcmp(argv[1],"8")==0 && argc != 5) ||
       ( strcmp(argv[1],"9")==0 && argc != 3) 
       ) {
@@ -39,7 +39,8 @@ Int_t main(int argc, char **argv){
     cout << " 2 - sim data analysis                 " << endl; 
     cout << " 3 - lab and sim data analysis         " << endl;
     cout << " 4 - multiple sim data analysis        " << endl;
-    cout << " 5 - plot theory curve only            " << endl; 
+    cout << " 5 - sim data scattering analysis      " << endl;
+    cout << " 6 - plot theory curve only            " << endl; 
     cout << " 0 - lab data analysis (overwrite)     " << endl; 
     cout << " 8 - lab data - make raw trees only..  " << endl;
     cout << "    ..and specify file number limits   " << endl; 
@@ -123,7 +124,7 @@ Int_t main(int argc, char **argv){
   //-----------------------------------------------------------------
   //-----                    THEORY CURVE                       -----
 
-  if( strcmp(argv[1],"5")==0 ){
+  if( strcmp(argv[1],"6")==0 ){
   
     cout << endl;
     cout << "       -------------------------" << endl; 
@@ -395,11 +396,8 @@ Int_t main(int argc, char **argv){
     
     delete data;
   } 
-
-
-   else if( strcmp(argv[1],"4")==0 ) {
-
-     
+  else if( strcmp(argv[1],"4")==0 ) {
+    
     cout << endl;
     cout << "       ----------------------" << endl; 
     cout << "       | simulation analysis |" << endl;
@@ -411,8 +409,30 @@ Int_t main(int argc, char **argv){
     cout << " Analysing : " << argv[2] << " and "<< argv[3] << endl;
     
     TSim * simData = new TSim(argv[2], argv[3]);
+    
+    
+    cout << endl;
+    cout << " Calculating & Plotting Asymmetry " << endl;
+    
+    simData->GraphAsymmetrySim(argv[2], argv[3]);
+        
+    delete simData;
+    
+  }
+  else if( strcmp(argv[1],"5")==0 ) {
+    
+    cout << endl;
+    cout << "       ----------------------" << endl; 
+    cout << "       | simulation analysis |" << endl;
+    cout << "       |  scattering study   |" << endl;
+    cout << "       ----------------------" << endl; 
+    cout << endl;
 
-
+    cout << endl;
+    cout << " Analysing : " << argv[2] << endl;
+    
+    TSim * simData = new TSim(argv[2], argv[2]);
+    
     cout << endl;
     cout << " Calculating & Plotting Asymmetry " << endl;
     

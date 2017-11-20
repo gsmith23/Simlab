@@ -24,7 +24,7 @@ class TSim : public TObject{
   //==================================
   // convert raw root file to root file
   // containing sorted events
-  Int_t SortEvents(TString);
+  Int_t  SortEvents(TString);
   Bool_t SortedROOTFileExists();
 
   //==================================
@@ -32,9 +32,12 @@ class TSim : public TObject{
 
  
   Int_t CalculateAsymmetrySim(TString);
+  Int_t CalculateAsymmetrySimScattered(TString,
+				       Float_t);
   Int_t GraphAsymmetrySim(TString, TString);
+  
   Int_t CalculateAsymmetryLab(TString);
-  void GraphAsymmetryLab(TString);
+  void  GraphAsymmetryLab(TString);
   
   //==================================
     
