@@ -18,9 +18,6 @@ TSim::TSim(TString fileNumber){
   rootFileRawName = rootFileRawName + ".root";
   rootFileSortName = rootFileSortName + ".root";
 
-  //  !! temporary 
-  //SetAsymmetry(fileNumber);
-  
 }
 
 //option for use with two input files
@@ -42,9 +39,6 @@ TSim::TSim(TString fileNumber1, TString fileNumber2){
   rootFileSortName2 = rootFileSortName2 + ".root";
 
   //  Initialise();
-  
-  //!! temporary 
-  // SetAsymmetry(fileNumber);
   
 }
 
@@ -1121,11 +1115,10 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
 
 //-----------------------------------------------------------------------
 Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
-					   Float_t thetaS){
+					   Float_t thetaS,
+					   Float_t thetaSHalfWidth){
 
   GetThetaBinValues();
-  
-  Float_t thetaSHalfWidth = 40.;
   
   cout << endl;
   cout << " Getting asymmetry sim " << endl;
@@ -1178,10 +1171,6 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
     
     Int_t thBin = -1;
     
-    // if (GetThetaBin(ThetaA_1st) == GetThetaBin(ThetaB_1st)){
-    //   thBin = GetThetaBin(ThetaA_1st);
-    // }
-    
     if (GetThetaBin(ThetaA_2nd) == GetThetaBin(ThetaB_1st)){
       thBin = GetThetaBin(ThetaA_2nd);
     }
@@ -1210,20 +1199,22 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
     
   }//end of: for(Int_t ientry...
   
-  // //printing out the asym matrix 
-  for(Int_t j = 0 ; j <nThbins; j++){
-     for(Int_t k = 0 ; k < nPhibinsSim; k++){
-     cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;
-     }
-  }
+//   // //printing out the asym matrix 
+//   for(Int_t j = 0 ; j <nThbins; j++){
+//      for(Int_t k = 0 ; k < nPhibinsSim; k++){
+//      cout<<"assym matrix for theta bin "<<j<<" and phi bin "<<k<<" is "<<AsymMatrix_sim[j][k]<<endl;
+//      }
+//   }
   
   return 0;
-} //end of CalculateAsymmetrySim
+} //end of CalculateAsymmetrySimScattered
 
 
 
 Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
 			      TString inputFileNumber2){
+  
+  
   
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
@@ -1275,7 +1266,12 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   //CalculateAsymmetrySim(inputFileNumber2);
   
   //!!! very temporary
-  CalculateAsymmetrySimScattered(inputFileNumber1,50);
+  Float_t thetaS  = 30.;
+  Float_t thSHalf = 10.;
+  
+  CalculateAsymmetrySimScattered(inputFileNumber1,
+				 thetaS,
+				 thSHalf);
   
   for (Int_t i = 0 ; i < nThbins ; i++){
     if (AsymMatrix_sim[i][0] != 0){
@@ -1351,7 +1347,12 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   sprintf(theoryLegendTitle, "theory curve #alpha_{#phi} = %.1f^{o}", alpha1);  
   
-  hr = canvas->DrawFrame(10,0.5,170,3.0);
+  //hr = canvas->DrawFrame(10,0.5,170,3.0);
+  
+  Float_t maxY = 2.0;
+  Float_t minY = 0.0;
+  hr = canvas->DrawFrame(10,minY,170,maxY);
+  
   hr->GetXaxis()->SetTitle("#theta (deg)");
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
@@ -1360,7 +1361,8 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
     
   TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
 
-  leg->AddEntry(grThe,theoryLegendTitle,"L P");
+  //leg->AddEntry(grThe,theoryLegendTitle,"L P");
+  
   leg->AddEntry(grAsym1,"Polarised Photons","E P");
   //  leg->AddEntry(grAsym1,"Entangled Photons","E P");
 
@@ -1376,7 +1378,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   grAsym2->Draw("same P E");
   //}
   
-  grThe->Draw("same P L");
+  //grThe->Draw("same P L");
 
   leg->Draw();
     

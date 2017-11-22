@@ -87,13 +87,9 @@ Float_t TTheory::ThetaToElectronEnergy(Float_t theta){
 //--------------------------------------------------
 // Plotting routine 
 
-
 void TTheory::GraphFiniteAsymmetry(Int_t nBins,
 				   Float_t semiSpan,
 				   Char_t xVariable){
-  
-  
-  
   
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);

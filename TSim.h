@@ -33,7 +33,9 @@ class TSim : public TObject{
  
   Int_t CalculateAsymmetrySim(TString);
   Int_t CalculateAsymmetrySimScattered(TString,
+				       Float_t,
 				       Float_t);
+  
   Int_t GraphAsymmetrySim(TString, TString);
   
   Int_t CalculateAsymmetryLab(TString);
