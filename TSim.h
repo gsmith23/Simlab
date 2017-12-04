@@ -30,14 +30,18 @@ class TSim : public TObject{
   //==================================
   // 
 
- 
+  
   Int_t CalculateAsymmetrySim(TString);
   Int_t CalculateAsymmetrySimScattered(TString,
 				       Float_t,
 				       Float_t);
   
-  Int_t GraphAsymmetrySim(TString, TString);
-  
+  Int_t GraphAsymmetrySim(TString, 
+			  TString, 
+			  Int_t   nThSBins = 0,
+			  Float_t thSMin = 0.,
+			  Float_t thSMax = 0.);
+    
   Int_t CalculateAsymmetryLab(TString);
   void  GraphAsymmetryLab(TString);
   
@@ -123,7 +127,7 @@ class TSim : public TObject{
   Int_t nb_ComptA[nCrystals];
   Int_t nb_ComptB[nCrystals];
 
-  static const Int_t nThbins = 8;
+  static const Int_t nThbins = 2;
   static const Int_t nPhibins = 4;
   static const Int_t nPhibinsSim = 8; //can be changed (to a multiple of 4)
 

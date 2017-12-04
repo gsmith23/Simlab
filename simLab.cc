@@ -9,7 +9,7 @@ Int_t main(int argc, char **argv){
   cout << endl;
   cout << endl;
   cout << " -----------------------------------" << endl;
-  cout << " ---------  QET Analysis ------------" << endl; 
+  cout << " ---------  QET Analysis -----------" << endl; 
   cout << " -----------------------------------" << endl;
   cout << " ---------- Version 6.0 ------------" << endl; 
   cout << " -----------------------------------" << endl;
@@ -431,13 +431,32 @@ Int_t main(int argc, char **argv){
     cout << endl;
     cout << " Analysing : " << argv[2] << endl;
     
-    TSim * simData = new TSim(argv[2], argv[2]);
+    TSim * simData = new TSim(argv[2]);
     
     cout << endl;
     cout << " Calculating & Plotting Asymmetry " << endl;
     
-    simData->GraphAsymmetrySim(argv[2], argv[3]);
-        
+    Int_t   nThetaBins = 3;
+    Float_t thetaSMin  = 10.;
+    Float_t thetaSMax  = 100.;
+    
+    cout << endl;
+    cout << "  "
+	 << thetaSMin  
+	 << " < thetaS < " 
+	 << thetaSMax 
+	 << endl;
+    cout << "  "
+	 << nThetaBins 
+	 << " bins " 
+	 << endl;
+    
+    
+    simData->GraphAsymmetrySim(argv[2], argv[2],
+			       nThetaBins,
+			       thetaSMin,
+			       thetaSMax);
+    
     delete simData;
     
    }
