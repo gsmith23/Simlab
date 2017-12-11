@@ -1326,8 +1326,8 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   entangled[0] = kFALSE;
   entangled[1] = kFALSE;
   
-  entangled[0] = kTRUE;
-  entangled[1] = kTRUE;
+  // entangled[0] = kTRUE;
+  // entangled[1] = kTRUE;
 
   polarised[0] = kFALSE;
   polarised[1] = kFALSE;
