@@ -1412,6 +1412,9 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   Float_t maxY = 1.8;
   Float_t minY = 1.0;
   
+  if(entangled[0] || entangled[1])
+    maxY =  3.0;
+  
   TH1F *hr;
   hr = canvas->DrawFrame(10,minY,170,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
@@ -1419,7 +1422,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   hr->GetYaxis()->SetTitle(yAxis);
   hr->GetYaxis()->SetTitleOffset(0.7);
   
-  TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
+  TLegend *leg = new TLegend(0.45,0.65,0.9,0.85);
   
   TTheory *theory = new TTheory();
   cout << endl;
@@ -1481,7 +1484,6 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
       leg->AddEntry(grAsym[g],gLegTitle,"E P");
       grAsym[g]->Draw("same P E");
       
-      
   }
   
   gStyle->SetTitleH(0.1);
@@ -1500,7 +1502,9 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   canvas->SaveAs(plotN);
   
+  // ------------------------------------------------
   //  Fourier Coefficients Graph
+  
   leg->Clear();
   
   leg = new TLegend(0.3,0.75,0.8,0.85);
