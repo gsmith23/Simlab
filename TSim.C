@@ -667,8 +667,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   cout << endl;
   cout << " Getting asymmetry " << endl;
   
-  this->SetStyle();
-
   Int_t inputFileInt = inputFileNumber.Atoi();
   
   TString plotName;
@@ -737,14 +735,14 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     sortDataTree->GetEvent(ientry);
 
-    Int_t thBin = -1;
-    Float_t phiA = -1;
-    Float_t phiB = -1;
-    Int_t indexA = -1;
-    Int_t indexB = -1;
-    Float_t totEA = 0;
-    Float_t totEB = 0;
-
+    Int_t   thBin  = -1;
+    Float_t phiA   = -1;
+    Float_t phiB   = -1;
+    Int_t   indexA = -1;
+    Int_t   indexB = -1;
+    Float_t totEA  = 0;
+    Float_t totEB  = 0;
+    
     for (Int_t k=0; k<nCrystals; k++){
       totEA += EA[k];
       totEB += EB[k];
@@ -799,7 +797,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	AsymMatrix[thBin][3] += 1;
 	n270++;}
 
-      // check that first hits were in central
+      // check that first hits were in central !!!!!
       if ((simtHA[4]<ThMax[thBin])&&(simtHA[4]>ThMin[thBin])&&
 	  (simtHB[4]<ThMax[thBin])&&(simtHB[4]>ThMin[thBin])&&
 	  (CentralY(YposA[4]))&&(CentralZ(ZposA[4]))&&
@@ -1021,14 +1019,52 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
 
 }
 //-----------------------------------------------------------------------
+
+void TSim::CalculateABC(){
+  
+  for(Int_t i = 0 ; i < nThbins ; i++){
+    
+    for(Int_t j = 0 ; j < 3 ; j++){
+      fABC[i][j] = 0.;
+      pABC[i][j] = 0.;
+    }
+    
+    if (AsymMatrix_sim[i][0]== 0) continue;
+    
+    fABC[i][0]  =  AsymMatrix_sim[i][bin000];
+    fABC[i][1]  =  AsymMatrix_sim[i][bin000];
+    fABC[i][2]  =  AsymMatrix_sim[i][bin000];
+    
+
+    fABC[i][0] +=  AsymMatrix_sim[i][bin090];
+    fABC[i][1] +=  AsymMatrix_sim[i][bin000];
+    fABC[i][2] -=  AsymMatrix_sim[i][bin090];
+    
+    fABC[i][0] +=  AsymMatrix_sim[i][bin180];
+    fABC[i][1] -=  AsymMatrix_sim[i][bin180];
+    fABC[i][2] +=  AsymMatrix_sim[i][bin180];
+    
+    fABC[i][0] +=  AsymMatrix_sim[i][bin270];
+    fABC[i][1] -=  AsymMatrix_sim[i][bin180];
+    fABC[i][2] -=  AsymMatrix_sim[i][bin270];
+    
+    for(Int_t j = 0 ; j < 3 ; j++){
+      fABC[i][j] = fABC[i][j]/4.;
+      pABC[i][j] = fABC[i][j]/fABC[i][bin000];
+      
+//       cout << " pABC["<< i << "][" << j << "] = " 
+// 	   <<  pABC[i][j] << endl;
+    }
+  }
+  
+}
+
 Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
 
   GetThetaBinValues();
 
   cout << endl;
   cout << " Getting asymmetry sim " << endl;
-  
-  this->SetStyle();
   
   TString plotName;
   plotName = "../Plots/Asym_sim_" + inputFileNumber;
@@ -1063,7 +1099,7 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
     Float_t dPhi_1st = PhiA_1st + PhiB_1st;
     if(dPhi_1st<0)
       dPhi_1st = dPhi_1st + 360; 
-
+    
     Int_t thBin = -1;
     if (GetThetaBin(ThetaA_1st) == GetThetaBin(ThetaB_1st)){
       thBin = GetThetaBin(ThetaA_1st);
@@ -1073,7 +1109,7 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
     // dphi=0 bin
     if( (dPhi_1st <   halfBinSize     ) || 
 	(dPhi_1st > (360-halfBinSize) ) )
-      AsymMatrix_sim[thBin][0] += 1;
+      AsymMatrix_sim[thBin][bin000] += 1;
     // fill the rest 
     for (Int_t i = 1 ; i < nPhibinsSim ; i++){
       if( (dPhi_1st > (halfBinSize*(2*i - 1)) ) &&
@@ -1114,8 +1150,6 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
   cout << " thetaS     = " << thetaS     << endl;
   cout << " thetaSHalf = " << thetaSHalf << endl;
 
-  this->SetStyle();
-  
   TString plotName;
   plotName = "../Plots/Asym_sim_" + inputFileNumber;
 
@@ -1182,7 +1216,7 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 	  //fill matrix for dphi=0 bin
 	  if((dPhi_1st<halfBinSize) || 
 	     (dPhi_1st>360-halfBinSize))
-	    AsymMatrix_sim[thBin][0] += 1;
+	    AsymMatrix_sim[thBin][bin000] += 1;
 	  
 	  //fill the rest of the matrix 
 	  for (Int_t i = 1 ; i < nPhibinsSim ; i++){
@@ -1218,6 +1252,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
 			      Float_t thetaSMin,
 			      Float_t thetaSMax			      
 			      ){
+  this->SetStyle();
   
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
@@ -1240,16 +1275,13 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   //Calculating ratios for desired dPhiDiff
   Float_t AsPhiDiff[nThbins] = {0.};
   Float_t AePhiDiff[nThbins] = {0.};
-
+  
   Int_t inputFileInt1 = inputFileNumber1.Atoi();
   Int_t inputFileInt2 = inputFileNumber2.Atoi();
   
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				200,200,1400,1000);
   
-  Int_t bin90  = nPhibinsSim/4;
-  Int_t bin180 = nPhibinsSim/2;
-  Int_t bin270 = 3*nPhibinsSim/4;
   
   Double_t halfBinSize = 180.0/nPhibinsSim;
   
@@ -1259,9 +1291,11 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   Float_t thetaSHalf = thetaSBinWidth/2.;
   Float_t thetaS_arr[nThetaSBins];
+  Float_t energyS_arr[nThetaSBins];
     
   for (Int_t i = 0 ; i < nThetaSBins ; i++){
-    thetaS_arr[i] = thetaSMin + (i+0.5)*thetaSBinWidth;
+    thetaS_arr[i]  = thetaSMin + (i+0.5)*thetaSBinWidth;
+    energyS_arr[i] = ThetaToPhotonEnergy(thetaS_arr[i]); 
   }
   
   Int_t   nGraphs = 2;
@@ -1269,34 +1303,50 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
     nGraphs = nThetaSBins + 1;
   
   TGraphErrors *grAsym[nGraphs];
-
-  for (Int_t i = 0 ; i < nGraphs ; i++){
-   
-    if     ( i == 0 ){
-      // Set: AsymMatrix_sim[thBin][0]
+  TGraphErrors *grA[nGraphs];
+  TGraphErrors *grB[nGraphs];
+  TGraphErrors *grC[nGraphs];
+  
+  for (Int_t g = 0 ; g < nGraphs ; g++){
+    
+    if     ( g == 0 ){
+      // Set: AsymMatrix_sim[thBin][]
       CalculateAsymmetrySim(inputFileNumber1);
     }
-    else if( i >= 1 ){
+    else if( g >= 1 ){
       // Standard analysis, second file (option 4) 
       if(nThetaSBins == 0)
 	CalculateAsymmetrySim(inputFileNumber2);
       // Scattered analysis same file (option 5)
       else
 	CalculateAsymmetrySimScattered(inputFileNumber1,
-				       thetaS_arr[i-1],
+				       thetaS_arr[g-1],
 				       thetaSHalf);
     }
     
-    // Set: N(dPhi)/N(0)
+    // now that AsymMatrix_sim[thBin][phiBin]
+    // is set ...
+    CalculateABC();
+    
+    Float_t pC[nThbins];
+    
     for (Int_t i = 0 ; i < nThbins ; i++){
+      pA[i] = pABC[i][0];
+      pB[i] = pABC[i][1];
+      pC[i] = pABC[i][2];
+      
+    }
+
+    // Set: N(dPhi)/N(0)
+	  for (Int_t i = 0 ; i < nThbins ; i++){
       if (AsymMatrix_sim[i][0]== 0) continue;
       
       if (dPhiDiff  == 90){
-	AsPhiDiff[i] = AsymMatrix_sim[i][bin90];
+	AsPhiDiff[i] = AsymMatrix_sim[i][bin090];
 	AsPhiDiff[i] = AsPhiDiff[i]+AsymMatrix_sim[i][bin270];
 	AsPhiDiff[i] = AsPhiDiff[i]/(2.*AsymMatrix_sim[i][0]);
 	
-	AePhiDiff[i] = AsymMatrix_sim[i][bin90];
+	AePhiDiff[i] = AsymMatrix_sim[i][bin090];
 	AePhiDiff[i] = AsymMatrix_sim[i][bin270];
 	AePhiDiff[i] = 1./AePhiDiff[i];
 	AePhiDiff[i] = AePhiDiff[i] + (1./AsymMatrix_sim[i][0]);
@@ -1320,13 +1370,28 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
       }	
     } // end of: for (Int_t i = 0 ; i < nThbins ; i+ 
     
-    grAsym[i] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+    grAsym[g] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+    grA[g]    = new TGraphErrors(nThbins,plotTheta,pA,0,0);
+    grB[g]    = new TGraphErrors(nThbins,plotTheta,pB,0,0);
+    grC[g]    = new TGraphErrors(nThbins,plotTheta,pC,0,0);
     
   }
   
-  for( Int_t i = 0 ; i < nGraphs ; i++ ){
-    grAsym[i]->SetLineColor( i+1 );
-    grAsym[i]->SetMarkerColor( i+1 );
+  for( Int_t g = 0 ; g < nGraphs ; g++ ){
+    grAsym[g]->SetLineColor( g+1 );
+    grAsym[g]->SetMarkerColor( g+1 );
+    
+    grA[g]->SetLineColor( g+1 );
+    grA[g]->SetLineStyle( g );
+    grA[g]->SetMarkerColor( g+1 );
+    
+    grB[g]->SetLineColor( g+1 );
+    grB[g]->SetLineStyle( g+1 );
+    grB[g]->SetMarkerColor( g+1 );
+    
+    grC[g]->SetLineColor( g+1 );
+    grC[g]->SetLineStyle( g+2 );
+    grC[g]->SetMarkerColor( g+1 );
   }
   
   // Theory Curve
@@ -1345,7 +1410,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   sprintf(theoryLegendTitle, "theory curve #alpha_{#phi} = %.1f^{o}", alpha1);  
   
   Float_t maxY = 1.8;
-  Float_t minY = 0.8;
+  Float_t minY = 1.0;
   
   TH1F *hr;
   hr = canvas->DrawFrame(10,minY,170,maxY);
@@ -1392,10 +1457,11 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
     gLegTitle = "UnPolarised" + gLegTitle;
   
   leg->AddEntry(grAsym[0],gLegTitle,"E P");
+  
   grAsym[0]->Draw("P E");
   
   // second+ file/s
-  for (Int_t i = 1 ; i < nGraphs ; i++ ){
+  for (Int_t g = 1 ; g < nGraphs ; g++ ){
     gLegTitle = " Photons";
     
       if     (entangled[1])
@@ -1406,12 +1472,16 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
 	gLegTitle = "UnPolarised" + gLegTitle;
       
       if(nThetaSBins > 0.){
-	gLegTitle = gLegTitle + " Scattered at %.0f^{o}";
-	gLegTitle.Form(gLegTitle,thetaS_arr[i-1]);
+	gLegTitle = gLegTitle + " Scattered at %.0f^{o} (%.1f keV)";
+	
+	gLegTitle.Form(gLegTitle,thetaS_arr[g-1],energyS_arr[g-1]);
+	
       }
       
-      leg->AddEntry(grAsym[i],gLegTitle,"E P");
-      grAsym[i]->Draw("same P E");
+      leg->AddEntry(grAsym[g],gLegTitle,"E P");
+      grAsym[g]->Draw("same P E");
+      
+      
   }
   
   gStyle->SetTitleH(0.1);
@@ -1421,11 +1491,83 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   leg->Draw();
   
-  sprintf(plotN,"../Plots/A_%d_Inputs%dn%d_%dPhiBins.pdf", 
-	  dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
+  if(nThetaSBins==0)
+    sprintf(plotN,"../Plots/A_%d_Files%d_%d_%dPhiBins.pdf", 
+	    dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
+  else
+    sprintf(plotN,"../Plots/A_%d_Scattered_%d_%dPhiBins.pdf", 
+	    dPhiDiff, inputFileInt1, nPhibinsSim);  
   
   canvas->SaveAs(plotN);
+  
+  //  Fourier Coefficients Graph
+  leg->Clear();
+  
+  leg = new TLegend(0.3,0.75,0.8,0.85);
+  
+  maxY = 0.2;
+  minY = -0.3;
+  if(entangled[0])
+    minY = -0.5;
+  
+  hr = canvas->DrawFrame(10,minY,170,maxY);
+  hr->GetXaxis()->SetTitle("#theta (deg)");
+  hr->GetYaxis()->SetTitle("cos(2#Delta#phi) coefficient");
+  hr->GetYaxis()->SetTitleOffset(0.7);
+  
+  gLegTitle = " Photons";
 
+  // first file
+  if     (entangled[0])
+    gLegTitle = "Entangled"   + gLegTitle;
+  else if(polarised[0])
+    gLegTitle = "Polarised"   + gLegTitle;
+  else 
+    gLegTitle = "UnPolarised" + gLegTitle;
+  
+  leg->AddEntry(grC[0],gLegTitle,"L");
+  
+  //  grA[0]->Draw("L");
+  //   grB[0]->Draw("L");
+  grC[0]->Draw("L P");
+  
+  // second+ file/s
+  for (Int_t g = 1 ; g < nGraphs ; g++ ){
+    gLegTitle = " Photons";
+    if     (entangled[1])
+      gLegTitle = "Entangled"   + gLegTitle;
+    else if(polarised[1])
+      gLegTitle = "Polarised"   + gLegTitle;
+    else 
+      gLegTitle = "UnPolarised" + gLegTitle;
+    
+    if(nThetaSBins > 0.){
+      gLegTitle = gLegTitle + " Scattered at %.0f^{o} (%.1f keV)";
+      
+      gLegTitle.Form(gLegTitle,thetaS_arr[g-1],energyS_arr[g-1]);
+      
+    }
+    
+    leg->AddEntry(grC[g],gLegTitle,"L");
+    //grA[g]->Draw("same P E");
+    //grB[g]->Draw("same P E");
+    grC[g]->Draw("same L P");
+    
+    
+  }
+  
+  if(nThetaSBins==0)
+    sprintf(plotN,"../Plots/FourierCoeffs_%d_%d_%dPhiBins.pdf", 
+	    inputFileInt1, inputFileInt2, nPhibinsSim);
+  else
+    sprintf(plotN,"../Plots/FourierCoeffs_Scattered_%d_%dPhiBins.pdf", 
+	    inputFileInt1, nPhibinsSim);  
+  
+
+  leg->Draw();
+  
+  canvas->SaveAs(plotN);
+  
   return 0;
  
 }//end of GraphAsymmetrySim
@@ -1479,7 +1621,8 @@ void TSim::SetStyle(){
   //  FILL CONTOURS LINE BAR 
   //  Frames
   garyStyle->SetFrameBorderMode(0);
-  
+  garyStyle->SetFrameFillColor(0);
+
   //  FILL BORDER LINE
   //  Graphs
   //  LINE ERRORS
@@ -1503,7 +1646,12 @@ void TSim::SetStyle(){
   garyStyle->SetOptFit(0);
   
   //----------  Legend
-
+  
+  garyStyle->SetLegendBorderSize(0);
+  garyStyle->SetLegendFillColor(0);
+  garyStyle->SetLegendFont(42);
+  garyStyle->SetLegendTextSize(0.);  
+  
   gROOT->SetStyle("garyStyle");
   gROOT->ForceStyle();
 

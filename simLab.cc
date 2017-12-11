@@ -26,6 +26,8 @@ Int_t main(int argc, char **argv){
       ( strcmp(argv[1],"1")==0 && argc != 3) ||
       ( strcmp(argv[1],"2")==0 && argc != 3) ||
       ( strcmp(argv[1],"3")==0 && argc != 4) ||
+      ( strcmp(argv[1],"4")==0 && argc != 4) ||
+      ( strcmp(argv[1],"5")==0 && argc != 3) ||
       ( strcmp(argv[1],"6")==0 && argc != 2) ||
       ( strcmp(argv[1],"8")==0 && argc != 5) ||
       ( strcmp(argv[1],"9")==0 && argc != 3) 
@@ -295,9 +297,9 @@ Int_t main(int argc, char **argv){
   //
   else if( strcmp(argv[1],"2")==0 ) {
     cout << endl;
-    cout << "       ----------------------" << endl; 
-    cout << "       | simulation analysis |" << endl; 
-    cout << "       ----------------------" << endl; 
+    cout << "     ---------------------------" << endl; 
+    cout << "     | simulation lab analysis |" << endl; 
+    cout << "     ---------------------------" << endl; 
     cout << endl;
 
     cout << endl;
@@ -448,7 +450,7 @@ Int_t main(int argc, char **argv){
 	 << endl;
     cout << "  "
 	 << nThetaBins 
-	 << " bins " 
+	 << " theta_{S} bins " 
 	 << endl;
     
     
