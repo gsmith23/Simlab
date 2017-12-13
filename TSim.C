@@ -504,19 +504,45 @@ Bool_t TSim::GoodTheta(Float_t theta){
   return goodTheta;
 }
 
-Bool_t TSim::CentralY(Double_t posY){
-  
-  Bool_t centralY = kFALSE;
-  
-  //! works only for this particular detector geometry
-  posY = Abs(posY);
 
-  if( posY < 2.)
-    centralY = kTRUE;
-
-  return centralY;
+Bool_t TSim::CentralXA(Double_t posXA){
+  
+  Bool_t centralXA = kFALSE;
+  
+  // if( posXA > 0. && 
+//       posXA < 54.25 )
+    
+    centralXA = kTRUE;
+  
+  return centralXA;
 }
 
+Bool_t TSim::CentralXB(Double_t posXB){
+  
+  Bool_t centralXB = kFALSE;
+  
+  // if( posXB < 0.  && 
+//       posXB > -54.25 )
+  centralXB = kTRUE;
+  
+  return centralXB;
+}
+
+
+Bool_t TSim::CentralYZ(Double_t posYZ){
+  
+  Bool_t centralYZ = kFALSE;
+  
+  //! works for 2 x 2 mm^2 crystals
+  posYZ = Abs(posYZ);
+
+  if( posYZ < 2.)
+    centralYZ = kTRUE;
+
+  return centralYZ;
+}
+
+// original simulation had 3 x 4 x 22 mm crystals
 Bool_t TSim::CentralZ(Double_t posZ){
   
   Bool_t centralZ = kFALSE;
@@ -801,18 +827,24 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	n270++;}
 
       // check that first hits were in central !!!!!
-      if ((simtHA[4]<ThMax[thBin])&&(simtHA[4]>ThMin[thBin])&&
-	  (simtHB[4]<ThMax[thBin])&&(simtHB[4]>ThMin[thBin])&&
-	  (CentralY(YposA[4]))&&(CentralZ(ZposA[4]))&&
-	  (CentralY(YposB[4]))&&(CentralZ(ZposB[4]))&&
-	  (nb_ComptA[4] == 1.)&&(nb_ComptB[4] == 1.)){
+      if ( simtHA[4]<ThMax[thBin] && 
+	   simtHA[4]>ThMin[thBin] &&
+	   simtHB[4]<ThMax[thBin] && 
+	   simtHB[4]>ThMin[thBin] &&
+	   CentralYZ(YposA[4])    && 
+	   CentralYZ(ZposA[4])    &&
+	   CentralYZ(YposB[4])    && 
+	   CentralYZ(ZposB[4])    &&
+	   nb_ComptA[4] == 1.     && 
+	   nb_ComptB[4] == 1. ){
+	
 	if (phiDiff == 0.)
 	  AsymTrue[thBin][0] += 1;
-	if ((phiDiff == 90)||(phiDiff == -270))
+	if ((phiDiff == 90) || (phiDiff == -270))
 	  AsymTrue[thBin][1] += 1;
-	if ((phiDiff == 180)||(phiDiff == -180))
+	if ((phiDiff == 180) || (phiDiff == -180))
 	  AsymTrue[thBin][2] += 1;
-	if ((phiDiff == -90)||(phiDiff == 270))
+	if ((phiDiff == -90) || (phiDiff == 270))
 	  AsymTrue[thBin][3] += 1;
       }
     }
@@ -1085,6 +1117,7 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   simDataTree->SetBranchAddress("ThetaA_1st",&ThetaA_1st);
   simDataTree->SetBranchAddress("ThetaA_2nd",&ThetaA_2nd);
   simDataTree->SetBranchAddress("ThetaB_1st",&ThetaB_1st);
+  simDataTree->SetBranchAddress("ThetaB_2nd",&ThetaB_2nd);
   simDataTree->SetBranchAddress("PhiA_1st",&PhiA_1st);
   simDataTree->SetBranchAddress("PhiA_2nd",&PhiA_2nd);
   simDataTree->SetBranchAddress("PhiB_1st",&PhiB_1st);
@@ -1105,7 +1138,8 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
       dPhi_1st = dPhi_1st + 360; 
     
     Int_t thBin = -1;
-    if (GetThetaBin(ThetaA_1st) == GetThetaBin(ThetaB_1st)){
+    if (GetThetaBin(ThetaA_1st) == 
+	GetThetaBin(ThetaB_1st)){
       thBin = GetThetaBin(ThetaA_1st);
     }
     
@@ -1156,7 +1190,7 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 
   TString plotName;
   plotName = "../Plots/Asym_sim_" + inputFileNumber;
-
+  
   plotName = plotName + ".pdf";
   
   TString inputFileName = "../Data/sim" + inputFileNumber;
@@ -1169,14 +1203,25 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
   TFile* inputFile = new TFile(inputFileName);
 
   TTree* simDataTree=(TTree*)inputFile->Get("Tangle2");
-
+  
   simDataTree->SetBranchAddress("ThetaA_1st",&ThetaA_1st);
   simDataTree->SetBranchAddress("ThetaA_2nd",&ThetaA_2nd);
   simDataTree->SetBranchAddress("ThetaB_1st",&ThetaB_1st);
+  simDataTree->SetBranchAddress("ThetaB_2nd",&ThetaB_2nd);
+
   simDataTree->SetBranchAddress("PhiA_1st",&PhiA_1st);
   simDataTree->SetBranchAddress("PhiA_2nd",&PhiA_2nd);
   simDataTree->SetBranchAddress("PhiB_1st",&PhiB_1st);
   simDataTree->SetBranchAddress("PhiB_2nd",&PhiB_2nd);
+  
+  simDataTree->SetBranchAddress("XposA_1st", &XposA_1st);
+  simDataTree->SetBranchAddress("YposA_1st", &YposA_1st);
+  simDataTree->SetBranchAddress("ZposA_1st", &ZposA_1st);
+
+  simDataTree->SetBranchAddress("XposB_1st", &XposB_1st);
+  simDataTree->SetBranchAddress("YposB_1st", &YposB_1st);
+  simDataTree->SetBranchAddress("ZposB_1st", &ZposB_1st);
+  
   
   for(Int_t j = 0 ; j <nThbins; j++){
     for(Int_t k = 0 ; k < nPhibinsSim; k++)
@@ -1233,7 +1278,7 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
       
 	thetaA1  = ThetaA_1st;
 	thetaB1  = ThetaB_2nd;
-	thetaABS = ThetaB_1st;
+	thetaABS = ThetaA_1st;
       }
       else{ 
 	scatterArray='C'; // scattering in both
@@ -1262,9 +1307,22 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 
     if(thBin < 0) continue;      
     
+    
+
     if( (thetaABS > (thetaS - thetaSHalf) ) &&
-	(thetaABS < (thetaS + thetaSHalf) ))
+	(thetaABS < (thetaS + thetaSHalf) ) &&
+	CentralXA(XposA_1st)                &&
+	CentralYZ(YposA_1st)                &&
+	CentralYZ(ZposA_1st)                &&
+	CentralXB(XposB_1st)                &&
+	CentralYZ(YposB_1st)                &&
+	CentralYZ(ZposB_1st)                
+	)
       {
+
+//     cout << " XposA_1st = " << XposA_1st << endl;
+//     cout << " XposB_1st = " << XposB_1st << endl;
+	
 	// fill dphi=0 bin
 	if( (dPhi_1st < halfBinSize       ) || 
 	    (dPhi_1st > (360-halfBinSize) )
@@ -1272,10 +1330,14 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 	  AsymMatrix_sim[thBin][bin000] += 1;
 	
 	// fill the rest 
+	// !! applying condition that scattering is
+	// in central conditions !!
 	for (Int_t i = 1 ; i < nPhibinsSim ; i++){
-	  if( (dPhi_1st > (halfBinSize*(2*i - 1)) ) &&
-	  (dPhi_1st < (halfBinSize*(2*i + 1)) ) )
+	  if( dPhi_1st > (halfBinSize*(2*i - 1))  &&
+	      dPhi_1st < (halfBinSize*(2*i + 1))  
+	      ){
 	    AsymMatrix_sim[thBin][i] += 1;
+	  }
 	}
       }
     

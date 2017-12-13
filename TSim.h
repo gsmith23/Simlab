@@ -76,9 +76,10 @@ class TSim : public TObject{
   //==== conditions =====
   
   Bool_t GoodTheta(Float_t);
-  Bool_t CentralY(Double_t);
+  Bool_t CentralYZ(Double_t);
   Bool_t CentralZ(Double_t);
-
+  Bool_t CentralXA(Double_t);
+  Bool_t CentralXB(Double_t);
   //====================================
   // overload operator to use with TF1
   double operator() (double *v, double *p) {
