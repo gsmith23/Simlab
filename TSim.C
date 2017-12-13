@@ -1607,7 +1607,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
 	gLegTitle = "UnPolarised," + gLegTitle;
       
       if(nThetaSBins > 0.){
-	gLegTitle = gLegTitle + " #theta_{S} = %.0f^{o} (%.0f keV)";
+	gLegTitle = gLegTitle + " theta_{S} = %.0f^{o} (%.0f keV)";
 	
 	gLegTitle.Form(gLegTitle,thetaS_arr[g-1],energyS_arr[g-1]);
 	
@@ -1676,7 +1676,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
       gLegTitle = "UnPolarised," + gLegTitle;
     
     if(nThetaSBins > 0.){
-      gLegTitle = gLegTitle + " #theta_{S} = %.0f^{o} (%.0f keV)";
+      gLegTitle = gLegTitle + " theta_{S} = %.0f^{o} (%.0f keV)";
       
       gLegTitle.Form(gLegTitle,thetaS_arr[g-1],energyS_arr[g-1]);
       
