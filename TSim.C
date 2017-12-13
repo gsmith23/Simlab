@@ -509,9 +509,8 @@ Bool_t TSim::CentralXA(Double_t posXA){
   
   Bool_t centralXA = kFALSE;
   
-  // if( posXA > 0. && 
-//       posXA < 54.25 )
-    
+  if( posXA > 0. && 
+      posXA < 54.25 )
     centralXA = kTRUE;
   
   return centralXA;
@@ -521,9 +520,9 @@ Bool_t TSim::CentralXB(Double_t posXB){
   
   Bool_t centralXB = kFALSE;
   
-  // if( posXB < 0.  && 
-//       posXB > -54.25 )
-  centralXB = kTRUE;
+  if( posXB < 0.  && 
+      posXB > -54.25 )
+    centralXB = kTRUE;
   
   return centralXB;
 }
@@ -1307,18 +1306,19 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 
     if(thBin < 0) continue;      
     
-    
-
+    // scattering angle in range and
+    // hit in central crystal
     if( (thetaABS > (thetaS - thetaSHalf) ) &&
-	(thetaABS < (thetaS + thetaSHalf) ) &&
-	CentralXA(XposA_1st)                &&
-	CentralYZ(YposA_1st)                &&
-	CentralYZ(ZposA_1st)                &&
-	CentralXB(XposB_1st)                &&
-	CentralYZ(YposB_1st)                &&
-	CentralYZ(ZposB_1st)                
-	)
-      {
+	(thetaABS < (thetaS + thetaSHalf) )){
+      // { &&
+// 	CentralXA(XposA_1st)                &&
+// 	CentralYZ(YposA_1st)                &&
+// 	CentralYZ(ZposA_1st)                &&
+// 	CentralXB(XposB_1st)                &&
+// 	CentralYZ(YposB_1st)                &&
+// 	CentralYZ(ZposB_1st)                
+// 	)
+//       {
 
 //     cout << " XposA_1st = " << XposA_1st << endl;
 //     cout << " XposB_1st = " << XposB_1st << endl;
