@@ -512,7 +512,11 @@ Bool_t TSim::CentralXA(Double_t posXA){
   if( posXA > 0. && 
       posXA < 54.25 )
     centralXA = kTRUE;
-  
+
+//   if( posXA > 35. && 
+//       posXA < 45. )
+//     centralXA = kTRUE;
+
   return centralXA;
 }
 
@@ -523,6 +527,10 @@ Bool_t TSim::CentralXB(Double_t posXB){
   if( posXB < 0.  && 
       posXB > -54.25 )
     centralXB = kTRUE;
+  
+//   if( posXB < -35.  && 
+//       posXB > -45. )
+//     centralXB = kTRUE;
   
   return centralXB;
 }
@@ -1234,11 +1242,11 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
   
   // Event loop - scattering study
   
-  Float_t dPhi_1st;
+  Float_t dPhi;
   
   // thetas used in asymmetry calc
-  Float_t thetaA1  = 0.;
-  Float_t thetaB1  = 0.;
+  Float_t thetaA  = 0.;
+  Float_t thetaB  = 0.;
   // scattering angle in data
   Float_t thetaABS = 0.;
 
@@ -1248,69 +1256,83 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
     
     scatterArray = 'N';
     
-    thetaA1  = 0.;
-    thetaB1  = 0.;
+    thetaA  = 0.;
+    thetaB  = 0.;
     thetaABS = 0.;
     
-    dPhi_1st = -999.;
+    dPhi = -999.;
     
     simDataTree->GetEvent(ientry);
     
-    // scattering in A or B
-    if ( PhiA_2nd < 499. &&
-	 PhiB_1st < 499.){
+    // scattering in array A or B 
+    // or both?
+    if ( PhiA_2nd   < 499. && 
+	 ThetaA_2nd < 499. ){
+      
       scatterArray = 'A';
       
-      thetaA1  = ThetaA_2nd;
-      thetaB1  = ThetaB_1st;
+      thetaA   = ThetaA_2nd;
+      thetaB   = ThetaB_1st;
       thetaABS = ThetaA_1st;
       
-      dPhi_1st = PhiA_2nd + PhiB_1st;
+      dPhi =  PhiB_1st + PhiA_2nd;
     }
     
-    if( PhiB_2nd < 499. &&
-	PhiA_1st < 499.){
+    if( PhiB_2nd   < 499. &&
+	ThetaB_2nd < 499.){
       
-      if(scatterArray!='A'){
-	scatterArray = 'B';
-	dPhi_1st = PhiB_2nd + PhiA_1st;
-      
-	thetaA1  = ThetaA_1st;
-	thetaB1  = ThetaB_2nd;
-	thetaABS = ThetaA_1st;
+      if(scatterArray=='A'){
+	scatterArray='C'; // scattering in both
       }
       else{ 
-	scatterArray='C'; // scattering in both
+	scatterArray = 'B';
 	
-	continue; // for now
+	thetaA   = ThetaA_1st;
+	thetaB   = ThetaB_2nd;
+	thetaABS = ThetaB_1st;
+
+	dPhi = PhiB_2nd + PhiA_1st;	
       }
     }
-
+    
+    //!!!!
+    if(scatterArray=='C') {
+      thetaA   = ThetaA_2nd;
+      thetaB   = ThetaB_2nd;
+    }
+    else 
+      continue; // for now
+    
     //cout << " scatterArray = " << scatterArray << endl;
     
-    if(dPhi_1st < -900  ||
-       thetaA1 < 1.     ||
-       thetaB1 < 1.
-       )
+    if( thetaA < 1.  ||
+	thetaB < 1.
+	)
       continue;
     
-    if(dPhi_1st < 0)
-      dPhi_1st = dPhi_1st + 360; 
+    if(dPhi < 0)
+      dPhi = dPhi + 360; 
     
     Int_t thBin = -1;
     
     // theta1 == theta2 ? 
-    if (GetThetaBin(thetaA1) == GetThetaBin(thetaB1)){
-      thBin = GetThetaBin(thetaA1);
+    if (GetThetaBin(thetaA) == GetThetaBin(thetaB)){
+      thBin = GetThetaBin(thetaA);
     }
-
+    
     if(thBin < 0) continue;      
+
+    if (GetThetaBin(ThetaB_1st) != GetThetaBin(ThetaA_1st) ||
+	GetThetaBin(ThetaB_1st) == -1)
+      continue;
+      
+
     
     // scattering angle in range and
     // hit in central crystal
     if( (thetaABS > (thetaS - thetaSHalf) ) &&
 	(thetaABS < (thetaS + thetaSHalf) )){
-      // { &&
+	  // &&
 // 	CentralXA(XposA_1st)                &&
 // 	CentralYZ(YposA_1st)                &&
 // 	CentralYZ(ZposA_1st)                &&
@@ -1319,13 +1341,13 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 // 	CentralYZ(ZposB_1st)                
 // 	)
 //       {
-
+	  
 //     cout << " XposA_1st = " << XposA_1st << endl;
 //     cout << " XposB_1st = " << XposB_1st << endl;
 	
 	// fill dphi=0 bin
-	if( (dPhi_1st < halfBinSize       ) || 
-	    (dPhi_1st > (360-halfBinSize) )
+	if( (dPhi < halfBinSize       ) || 
+	    (dPhi > (360-halfBinSize) )
 	    )
 	  AsymMatrix_sim[thBin][bin000] += 1;
 	
@@ -1333,8 +1355,8 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 	// !! applying condition that scattering is
 	// in central conditions !!
 	for (Int_t i = 1 ; i < nPhibinsSim ; i++){
-	  if( dPhi_1st > (halfBinSize*(2*i - 1))  &&
-	      dPhi_1st < (halfBinSize*(2*i + 1))  
+	  if( dPhi > (halfBinSize*(2*i - 1))  &&
+	      dPhi < (halfBinSize*(2*i + 1))  
 	      ){
 	    AsymMatrix_sim[thBin][i] += 1;
 	  }
@@ -1374,7 +1396,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
   Int_t  dPhiDiff = 90;
-
+  
   Bool_t drawTheory = kFALSE;
   
   // Set Data types for files/analysis
@@ -1388,9 +1410,9 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   entangled[0] = kFALSE;
   entangled[1] = kFALSE;
   
-  // entangled[0] = kTRUE;
-  // entangled[1] = kTRUE;
-
+  entangled[0] = kTRUE;
+  entangled[1] = kTRUE;
+  
   polarised[0] = kFALSE;
   polarised[1] = kFALSE;
 
@@ -1544,8 +1566,8 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   Float_t maxY = 1.8;
   Float_t minY = 0.8;
 
-  if(entangled[0] || entangled[1])
-    maxY =  3.0;
+  // if(entangled[0] || entangled[1])
+//     maxY =  3.0;
   
   TH1F *hr;
   hr = canvas->DrawFrame(10,minY,170,maxY);
@@ -1607,7 +1629,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
 	gLegTitle = "UnPolarised," + gLegTitle;
       
       if(nThetaSBins > 0.){
-	gLegTitle = gLegTitle + " theta_{S} = %.0f^{o} (%.0f keV)";
+	gLegTitle = gLegTitle + " #theta_{S} = %.0f^{o} (%.0f keV)";
 	
 	gLegTitle.Form(gLegTitle,thetaS_arr[g-1],energyS_arr[g-1]);
 	
@@ -1676,7 +1698,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
       gLegTitle = "UnPolarised," + gLegTitle;
     
     if(nThetaSBins > 0.){
-      gLegTitle = gLegTitle + " theta_{S} = %.0f^{o} (%.0f keV)";
+      gLegTitle = gLegTitle + " #theta_{S} = %.0f^{o} (%.0f keV)";
       
       gLegTitle.Form(gLegTitle,thetaS_arr[g-1],energyS_arr[g-1]);
       
