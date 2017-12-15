@@ -1264,8 +1264,7 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
     
     simDataTree->GetEvent(ientry);
     
-    // scattering in array A or B 
-    // or both?
+    // scattering in array A
     if ( PhiA_2nd   < 499. && 
 	 ThetaA_2nd < 499. ){
       
@@ -1278,11 +1277,13 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
       dPhi =  PhiB_1st + PhiA_2nd;
     }
     
+    // scattering in array B
     if( PhiB_2nd   < 499. &&
 	ThetaB_2nd < 499.){
       
       if(scatterArray=='A'){
-	scatterArray='C'; // scattering in both
+	// scattering in both
+	scatterArray='C'; 
       }
       else{ 
 	scatterArray = 'B';
@@ -1290,18 +1291,17 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 	thetaA   = ThetaA_1st;
 	thetaB   = ThetaB_2nd;
 	thetaABS = ThetaB_1st;
-
+	
 	dPhi = PhiB_2nd + PhiA_1st;	
       }
     }
     
-    //!!!!
     if(scatterArray=='C') {
+      //scattering in both
       thetaA   = ThetaA_2nd;
       thetaB   = ThetaB_2nd;
-    }
-    else 
       continue; // for now
+    }
     
     //cout << " scatterArray = " << scatterArray << endl;
     
@@ -1322,29 +1322,16 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
     
     if(thBin < 0) continue;      
 
-    if (GetThetaBin(ThetaB_1st) != GetThetaBin(ThetaA_1st) ||
-	GetThetaBin(ThetaB_1st) == -1)
-      continue;
-      
-
+    // scattering in both
+    // if (GetThetaBin(ThetaB_1st) != GetThetaBin(ThetaA_1st) ||
+    // 	GetThetaBin(ThetaB_1st) == -1)
+    //       continue;
     
     // scattering angle in range and
     // hit in central crystal
     if( (thetaABS > (thetaS - thetaSHalf) ) &&
 	(thetaABS < (thetaS + thetaSHalf) )){
-	  // &&
-// 	CentralXA(XposA_1st)                &&
-// 	CentralYZ(YposA_1st)                &&
-// 	CentralYZ(ZposA_1st)                &&
-// 	CentralXB(XposB_1st)                &&
-// 	CentralYZ(YposB_1st)                &&
-// 	CentralYZ(ZposB_1st)                
-// 	)
-//       {
-	  
-//     cout << " XposA_1st = " << XposA_1st << endl;
-//     cout << " XposB_1st = " << XposB_1st << endl;
-	
+      
 	// fill dphi=0 bin
 	if( (dPhi < halfBinSize       ) || 
 	    (dPhi > (360-halfBinSize) )
