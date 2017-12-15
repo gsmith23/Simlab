@@ -438,9 +438,9 @@ Int_t main(int argc, char **argv){
     cout << endl;
     cout << " Calculating & Plotting Asymmetry " << endl;
     
-    Int_t   nThetaBins = 3;
+    Int_t   nThetaBins = 5;
     Float_t thetaSMin  = 10.;
-    Float_t thetaSMax  = 100.;
+    Float_t thetaSMax  = 110.;
     
     cout << endl;
     cout << "  "
