@@ -28,6 +28,7 @@ Int_t main(int argc, char **argv){
       ( strcmp(argv[1],"3")==0 && argc != 4) ||
       ( strcmp(argv[1],"4")==0 && argc != 4) ||
       ( strcmp(argv[1],"5")==0 && argc != 3) ||
+      ( strcmp(argv[1],"5")==0 && argc != 4) ||
       ( strcmp(argv[1],"6")==0 && argc != 2) ||
       ( strcmp(argv[1],"8")==0 && argc != 5) ||
       ( strcmp(argv[1],"9")==0 && argc != 3) 
