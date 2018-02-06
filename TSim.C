@@ -1397,8 +1397,8 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   entangled[0] = kFALSE;
   entangled[1] = kFALSE;
   
-  // entangled[0] = kTRUE;
-  // entangled[1] = kTRUE;
+  entangled[0] = kTRUE;
+  //  entangled[1] = kTRUE;
   
   polarised[0] = kFALSE;
   polarised[1] = kFALSE;
@@ -1605,7 +1605,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   leg->AddEntry(grAsym[0],gLegTitle,"E P");
   
-  grAsym[0]->Draw("P E");
+  grAsym[0]->Draw("P L E");
   
   // second+ file/s
   for (Int_t g = 1 ; g < nGraphs ; g++ ){
@@ -1626,7 +1626,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
       }
       
       leg->AddEntry(grAsym[g],gLegTitle,"E P");
-      grAsym[g]->Draw("same P E");
+      grAsym[g]->Draw("same P L E");
       
   }
   
