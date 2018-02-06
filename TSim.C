@@ -1398,7 +1398,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   entangled[1] = kFALSE;
   
   entangled[0] = kTRUE;
-  entangled[1] = kTRUE;
+  //  entangled[1] = kTRUE;
   
   polarised[0] = kFALSE;
   polarised[1] = kFALSE;
@@ -1553,8 +1553,11 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   Float_t maxY = 1.8;
   Float_t minY = 0.8;
 
-  // if(entangled[0] || entangled[1])
-//     maxY =  3.0;
+  if( entangled[0] || 
+      entangled[1]){
+    minY =   0.0;
+    maxY =   3.5;
+  }
   
   TH1F *hr;
   hr = canvas->DrawFrame(10,minY,170,maxY);
@@ -1602,7 +1605,7 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   leg->AddEntry(grAsym[0],gLegTitle,"E P");
   
-  grAsym[0]->Draw("P E");
+  grAsym[0]->Draw("P L E");
   
   // second+ file/s
   for (Int_t g = 1 ; g < nGraphs ; g++ ){
@@ -1616,14 +1619,14 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
 	gLegTitle = "UnPolarised," + gLegTitle;
       
       if(nThetaSBins > 0.){
-	gLegTitle = gLegTitle + " #theta_{S} = %.0f^{o} (%.0f keV)";
-	
-	gLegTitle.Form(gLegTitle,thetaS_arr[g-1],energyS_arr[g-1]);
+	gLegTitle.Form(gLegTitle + " #theta_{S} = %.0f^{o} (%.0f keV)",
+		       thetaS_arr[g-1],
+		       energyS_arr[g-1]);
 	
       }
       
       leg->AddEntry(grAsym[g],gLegTitle,"E P");
-      grAsym[g]->Draw("same P E");
+      grAsym[g]->Draw("same P L E");
       
   }
   
@@ -1648,10 +1651,13 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   leg->Clear();
   
-  maxY = 0.2;
+  maxY =  0.3;
   minY = -0.3;
-  if(entangled[0])
+  if(entangled[0] ||
+     entangled[1]){
+    maxY =  0.5;
     minY = -0.5;
+  }
   
   hr = canvas->DrawFrame(10,minY,170,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
@@ -1685,9 +1691,9 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
       gLegTitle = "UnPolarised," + gLegTitle;
     
     if(nThetaSBins > 0.){
-      gLegTitle = gLegTitle + " #theta_{S} = %.0f^{o} (%.0f keV)";
       
-      gLegTitle.Form(gLegTitle,thetaS_arr[g-1],energyS_arr[g-1]);
+      gLegTitle.Form(gLegTitle + " #theta_{S} = %.0f^{o} (%.0f keV)",
+		     thetaS_arr[g-1],energyS_arr[g-1]);
       
     }
     
@@ -1695,7 +1701,6 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
     //grA[g]->Draw("same P E");
     //grB[g]->Draw("same P E");
     grC[g]->Draw("same L P");
-    
     
   }
   
