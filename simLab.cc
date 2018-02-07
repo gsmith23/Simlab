@@ -307,9 +307,11 @@ Int_t main(int argc, char **argv){
     cout << " Analysing : " << argv[2] << endl;
     
     TSim * simData = new TSim(argv[2]);
-    
+
     Char_t sort = 'n';
     cout << endl;
+    cout << " Sorting ROOT file " << endl;
+    
     cout << " Sort/Re-sort ROOT file ? " << endl;
     cout << " n (default)/ y " << endl;
     cout << " ";
@@ -319,7 +321,7 @@ Int_t main(int argc, char **argv){
       
       cout << endl;
       cout << " Sorting data " << endl;
-	
+      
       simData->SortEvents(argv[2]);
     }
     
