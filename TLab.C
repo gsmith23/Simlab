@@ -952,7 +952,7 @@ void TLab::GraphAsymmetry(Char_t option){
   // lab data:  90 e.g corresponds to 
   // A(90) = P(90)/P(0) 
   //!!!!
-  Int_t   dPhiDiff = 180;
+  Int_t   dPhiDiff = 90;
 
   Float_t  phi[nPhiBins];
 
