@@ -279,7 +279,11 @@ Int_t  TSim::SortEvents(TString fileNumber){
   
   Double_t HWHM = 25.; //average from lab data
 
-  //energy resolution coefficient k, such thatt sigma(Energy) = k*Sqrt(Energy)
+  // energy resolution coefficient k 
+  // such that sigma(Energy) = k*Sqrt(Energy)
+  // sigma = DeltaE_511 / sqrt(511) * 1 / (2sqrt(2ln2)
+  // IE: k = DeltaE_511 / sqrt(511) = 25/sqrt(511)
+  
   for (Int_t i = 0; i < nCrystals; i++){
     sigmaA[i] = HWHM/(Sqrt(2*Log(2.)*511));
     sigmaB[i] = HWHM/(Sqrt(2*Log(2.)*511));
@@ -418,6 +422,8 @@ Int_t  TSim::SortEvents(TString fileNumber){
 
     for (Int_t j = 0 ; j < nCrystals ; j++){
       
+      // sigmaE = sigma511 * sqrt( E / 511) 
+      
       EA[j] = rand->Gaus(CrystEnergyDep[j],sigmaA[j]*Sqrt(CrystEnergyDep[j]));
       EB[j] = rand->Gaus(CrystEnergyDep[j+nCrystals], sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals]));
       
@@ -440,7 +446,7 @@ Int_t  TSim::SortEvents(TString fileNumber){
 
       nb_ComptA[j] = nb_Compt[j];
       nb_ComptB[j] = nb_Compt[j + nCrystals];
-
+      
       XposA[j] = XposA_1st;
       YposA[j] = YposA_1st;
       ZposA[j] = ZposA_1st;
@@ -843,7 +849,9 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	   CentralYZ(YposB[4])    && 
 	   CentralYZ(ZposB[4])    &&
 	   nb_ComptA[4] == 1.     && 
-	   nb_ComptB[4] == 1. ){
+	   nb_ComptB[4] == 1.     &&
+	   EA[4] > 60.            &&
+	   EB[4] > 60. ){
 	
 	if (phiDiff == 0.)
 	  AsymTrue[thBin][0] += 1;
