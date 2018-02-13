@@ -37,6 +37,8 @@ class TSim : public TObject{
 				       Float_t);
   
   void CalculateABC();
+  void CalculateABC_Lab();
+  void CalculateABC_True();
   
   Int_t GraphAsymmetrySim(TString, 
 			  TString, 
@@ -139,7 +141,7 @@ class TSim : public TObject{
   Int_t bin090 = nPhibinsSim*1/4;
   Int_t bin180 = nPhibinsSim*2/4;
   Int_t bin270 = nPhibinsSim*3/4;
-  
+
   Double_t XposA[nCrystals];
   Double_t YposA[nCrystals];
   Double_t ZposA[nCrystals];
@@ -166,12 +168,30 @@ class TSim : public TObject{
   Float_t pA[nThbins];
   Float_t pB[nThbins];
   Float_t pC[nThbins];
+  
+  Float_t fABC_Lab[nThbins][3];
+  Float_t pABC_Lab[nThbins][3];
+  Float_t pA_Lab[nThbins];
+  Float_t pB_Lab[nThbins];
+  Float_t pC_Lab[nThbins];
+
+  Float_t fABC_True[nThbins][3];
+  Float_t pABC_True[nThbins][3];
+  Float_t pA_True[nThbins];
+  Float_t pB_True[nThbins];
+  Float_t pC_True[nThbins];
 
   Int_t n000;
   Int_t n090;
   Int_t n180;
   Int_t n270;
 
+  Double_t P_lab[nThbins];
+  Double_t Pq_lab[nThbins];
+
+  Double_t P_true_lab[nThbins];
+  Double_t Pq_true_lab[nThbins];
+  
   Double_t sigmaA[nCrystals];
   Double_t sigmaB[nCrystals];
   
