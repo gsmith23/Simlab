@@ -1232,7 +1232,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   grB_True->Draw("L P same");
   
   plotName = "../Plots/B_coeff_";
-  plotName = plotName + inputFileNumber;
+  plotName = plotName + inputFileNumber1;
   plotName = plotName + ".pdf";
     
   canvas->SaveAs(plotName);
@@ -1251,7 +1251,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   grC_True->Draw("L P same");
   
   plotName = "../Plots/C_coeff_";
-  plotName = plotName + inputFileNumber;
+  plotName = plotName + inputFileNumber1;
   plotName = plotName + ".pdf";
     
   canvas->SaveAs(plotName);
