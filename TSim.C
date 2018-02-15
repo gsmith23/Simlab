@@ -935,14 +935,14 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   cout<<plotTheta[6]<<" - "<<AsymTrue[6][0]<<" - "<<AsymTrue[6][1]<<" - "<<AsymTrue[6][2]<<" - "<<AsymTrue[6][3]<<endl;
   cout<<plotTheta[7]<<" - "<<AsymTrue[7][0]<<" - "<<AsymTrue[7][1]<<" - "<<AsymTrue[7][2]<<" - "<<AsymTrue[7][3]<<endl;
 
-  for(Int_t j = 0 ; j < nThbins; j++){ 
-    cout << endl;
-    cout << " bin            = " << j              << endl;
-    cout << " P_lab[j]       = " << P_lab[j]       << endl;
-    cout << " Pq_lab[j]      = " << Pq_lab[j]      << endl;
-    cout << " P_true_lab[j]  = " << P_true_lab[j]  << endl;
-    cout << " Pq_true_lab[j] = " << Pq_true_lab[j] << endl;
-  }
+  // for(Int_t j = 0 ; j < nThbins; j++){ 
+//     cout << endl;
+//     cout << " bin            = " << j              << endl;
+//     cout << " P_lab[j]       = " << P_lab[j]       << endl;
+//     cout << " Pq_lab[j]      = " << Pq_lab[j]      << endl;
+//     cout << " P_true_lab[j]  = " << P_true_lab[j]  << endl;
+//     cout << " Pq_true_lab[j] = " << Pq_true_lab[j] << endl;
+//   }
   
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				  10,10,1200,800);
@@ -1010,13 +1010,16 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
     pC_True[i] = pABC_True[i][2];
   }
  
-  //TGraphErrors *grC[nGraphs];
+  TGraphErrors *grB_Lab;
   TGraphErrors *grC_Lab;
+  TGraphErrors *grB_True;
   TGraphErrors *grC_True;
-  //grC_Lab[g]    = new TGraphErrors(nThbins,plotTheta,pC_Lab,0,0);
-  grC_Lab    = new TGraphErrors(nThbins,plotTheta,pC_Lab,0,0);
+  
+  grB_Lab     = new TGraphErrors(nThbins,plotTheta,pB_Lab,0,0);
+  grC_Lab     = new TGraphErrors(nThbins,plotTheta,pC_Lab,0,0);
+  grB_True    = new TGraphErrors(nThbins,plotTheta,pB_True,0,0);
   grC_True    = new TGraphErrors(nThbins,plotTheta,pC_True,0,0);
-
+  
   //Calculating ratios for desired dPhiDiff
   Float_t AsPhiDiff[nThbins] = {0.};
   Float_t AePhiDiff[nThbins] = {0.};
@@ -1154,28 +1157,46 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   // ------------------------------------------------
   //  Fourier Coefficients Graph
 
-  
   leg->Clear();
   
-  maxY =  0.8;
-  Float_t minY = -0.8;
+  maxY =  1.0;
+  Float_t minY = -1.2;
+    
+  hr = canvas->DrawFrame(10,minY,170,maxY);
+  hr->GetXaxis()->SetTitle("#theta (deg)");
+  hr->GetYaxis()->SetTitle("cos(#Delta#phi) coefficient");
+  hr->GetYaxis()->SetTitleOffset(0.7);
+
+  grB_Lab->Draw("L P");
+  
+  grB_True->SetLineColor(kGreen);
+  grB_True->Draw("L P same");
+  
+  plotName = "../Plots/B_coeff_";
+  plotName = plotName + inputFileNumber;
+  plotName = plotName + ".pdf";
+    
+  canvas->SaveAs(plotName);
+  
+  maxY =  0.6;
+  minY = -0.4;
     
   hr = canvas->DrawFrame(10,minY,170,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   hr->GetYaxis()->SetTitle("cos(2#Delta#phi) coefficient");
   hr->GetYaxis()->SetTitleOffset(0.7);
-
+  
   grC_Lab->Draw("L P");
   
   grC_True->SetLineColor(kGreen);
   grC_True->Draw("L P same");
   
-  plotName = "../Plots/FourierCoeffs_";
+  plotName = "../Plots/C_coeff_";
   plotName = plotName + inputFileNumber;
   plotName = plotName + ".pdf";
     
   canvas->SaveAs(plotName);
-
+  
 }
 //-----------------------------------------------------------------------
 
