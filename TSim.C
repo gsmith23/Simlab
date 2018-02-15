@@ -987,10 +987,14 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
   Int_t inputFileInt1 = inputFileNumber1.Atoi();
   
+  Int_t inputFileInt2 = 0;
+  
   Int_t nFiles = 2;
 
   if(inputFileNumber2=="??")
     nFiles = 1;
+  else 
+    inputFileInt2 = inputFileNumber2.Atoi();
   
   cout << "  " << nFiles << " Files " << endl;
 
@@ -1198,7 +1202,11 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   Char_t plotN[128];
   Char_t yAxis[128];
   
-  sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
+  if(nFiles==1)
+    sprintf(yAxis,"N(%d^{o})/N(0^{o})",dPhiDiff);
+  else if(nFiles == 2)
+    sprintf(yAxis,"N^{E}(%d^{o})/N^{E}(0^{o}) * N^{U}(0^{o})/N^{U}(%d^{o}) ",dPhiDiff,dPhiDiff);
+  
   hr->GetYaxis()->SetTitle(yAxis);
   leg->AddEntry(grAsym[1],
 		  theoryLegendTitle,"L P");
@@ -1209,7 +1217,10 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   grAsym[2]->Draw("P E");
   leg->Draw();
 
-  sprintf(plotN,"../Plots/A_%d_%d.pdf",inputFileInt1,dPhiDiff);
+  if     (nFiles==1)
+    sprintf(plotN,"../Plots/A_%d_%d.pdf",inputFileInt1,dPhiDiff);
+  else if(nFiles==2)
+    sprintf(plotN,"../Plots/A_%d_%d_%d.pdf",inputFileInt1,inputFileInt2,dPhiDiff);
   
   canvas->SaveAs(plotN);
 
