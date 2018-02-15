@@ -583,14 +583,14 @@ Float_t TSim::CrystalToPhi(Int_t crystal){
   return phi;
 }
 
-void TSim::SetAsymmetry(TString inputFileNumber){
+// void TSim::SetAsymmetry(TString inputFileNumber){
   
-  cout << endl;
-  cout << " Setting asymmetry " << endl;
+//   cout << endl;
+//   cout << " Setting asymmetry " << endl;
   
-  this->CalculateAsymmetryLab(inputFileNumber);
+//   this->CalculateAsymmetryLab(inputFileNumber);
   
-}
+// }
 
 Float_t TSim::GetAsymLab(Int_t dPhiDiff, Int_t i){
 
@@ -972,19 +972,30 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   return 0;
 }
 
-void TSim::GraphAsymmetryLab(TString inputFileNumber){
+void TSim::GraphAsymmetryLab(TString inputFileNumber1,
+			     TString inputFileNumber2) {
   
-  // Calculate Asymmetry Lab done in
-  // simlab.cc
-
-  GetThetaBinValues();
+  cout << endl;
+  cout << "--------------------- " << endl;
+  cout << "  GraphAsymmetryLab   " << endl;
+  
+  // GetThetaBinValues() is implemented in
+  // CalculateAsymmetryLab
+  CalculateAsymmetryLab(inputFileNumber1);
 
   this->SetStyle();
 
-  Int_t inputFileInt = inputFileNumber.Atoi();
+  Int_t inputFileInt1 = inputFileNumber1.Atoi();
   
+  Int_t nFiles = 2;
+
+  if(inputFileNumber2=="??")
+    nFiles = 1;
+  
+  cout << "  " << nFiles << " Files " << endl;
+
   TString plotName;
-  plotName = "../Plots/Asym_" + inputFileNumber;
+  plotName = "../Plots/Asym_" + inputFileNumber1;
 
   plotName = plotName + ".pdf";
 
@@ -1024,47 +1035,87 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   Float_t AsTrue[nThbins] = {0.};
   Float_t AeTrue[nThbins] = {0.};
 
+  Float_t AsPhiDiff1[nThbins] = {0.};
+  Float_t AePhiDiff1[nThbins] = {0.};
+  Float_t AsPhiDiffR[nThbins] = {0.};
+  Float_t AePhiDiffR[nThbins] = {0.};
+
+  Float_t AsTrue1[nThbins] = {0.};
+  Float_t AeTrue1[nThbins] = {0.};
+  Float_t AsTrueR[nThbins] = {0.};
+  Float_t AeTrueR[nThbins] = {0.};
   
-  for (Int_t i = 0 ; i < nThbins ; i++){
-    if (AsymMatrix[i][0] != 0){
-      if (dPhiDiff  == 90){
-	AsPhiDiff[i] = AsymMatrix[i][1]/AsymMatrix[i][0];
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
-	//using average 90 and 270
-	AsPhiDiff[i] = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
-      }
-      if (dPhiDiff  == 180){
-	AsPhiDiff[i] = AsymMatrix[i][2]/AsymMatrix[i][0];
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][2])+(1/AsymMatrix[i][0]));
-      }
-      if (dPhiDiff  == 270){
-	AsPhiDiff[i] = AsymMatrix[i][3]/AsymMatrix[i][0];
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][3])+(1/AsymMatrix[i][0]));
-      }
-    }
-  }
 
-  for (Int_t i = 0 ; i < nThbins ; i++){
-    if (AsymTrue[i][0] != 0){
-      if (dPhiDiff  == 90){
-	AsTrue[i] = AsymTrue[i][1]/AsymTrue[i][0];
-	AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][1])+(1/AsymTrue[i][0]));
-	//using average 90 and 270
-	AsTrue[i] = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
-	AeTrue[i] = AsTrue[i]*Sqrt((1/(AsymTrue[i][1]+AsymTrue[i][3]))+(1/AsymTrue[i][0]));
-      }
-      if (dPhiDiff  == 180){
-	AsTrue[i] = AsymTrue[i][2]/AsymTrue[i][0];
-	AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][2])+(1/AsymTrue[i][0]));
-      }
-      if (dPhiDiff  == 270){
-	AsTrue[i] = AsymTrue[i][3]/AsymTrue[i][0];
-	AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][3])+(1/AsymTrue[i][0]));
-      }
-    }
-  }
+  for (Int_t file = 0 ; file < nFiles ; file++){
+    
+    if (file==1)
+      CalculateAsymmetryLab(inputFileNumber2);
 
+    for (Int_t i = 0 ; i < nThbins ; i++){
+      if (AsymMatrix[i][0] != 0){
+	if (dPhiDiff  == 90){
+	  AsPhiDiff[i] = AsymMatrix[i][1]/AsymMatrix[i][0];
+	  AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
+	  //using average 90 and 270
+	  AsPhiDiff[i] = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
+	  AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
+	}
+	if (dPhiDiff  == 180){
+	  AsPhiDiff[i] = AsymMatrix[i][2]/AsymMatrix[i][0];
+	  AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][2])+(1/AsymMatrix[i][0]));
+	}
+	if (dPhiDiff  == 270){
+	  AsPhiDiff[i] = AsymMatrix[i][3]/AsymMatrix[i][0];
+	  AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][3])+(1/AsymMatrix[i][0]));
+	}
+      }
+    
+      if     (file==0){
+	AsPhiDiff1[i] = AsPhiDiff[i];
+	AePhiDiff1[i] = AePhiDiff[i];
+	
+      }
+      else if(file==1){
+	AsPhiDiffR[i] = AsPhiDiff1[i]/AsPhiDiff[i] ;
+	AePhiDiffR[i] = Sqrt(AePhiDiff[i]*AePhiDiff[i] + AePhiDiff1[i]*AePhiDiff1[i]);
+      }
+         
+    
+    }
+    
+    for (Int_t i = 0 ; i < nThbins ; i++){
+      if (AsymTrue[i][0] != 0){
+	if (dPhiDiff  == 90){
+	  AsTrue[i] = AsymTrue[i][1]/AsymTrue[i][0];
+	  AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][1])+(1/AsymTrue[i][0]));
+	  //using average 90 and 270
+	  AsTrue[i] = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
+	  AeTrue[i] = AsTrue[i]*Sqrt((1/(AsymTrue[i][1]+AsymTrue[i][3]))+(1/AsymTrue[i][0]));
+	}
+	if (dPhiDiff  == 180){
+	  AsTrue[i] = AsymTrue[i][2]/AsymTrue[i][0];
+	  AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][2])+(1/AsymTrue[i][0]));
+	}
+	if (dPhiDiff  == 270){
+	  AsTrue[i] = AsymTrue[i][3]/AsymTrue[i][0];
+	  AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][3])+(1/AsymTrue[i][0]));
+	}
+      }
+    
+      if     (file==0){
+	AsTrue1[i] = AsTrue[i];
+	AeTrue1[i] = AeTrue[i];
+	
+      }
+      else if(file==1){
+	AsTrueR[i] = AsTrue1[i]/AsTrue[i] ;
+	AeTrueR[i] = Sqrt(AeTrue[i]*AeTrue[i] + AeTrue1[i]*AeTrue1[i]);
+      }
+      
+    } // end of: for (Int_t i = 0 ; i < nThbins ...
+  
+  } //end of: for (Int_t file = 0 ; 
+  
   //theory curve
   Float_t aTheory[nThbins];
 
@@ -1110,14 +1161,22 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   hr->GetXaxis()->SetTitle("#theta (deg)");
 
   TGraphErrors *grAsym[3];
-  grAsym[0] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+  
+  if     (nFiles==1)
+    grAsym[0] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+  else if(nFiles == 2)
+    grAsym[0] = new TGraphErrors(nThbins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+  
   grAsym[1] = new TGraphErrors(nThbins,plotTheta,aTheory,0,0);
 
   for(Int_t i = 0; i < nThbins; i++)
     plotTheta[i] += 2.;
 
-  grAsym[2] = new TGraphErrors(nThbins,plotTheta,AsTrue,0,AeTrue);
-  
+  if     (nFiles==1)
+    grAsym[2] = new TGraphErrors(nThbins,plotTheta,AsTrue,0,AeTrue);
+  else if(nFiles == 2)
+    grAsym[2] = new TGraphErrors(nThbins,plotTheta,AsTrueR,0,AeTrueR);
+
   grAsym[0]->SetLineColor(kGreen+2.7);
   grAsym[0]->SetMarkerColor(kGreen+2.7);
   grAsym[1]->SetLineColor(kRed);
@@ -1147,7 +1206,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   grAsym[2]->Draw("P E");
   leg->Draw();
 
-  sprintf(plotN,"../Plots/A_%d_%d.pdf",inputFileInt,dPhiDiff);
+  sprintf(plotN,"../Plots/A_%d_%d.pdf",inputFileInt1,dPhiDiff);
   
   canvas->SaveAs(plotN);
 
@@ -1171,11 +1230,15 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber){
   grC_True->Draw("L P same");
   
   plotName = "../Plots/FourierCoeffs_";
-  plotName = plotName + inputFileNumber;
+  plotName = plotName + inputFileNumber1;
   plotName = plotName + ".pdf";
     
   canvas->SaveAs(plotName);
 
+  cout << "  GraphAsymmetryLab   " << endl;
+  cout << "--------------------- " << endl;
+  cout << endl;
+  
 }
 //-----------------------------------------------------------------------
 
@@ -1574,12 +1637,17 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 } //end of CalculateAsymmetrySimScattered
 
 
-Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
-			      TString inputFileNumber2,
-			      Int_t   nThetaSBins,
-			      Float_t thetaSMin,
-			      Float_t thetaSMax			      
-			      ){
+void TSim::GraphAsymmetrySim(TString inputFileNumber1,
+			     TString inputFileNumber2,
+			     Int_t   nThetaSBins,
+			     Float_t thetaSMin,
+			     Float_t thetaSMax			      
+			     ){
+  
+  cout << "-------------------" << endl;
+  cout << " GraphAsymmetrySim " << endl;
+  cout << "                   " << endl;
+
   this->SetStyle();
   
   // The ratio to be calculated for the
@@ -1616,6 +1684,12 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   Float_t AsPhiDiff[nThbins] = {0.};
   Float_t AePhiDiff[nThbins] = {0.};
   
+  Float_t AsPhiDiff1[nThbins] = {0.};
+  Float_t AePhiDiff1[nThbins] = {0.};
+
+  Float_t AsPhiDiffR[nThbins] = {0.};
+  Float_t AePhiDiffR[nThbins] = {0.};
+  
   Int_t inputFileInt1 = inputFileNumber1.Atoi();
   Int_t inputFileInt2 = inputFileNumber2.Atoi();
   
@@ -1643,9 +1717,12 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
     nGraphs = nThetaSBins + 1;
   
   TGraphErrors *grAsym[nGraphs];
+  TGraphErrors *grAsymR;
+  
   TGraphErrors *grA[nGraphs];
   TGraphErrors *grB[nGraphs];
   TGraphErrors *grC[nGraphs];
+  
   
   for (Int_t g = 0 ; g < nGraphs ; g++){
     
@@ -1672,8 +1749,6 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
     
     // To Do:
     //CalculateABC_Err()
-    
-    //Float_t pC[nThbins];
     
     for (Int_t i = 0 ; i < nThbins ; i++){
       pA[i] = pABC[i][0];
@@ -1713,20 +1788,38 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
 	AePhiDiff[i] = AePhiDiff[i] + 1./AsymMatrix_sim[i][0];
 	AePhiDiff[i] = AsPhiDiff[i]*Sqrt(AePhiDiff[i]);
       }	
+      
+      if(nThetaSBins==0){
+	if     (g == 0){
+	  AsPhiDiff1[i] = AsPhiDiff[i];
+	  AePhiDiff1[i] = AePhiDiff[i];
+	}
+	else if(g == 1){
+	  AsPhiDiffR[i] = AsPhiDiff1[i]/AsPhiDiff[i];
+	  AePhiDiffR[i] = Sqrt(AePhiDiff[i]*AePhiDiff[i] + AePhiDiff1[i]*AePhiDiff1[i]);
+	}
+      }
+      
     } // end of: for (Int_t i = 0 ; i < nThbins ; i+ 
     
     
-    
     grAsym[g] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+    
+    if(g==1)
+      grAsymR   = new TGraphErrors(nThbins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+    
     grA[g]    = new TGraphErrors(nThbins,plotTheta,pA,0,0);
     grB[g]    = new TGraphErrors(nThbins,plotTheta,pB,0,0);
     grC[g]    = new TGraphErrors(nThbins,plotTheta,pC,0,0);
     
-  }
+  } //end of : for (Int_t g = 0 ; g < nGr
   
   for( Int_t g = 0 ; g < nGraphs ; g++ ){
     grAsym[g]->SetLineColor( g+1 );
     grAsym[g]->SetMarkerColor( g+1 );
+
+    grAsymR->SetLineColor( g+1 );
+    grAsymR->SetMarkerColor( g+1 );
     
     grA[g]->SetLineColor( g+1 );
     grA[g]->SetLineStyle( g );
@@ -1749,7 +1842,10 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
   
   Char_t theoryLegendTitle[128];
-  Char_t plotN[128];
+  
+  Char_t  plotN[128];
+  TString plotName;
+  
   Char_t yAxis[128];
   
   alpha1 = RadToDeg()*alpha1;
@@ -1852,6 +1948,27 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   canvas->SaveAs(plotN);
   
+  //-----------------------------------------------------------------
+  // Graphing Ratio of Asymms for Entangled,Polarised to Unpolarised
+  
+  leg->Clear();
+  //leg->AddEntry(grAsymR,gLegTitle,"E P");
+  
+  hr = canvas->DrawFrame(10,minY,170,maxY);
+  hr->GetXaxis()->SetTitle("#theta (deg)");
+  sprintf(yAxis,"A^{E,P}/A^{E,U} #Delta #phi = %d",dPhiDiff);
+  hr->GetYaxis()->SetTitle(yAxis);
+  hr->GetYaxis()->SetTitleOffset(0.7);
+  
+  grAsymR->Draw("P L E");
+
+  plotName =  "../Plots/A_" + inputFileNumber1;
+  plotName += "_";
+  plotName += inputFileNumber2;
+  plotName += ".pdf";
+  
+  canvas->SaveAs(plotName);
+  
   // ------------------------------------------------
   //  Fourier Coefficients Graph
   
@@ -1922,7 +2039,9 @@ Int_t TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   canvas->SaveAs(plotN);
   
-  return 0;
+  cout << "                   " << endl;
+  cout << " GraphAsymmetrySim " << endl;
+  cout << "-------------------" << endl;
  
 }//end of GraphAsymmetrySim
 

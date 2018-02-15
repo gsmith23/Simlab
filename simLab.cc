@@ -22,14 +22,17 @@ Int_t main(int argc, char **argv){
   // check that the program is exectued with the correct
   // arguments and give examples if it is not
   if( ( argc < 2 ) || ( argc > 6 ) ||
-      ( strcmp(argv[1],"0")==0 && argc != 3) ||
-      ( strcmp(argv[1],"1")==0 && argc != 3) ||
-      ( strcmp(argv[1],"2")==0 && argc != 3) ||
-      ( strcmp(argv[1],"3")==0 && argc != 4) ||
-      ( strcmp(argv[1],"4")==0 && argc != 4) ||
-      ( strcmp(argv[1],"5")==0 && argc != 3) ||
-      ( strcmp(argv[1],"6")==0 && argc != 2) ||
-      ( strcmp(argv[1],"8")==0 && argc != 5) ||
+      ( strcmp(argv[1],"0")==0 && argc != 3)     ||
+      ( strcmp(argv[1],"1")==0 && argc != 3)     ||
+      (
+       ( strcmp(argv[1],"2")==0 && argc != 3) &&
+       ( strcmp(argv[1],"2")==0 && argc != 4) 
+       )                                         ||
+      ( strcmp(argv[1],"3")==0 && argc != 4)     ||
+      ( strcmp(argv[1],"4")==0 && argc != 4)     ||
+      ( strcmp(argv[1],"5")==0 && argc != 3)     ||
+      ( strcmp(argv[1],"6")==0 && argc != 2)     ||
+      ( strcmp(argv[1],"8")==0 && argc != 5)     ||
       ( strcmp(argv[1],"9")==0 && argc != 3) 
       ) {
     
@@ -60,12 +63,13 @@ Int_t main(int argc, char **argv){
     cout <<                                              endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
-    cout << " Option 2 - one further argument       " << endl; 
-    cout << " simulated data file number            " << endl;
+    cout << " Option 2 - one/two further arguments  " << endl; 
+    cout << " simulated data file number/s          " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
-    cout << " Example:                              " << endl; 
-    cout << " ./simLab 2 2                          " << endl;
+    cout << " Examples:                             " << endl; 
+    cout << " ./simLab 2 1                          " << endl;
+    cout << " ./simLab 2 1 2                        " << endl;
     cout << " ------------------------------------- " << endl;
     cout <<                                              endl;
     cout << " ------------------------------------- " << endl;
@@ -301,7 +305,7 @@ Int_t main(int argc, char **argv){
     cout << "     | simulation lab analysis |" << endl; 
     cout << "     ---------------------------" << endl; 
     cout << endl;
-
+    
     cout << endl;
     cout << " Analysing : " << argv[2] << endl;
     
@@ -327,9 +331,13 @@ Int_t main(int argc, char **argv){
     cout << endl;
     cout << " Calculating & Plotting Asymmetry " << endl;
     
-    simData->CalculateAsymmetryLab(argv[2]);
-    simData->GraphAsymmetryLab(argv[2]);
-        
+    //simData->CalculateAsymmetryLab(argv[2]);
+    
+    if     (argc==3)
+       simData->GraphAsymmetryLab(argv[2],"??");
+    else if(argc==4)
+      simData->GraphAsymmetryLab(argv[2],argv[3]);
+    
     delete simData;
   
   }/////////////////////////////////////////////////////////////////

@@ -40,14 +40,15 @@ class TSim : public TObject{
   void CalculateABC_Lab();
   void CalculateABC_True();
   
-  Int_t GraphAsymmetrySim(TString, 
-			  TString, 
-			  Int_t   nThSBins = 0,
-			  Float_t thSMin = 0.,
-			  Float_t thSMax = 0.);
-    
+  void GraphAsymmetrySim(TString, 
+			 TString, 
+			 Int_t   nThSBins = 0,
+			 Float_t thSMin = 0.,
+			 Float_t thSMax = 0.);
+  
   Int_t CalculateAsymmetryLab(TString);
-  void  GraphAsymmetryLab(TString);
+  void  GraphAsymmetryLab(TString,
+			  TString file2);
   
   //==================================
     
@@ -92,7 +93,7 @@ class TSim : public TObject{
   }
 
 
-  void SetAsymmetry(TString);
+  //void SetAsymmetry(TString);
   
   //Float_t GetAsymm(Int_t bin){
   //  return 0 /*asymmCr90[bin]*/;
