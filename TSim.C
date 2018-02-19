@@ -458,13 +458,13 @@ Int_t  TSim::SortEvents(TString fileNumber){
       YposB[j] = YposB_1st;
       ZposB[j] = ZposB_1st;
 
-
     }
     
     etHA[4] = ElectronEnergyToTheta(CrystEnergyDep[4]);
     etHB[4] = ElectronEnergyToTheta(CrystEnergyDep[13]);
     ltHA[4] = ElectronEnergyToTheta(EA[4]);
     ltHB[4] = ElectronEnergyToTheta(EB[4]);
+    
     maxtHAErr[4] = ElectronEnergyToTheta(CrystEnergyDep[4] + (sigmaPar*sigmaA[4]*Sqrt(CrystEnergyDep[4])));
     mintHAErr[4] = ElectronEnergyToTheta(CrystEnergyDep[4] - (sigmaPar*sigmaA[4]*Sqrt(CrystEnergyDep[4])));
     maxtHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] + (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));
@@ -582,15 +582,6 @@ Float_t TSim::CrystalToPhi(Int_t crystal){
 
   return phi;
 }
-
-// void TSim::SetAsymmetry(TString inputFileNumber){
-  
-//   cout << endl;
-//   cout << " Setting asymmetry " << endl;
-  
-//   this->CalculateAsymmetryLab(inputFileNumber);
-  
-// }
 
 Float_t TSim::GetAsymLab(Int_t dPhiDiff, Int_t i){
 
@@ -1084,7 +1075,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
       }
       else if(file==1){
 	AsPhiDiffR[i] = AsPhiDiff1[i]/AsPhiDiff[i] ;
-	AePhiDiffR[i] = Sqrt(AePhiDiff[i]*AePhiDiff[i] + AePhiDiff1[i]*AePhiDiff1[i]);
+	
+	AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + AePhiDiff1[i]*AePhiDiff1[i]/(AsPhiDiff1[i]*AsPhiDiff1[i]));
+	//AePhiDiffR[i] = Sqrt(AePhiDiff[i]*AePhiDiff[i] + AePhiDiff1[i]*AePhiDiff1[i]);
       }
          
     
@@ -1116,7 +1109,8 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
       }
       else if(file==1){
 	AsTrueR[i] = AsTrue1[i]/AsTrue[i] ;
-	AeTrueR[i] = Sqrt(AeTrue[i]*AeTrue[i] + AeTrue1[i]*AeTrue1[i]);
+	
+	AeTrueR[i] = AsTrueR[i] * Sqrt( AeTrue[i]*AeTrue[i]/(AsTrue[i]*AsTrue[i]) + AeTrue1[i]*AeTrue1[i]/(AsTrue1[i]*AsTrue1[i]));
       }
       
     } // end of: for (Int_t i = 0 ; i < nThbins ...
@@ -1161,9 +1155,14 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   
   Float_t maxY = 3.0;
 
-  if(dPhiDiff==180)
+  if(dPhiDiff==180){
     maxY = 6.0;
+    if(nFiles==2){
+	maxY = 2.0;
+      }
+  }
   
+   
   hr = canvas->DrawFrame(10,0.5,170,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
 

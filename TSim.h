@@ -93,16 +93,6 @@ class TSim : public TObject{
   }
 
 
-  //void SetAsymmetry(TString);
-  
-  //Float_t GetAsymm(Int_t bin){
-  //  return 0 /*asymmCr90[bin]*/;
-  // }
-  
-  // Float_t GetAsymErr(Int_t bin){
-  // return 0 /* asyerCr90[bin]*/;
-  //}
-  
   //======================
   //======================
   //==== Data Members ====

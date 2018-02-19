@@ -980,6 +980,7 @@ void TLab::GraphAsymmetry(Char_t option){
   // half resolution in theta
 
   Float_t semiSpan = thetaBinWidth/2.*DegToRad();
+  //Float_t semiSpan = thetaBinWidth/2.*DegToRad()*4.;
   
   cout << endl;
   cout << " semiSpan = " << semiSpan*RadToDeg() << endl;
@@ -993,14 +994,17 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimE[nThBins]={0};
   Float_t aSimTrue[nThBins]={0};
   Float_t aSimTrueE[nThBins]={0};
+  Float_t AsPhiDiffR[nThBins]={0};
+  Float_t AePhiDiffR[nThBins]={0};
 
-  // lab only
+  //  lab calculation (not theory only)
   if( option!='t' && option!='T'){
     
     cout << endl;
     cout << " Calculating asymmetry values and " << endl;
     cout << " associated errors for lab data ... " << endl;
-      
+    
+    //!!
     CalculateAsymmetry();
 
     for (Int_t i = 0 ; i < nThBins ; i++){
@@ -1075,7 +1079,7 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " and simulation results ... " << endl;
     TSim *simData = new TSim(simRun);
     simData->CalculateAsymmetryLab(simRun);
-;
+
     for(Int_t i = 0 ; i < nThBins ; i++){
       plotTheta[i] = plotTheta[i]*DegToRad();
       
@@ -1086,7 +1090,14 @@ void TLab::GraphAsymmetry(Char_t option){
       aSimE[i]   = simData->GetAsymLabErr(dPhiDiff,i);
       aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
       aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
-
+      
+      //AsPhiDiffR[i]= AsPhiDiffR[i]/1.3;
+      
+      //AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i])*1.3;
+      AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i]);
+      
+      AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
+      
     }
 
   }// end of:  if( option=='t' || option=='T'
@@ -1145,7 +1156,15 @@ void TLab::GraphAsymmetry(Char_t option){
  
   // Asymmetry
   TGraphErrors *grAsym[4];
-  grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
+  
+  //!!!!!!!
+  // temporary change
+  //!!!!!!!
+  grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+
+  //grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
+
+  
   grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
 
    
