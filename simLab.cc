@@ -394,11 +394,13 @@ Int_t main(int argc, char **argv){
     cout << endl;
     cout << " Enter plot type:   " << endl;
     cout << " a - Lab, Theory and Simulation (default)" << endl;
-    cout << " ";
+    cout << " d - Lab, Theory and Simulation: " 
+	 <<  "    Divide Lab Asym by Simulated Asym " << endl;
     cin  >> option;
 
-    if(option!='a' && option!='A' ){
-	  
+    if(option!='a' && option!='A' &&
+       option!='d' && option!='D' ){
+      
       cout << endl;
       cout << " invalid choice, setting to default " << endl;
 	  

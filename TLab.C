@@ -985,7 +985,13 @@ void TLab::GraphAsymmetry(Char_t option){
   
   Float_t  AsPhiDiff[nThBins];
   Float_t  AePhiDiff[nThBins];
-
+  
+  Bool_t divideByUnPol = kFALSE;
+  
+  if(option=='d'){
+    option = 'a';
+    divideByUnPol = kTRUE;
+  }
   
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
