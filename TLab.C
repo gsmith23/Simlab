@@ -756,7 +756,7 @@ void TLab::CalculateAsymmetry(){
 
   Int_t nDuplicates = 0;
 
-  TRandom1 * rand1 = new TRandom1(); 
+  //TRandom1 * rand1 = new TRandom1(); 
 
   for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
     
@@ -1023,11 +1023,11 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t alpha1   = DegToRad()*26.0*2.355/2.;
   
   //!!! very temporary
-  alpha1 = alpha1*1.5;
+  //alpha1 = alpha1*1.5;
 
   // half resolution in theta
 
-  Float_t semiSpan = thetaBinWidth/2.*DegToRad();
+  Float_t semiSpan = thetaBinWidth/2.*DegToRad()*2;
   //Float_t semiSpan = thetaBinWidth/2.*DegToRad()*4.;
   
   cout << endl;
@@ -1214,12 +1214,13 @@ void TLab::GraphAsymmetry(Char_t option){
   
   TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,0,muE);
   
-  //!!!!!!!
-  // temporary change
-  //!!!!!!!
-  //grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
-  
-  grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
+  //!!!!!!!!!!!!!!!!!
+  // temporary 
+  //!!!!!!!!!!!!!!!
+  if( divideByUnPol)
+    grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+  else
+    grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
   
   grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
   
@@ -1322,7 +1323,8 @@ void TLab::GraphAsymmetry(Char_t option){
   
   hr->GetXaxis()->SetTitle("#theta (deg)");
 
-  sprintf(yAxis,"(N(%d^{o})-N(0^{o})/(N(%d^{o})+N(0^{o})",dPhiDiff);
+  sprintf(yAxis,"(N(%d^{o})-N(0^{o})/(N(%d^{o})+N(0^{o})",
+	  dPhiDiff,dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
 
   sprintf(plotName,"../Plots/Mu_%d_%d.pdf",
