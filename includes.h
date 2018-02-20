@@ -36,6 +36,8 @@
 #include "TTree.h"
 #include "TClass.h"
 
+#include "TRandom1.h"
+
 #include <stdio.h>
 #include <iostream>
 #include <unistd.h>

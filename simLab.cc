@@ -76,6 +76,7 @@ Int_t main(int argc, char **argv){
     cout << " Option 3 - two further arguments      " << endl; 
     cout << "        run lab run number             " << endl;
     cout << "    simulated data file number         " << endl;
+    cout << "   (lab data normalised to simulated)  " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Example:                              " << endl; 

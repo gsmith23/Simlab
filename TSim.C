@@ -778,17 +778,29 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     Pq_true_lab[j] = 0.;
   }
   
+
+  Int_t   thBin  = -1;
+  Float_t phiA   = -1;
+  Float_t phiB   = -1;
+  Int_t   indexA = -1;
+  Int_t   indexB = -1;
+  Float_t totEA  = 0;
+  Float_t totEB  = 0;
+
+  Float_t phiB_prev = -1;
+  Float_t phiB_this = -1;
+
   //Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     sortDataTree->GetEvent(ientry);
       
-    Int_t   thBin  = -1;
-    Float_t phiA   = -1;
-    Float_t phiB   = -1;
-    Int_t   indexA = -1;
-    Int_t   indexB = -1;
-    Float_t totEA  = 0;
-    Float_t totEB  = 0;
+   thBin  = -1;
+   phiA   = -1;
+   phiB   = -1;
+   indexA = -1;
+   indexB = -1;
+   totEA  = 0;
+   totEB  = 0;
     
     for (Int_t k=0; k<nCrystals; k++){
       totEA += EA[k];
@@ -818,6 +830,34 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     } // end of : if (GetThetaBin(ltHA
     
     
+    //!!!!
+    // randomise phiB
+    // TRandom1 * rand1 = new TRandom1(); 
+    // phiB = rand1->Uniform()*360;
+    // if     ( phiB < 90 ){
+    //   phiB = 0.;
+    // }
+    // else if( phiB >= 90  &&
+    // 	     phiB < 180){
+    //   phiB = 90.;
+    // }
+    // else if( phiB >= 180 &&
+    // 	     phiB < 270){
+    //   phiB = 180.;
+    // }
+    // else if( phiB >= 270 &&
+    // 	     phiB < 360.){
+    //   phiB = 270.;
+    // }
+    
+    // make phiB value from previous event
+    // phiB_this = phiB;
+    // phiB = phiB_prev;
+    // phiB_prev = phiB_this;
+        
+    // cout << endl;
+    // cout << " phiB = " << phiB << endl;
+
     if ( (phiA > -1) && 
 	 (phiB > -1) ){
       
@@ -839,6 +879,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       hMEdiff->Fill(etHB[indexB],maxtHBErr[indexB] - etHB[indexB]);
       
       Float_t phiDiff = phiB - phiA;
+            
       if (phiDiff == 0.) {
 	AsymMatrix[thBin][0] += 1;
 	n000++;}

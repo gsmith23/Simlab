@@ -755,13 +755,15 @@ void TLab::CalculateAsymmetry(){
 
 
   Int_t nDuplicates = 0;
-  
+
+  TRandom1 * rand1 = new TRandom1(); 
+
   for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
     
     calDataTree->GetEvent(nEntry);
     Float_t totEA = 0.;
     Float_t totEB = 0.;
-    Int_t thBin = -1.;
+    Int_t   thBin = -1.;
 
     for (Int_t i = 0 ; i < nCrystals; i++){
       totEA += EA[i];
@@ -771,9 +773,31 @@ void TLab::CalculateAsymmetry(){
     AB000 = kFALSE, AB090 = kFALSE, 
       AB180 = kFALSE, AB270 = kFALSE;
 
+    // !!!!
+    // randomise second phi
+    // Float_t phiB = rand1->Uniform()*360;
+    // if     ( phiB < 90 ){
+    //   phiB = 0.;
+    // }
+    // else if( phiB >= 90  &&
+    // 	     phiB < 180){
+    //   phiB = 90.;
+    // }
+    // else if( phiB >= 180 &&
+    // 	     phiB < 270){
+    //   phiB = 180.;
+    // }
+    // else if( phiB >= 270 &&
+    // 	     phiB < 360.){
+    //   phiB = 270.;
+    // }
+
     //check total energy deposited per array
     //check if theta A and theta B are in the same bin
-    if ((totEA > 450)&&(totEA < 550)&&(totEB > 450)&&(totEB < 550)){
+    if ((totEA > 450) && 
+	(totEA < 550) &&
+	(totEB > 450) &&
+	(totEB < 550)){
  
       A[4] = kFALSE;
       B[4] = kFALSE;
@@ -794,42 +818,63 @@ void TLab::CalculateAsymmetry(){
 	B[4] = kTRUE;
 	nB[4]++;
       }
-
+      
    
       for (Int_t j = 0 ; j < nCrystals ; j++){
-	if(j!=4){
-	A[j] = kFALSE;  
-	B[j] = kFALSE;
-
-	if( ( GoodTheta(tHA[j]) ) &&
-	    ( tHA[j] > ThMin[thBin] ) &&
-	    ( tHA[j] < ThMax[thBin] )){
-	  A[j] = kTRUE;
-	  nA[j]++;
-	    
-	}
-      
-	if( ( GoodTheta(tHB[j]) ) &&
-	    ( tHB[j] > ThMin[thBin] ) &&
-	    ( tHB[j] < ThMax[thBin] )){
-	  B[j] = kTRUE;
-	  nB[j]++;
 	
-	}
+	if(j!=4){
+	  A[j] = kFALSE;  
+	  B[j] = kFALSE;
+	  
+	  if( ( GoodTheta(tHA[j]) ) &&
+	      ( tHA[j] > ThMin[thBin] ) &&
+	      ( tHA[j] < ThMax[thBin] )){
+	    A[j] = kTRUE;
+	    
+	    nA[j]++;
+	    
+	  }
+	  
+	  if( ( GoodTheta(tHB[j]) ) &&
+	      ( tHB[j] > ThMin[thBin] ) &&
+	      ( tHB[j] < ThMax[thBin] )){
+	    B[j] = kTRUE;
+	    nB[j]++;
+	    
+	  }
+	  	  
 	}
       } // end of: for (Int_t j = 0 ; j < nCrystals  
    
       // Central Crystals are always required
       if( !A[4] || !B[4] )
 	continue;
-    
+      
+      // // !!!!
+      // // Randomise
+
+      // for(Int_t r = 0 ; r < nCrystals ; r++)
+      // 	B[r] = kFALSE;
+	      
+      // if      (phiB ==  0.){
+      // 	B[1] = kTRUE;
+      // }
+      // else if (phiB == 90.){
+      // 	B[3] = kTRUE;
+      // }
+      // else if (phiB == 180.){
+      // 	B[5] = kTRUE;
+      // }
+      // else if (phiB == 270.){
+      // 	B[7] = kTRUE;	
+      // }
+	
       if((A[1]&&B[1])||
 	 (A[3]&&B[3])||
 	 (A[5]&&B[5])||
 	 (A[7]&&B[7]))
 	AB000 = kTRUE;
-
-    
+      
       if((A[1]&&B[3])||
 	 (A[3]&&B[7])||
 	 (A[7]&&B[5])||
@@ -976,6 +1021,9 @@ void TLab::GraphAsymmetry(Char_t option){
   // !!to do - access alpha1 from user input
 
   Float_t alpha1   = DegToRad()*26.0*2.355/2.;
+  
+  //!!! very temporary
+  alpha1 = alpha1*1.5;
 
   // half resolution in theta
 
@@ -997,6 +1045,9 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t AsPhiDiffR[nThBins]={0};
   Float_t AePhiDiffR[nThBins]={0};
 
+  Float_t mu[nThBins]={0};
+  Float_t muE[nThBins]={0};
+  
   //  lab calculation (not theory only)
   if( option!='t' && option!='T'){
     
@@ -1004,11 +1055,15 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " Calculating asymmetry values and " << endl;
     cout << " associated errors for lab data ... " << endl;
     
-    //!!
     CalculateAsymmetry();
-
+    
     for (Int_t i = 0 ; i < nThBins ; i++){
+      
       if (AsymMatrix[i][0] != 0){
+	
+	mu[i] = (AsymMatrix[i][1] - AsymMatrix[i][0]);
+	mu[i] = mu[i]/(AsymMatrix[i][1] + AsymMatrix[i][0]);
+
 	if (dPhiDiff  == 90){
 	  AsPhiDiff[i] =
 	    AsymMatrix[i][1]/AsymMatrix[i][0];
@@ -1138,10 +1193,10 @@ void TLab::GraphAsymmetry(Char_t option){
 
   // Graph counts vs dPhi integrated over theta
   TGraphErrors *grDPhi = new TGraphErrors(nPhiBins,
-					   phi,
-					   AsInt,
-					   0,
-					   AeInt);
+					  phi,
+					  AsInt,
+					  0,
+					  AeInt);
   
   Char_t plotName[128];
   // dPhi Plot
@@ -1157,16 +1212,17 @@ void TLab::GraphAsymmetry(Char_t option){
   // Asymmetry
   TGraphErrors *grAsym[4];
   
+  TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,0,muE);
+  
   //!!!!!!!
   // temporary change
   //!!!!!!!
-  grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
-
-  //grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
-
+  //grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+  
+  grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
   
   grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
-
+  
    
   for (Int_t k = 0; k<nThBins; k++)
     plotTheta[k] -= 2.;
@@ -1255,10 +1311,27 @@ void TLab::GraphAsymmetry(Char_t option){
   
   leg->Draw();
   
-  sprintf(plotName,"../Plots/A_%d_%d.pdf",runNumberInt,dPhiDiff);
+  sprintf(plotName,"../Plots/A_%d_%d.pdf",
+	  runNumberInt,dPhiDiff);
   
   canvas1->SaveAs(plotName);
+
+  // mu plot
+  hr = canvas1->DrawFrame(thetaLowEdge,-0.2,
+			  thetaHighEdge,0.5);
   
+  hr->GetXaxis()->SetTitle("#theta (deg)");
+
+  sprintf(yAxis,"(N(%d^{o})-N(0^{o})/(N(%d^{o})+N(0^{o})",dPhiDiff);
+  hr->GetYaxis()->SetTitle(yAxis);
+
+  sprintf(plotName,"../Plots/Mu_%d_%d.pdf",
+	  runNumberInt,dPhiDiff);
+  
+  grMu->Draw("P E");
+  
+  canvas1->SaveAs(plotName);
+
   // beep
   cout << '\a' << endl;
   
