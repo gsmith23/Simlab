@@ -1023,7 +1023,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 //   }
   
   TCanvas *canvas = new TCanvas("canvas","canvas",
-				  10,10,1200,800);
+				1500,1000);
 
   Char_t plotN[128];
 
@@ -1032,28 +1032,42 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   hLEdiff->GetYaxis()->SetTitle("lab #theta - energy #theta (deg)");
 
   sprintf(plotN,"../Plots/histLEdiff_%d.pdf",inputFileInt);
-  canvas->SaveAs(plotN);
+  
+  plotName = "../Plots/histLEdiff_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
    
   histThD->Draw("colz");
   histThD->GetXaxis()->SetTitle("#theta (deg)");
   histThD->GetYaxis()->SetTitle("sim #theta - energy #theta (deg)");
   
   sprintf(plotN,"../Plots/histThDiff_%d.pdf",inputFileInt);
-  canvas->SaveAs(plotN);
+
+  plotName = "../Plots/histThDiff_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
 
   hMEdiff->Draw("colz");
   hMEdiff->GetXaxis()->SetTitle("energy #theta (deg)");
   hMEdiff->GetYaxis()->SetTitle("max/min lab #theta - energy #theta (deg)");
-
+  
   sprintf(plotN,"../Plots/histME_%d.pdf",inputFileInt);
-  canvas->SaveAs(plotN);
   
-  canvas->Divide(2,4);
+  plotName = "../Plots/histME_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
   
-  //for( Int_t th = 0 ; th < nThbins ; th++){
-  for( Int_t th = 3 ; th < 4 ; th++){
+  canvas->Clear();
+  
+  canvas->Divide(4,2);
+  
+  for( Int_t th = 0 ; th < nThbins ; th++){
+  //for( Int_t th = 0 ; th < 4 ; th++){
     
-    canvas->cd(th);
+    canvas->cd(th+1);
 
     hThRes00[th]->SetLineColor(kBlue);
     hThRes90[th]->SetLineColor(kRed);
@@ -1078,19 +1092,26 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   }    
   
   sprintf(plotN,"../Plots/hThRes_%d.pdf",inputFileInt);
-  canvas->SaveAs(plotN);
   
+  plotName = "../Plots/hThRes_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
+  
+  //canvas->Clear();
   for( Int_t th = 0 ; th < nThbins ; th++){
     
-    canvas->cd(th);
+    canvas->cd(th+1);
     
     hThRes90_TL[th]->Draw("");
     hThRes00_TL[th]->Draw("same");  
   }
 
   sprintf(plotN,"../Plots/hThRes_TL_%d.pdf",inputFileInt);
-  canvas->SaveAs(plotN);
-  
+
+  plotName = "../Plots/hThRes_TL_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
   
   return 0;
 }
@@ -1124,7 +1145,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
   TString plotName;
   plotName = "../Plots/Asym_" + inputFileNumber1;
-
   plotName = plotName + ".pdf";
 
   // The ratio to be calculated for the
@@ -1331,8 +1351,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   alpha1 = alpha1*RadToDeg();
   theoryLegendTitle.Form("theory curve #alpha_{#phi} = %.1f^{o}", alpha1);
   
-  Char_t plotN[128];
-  Char_t yAxis[128];
+  Char_t  plotN[128];
+  //TString plotName = "";
+  Char_t  yAxis[128];
   
   if(nFiles==1)
     sprintf(yAxis,"N(%d^{o})/N(0^{o})",dPhiDiff);
@@ -1349,13 +1370,22 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   grAsym[2]->Draw("P E");
   leg->Draw();
 
-  if     (nFiles==1)
+  if     (nFiles==1){
     sprintf(plotN,"../Plots/A_%d_%d.pdf",inputFileInt1,dPhiDiff);
-  else if(nFiles==2)
+    plotName = "../Plots/A_" + inputFileNumber1;
+  }
+  else if(nFiles==2){
     sprintf(plotN,"../Plots/A_%d_%d_%d.pdf",inputFileInt1,inputFileInt2,dPhiDiff);
+    plotName  =  "../Plots/A_" + inputFileNumber1;
+    plotName += "_";
+    plotName += inputFileNumber2;
+  }  
   
-  canvas->SaveAs(plotN);
-
+  plotName.Form(plotName + "_%d",dPhiDiff);
+  plotName += ".pdf";
+  
+  canvas->SaveAs(plotName);
+  
   // ------------------------------------------------
   //  Fourier Coefficients Graph
 
@@ -1398,7 +1428,8 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   plotName = plotName + ".pdf";
     
   canvas->SaveAs(plotName);
-
+  
+  
   cout << "  GraphAsymmetryLab   " << endl;
   cout << "--------------------- " << endl;
   cout << endl;
@@ -2207,6 +2238,7 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   cout << " GraphAsymmetrySim " << endl;
   cout << "-------------------" << endl;
  
+
 }//end of GraphAsymmetrySim
 
 
