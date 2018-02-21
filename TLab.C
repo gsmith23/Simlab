@@ -757,6 +757,9 @@ void TLab::CalculateAsymmetry(){
   Int_t nDuplicates = 0;
 
   //TRandom1 * rand1 = new TRandom1(); 
+  
+  Float_t minE = 450.;
+  Float_t maxE = 550.;
 
   for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
     
@@ -794,10 +797,10 @@ void TLab::CalculateAsymmetry(){
 
     //check total energy deposited per array
     //check if theta A and theta B are in the same bin
-    if ((totEA > 450) && 
-	(totEA < 550) &&
-	(totEB > 450) &&
-	(totEB < 550)){
+    if ((totEA > minE) && 
+	(totEA < maxE) &&
+	(totEB > minE) &&
+	(totEB < maxE)){
  
       A[4] = kFALSE;
       B[4] = kFALSE;
@@ -826,13 +829,12 @@ void TLab::CalculateAsymmetry(){
 	  A[j] = kFALSE;  
 	  B[j] = kFALSE;
 	  
+	  // conditions on theta for outer crystals 
 	  if( ( GoodTheta(tHA[j]) ) &&
 	      ( tHA[j] > ThMin[thBin] ) &&
 	      ( tHA[j] < ThMax[thBin] )){
 	    A[j] = kTRUE;
-	    
 	    nA[j]++;
-	    
 	  }
 	  
 	  if( ( GoodTheta(tHB[j]) ) &&
@@ -840,7 +842,32 @@ void TLab::CalculateAsymmetry(){
 	      ( tHB[j] < ThMax[thBin] )){
 	    B[j] = kTRUE;
 	    nB[j]++;
-	    
+	  }
+	  
+	  // !!! TEMPORARY !!!
+	  // conditions on summed central 
+	  // and(/or) outer crystal energies
+	  // to select delta phi
+	  if( 
+	     ( GoodTheta(tHA[j]) )     &&
+	     ( (EA[j]+EA[4]) > minE )  &&
+	     ( (EA[j]+EA[4]) < maxE )  &&
+	     ( tHA[j] > ThMin[thBin] ) &&
+	     ( tHA[j] < ThMax[thBin] )
+	      ){
+	    A[j] = kTRUE;
+	    nA[j]++;
+	  }
+	  
+	  if( 
+	     ( GoodTheta(tHB[j]) )     &&
+	     ( (EB[j]+EB[4]) > minE )  &&
+	     ( (EB[j]+EB[4]) < maxE )  &&
+	     ( tHB[j] > ThMin[thBin] ) &&
+	     ( tHB[j] < ThMax[thBin] )
+	      ){
+	    B[j] = kTRUE;
+	    nB[j]++;
 	  }
 	  	  
 	}
@@ -906,7 +933,7 @@ void TLab::CalculateAsymmetry(){
       }
     
       if     (AB000)
-	AsymMatrix[thBin][0] +=1.;
+	AsymMatrix[thBin][0]+=1.;
       else if(AB090)
 	AsymMatrix[thBin][1]+=1.;
       else if(AB180)

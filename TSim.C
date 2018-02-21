@@ -708,8 +708,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH1F * hThRes90_TL[nThbins];
 
   //!!!! Start Here
-  // TH1F * hDPhiRes00[nThbins];
-  //   TH1F * hDPhiRes90[nThbins];
+  //TH1F * hDPhiRes00[nThbins];
+  //TH1F * hDPhiRes90[nThbins];
   
   TString hTitle = "hThRes00";
 
@@ -758,7 +758,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
   TFile* inputFile = new TFile(inputFileName);
   
-  //TTree* sortDataTree=(TTree*)inputFile->Get("sortDataTree");
   sortDataTree=(TTree*)inputFile->Get("sortDataTree");
 
   sortDataTree->SetBranchAddress("EA",EA);
@@ -1241,7 +1240,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 	AsPhiDiffR[i] = AsPhiDiff1[i]/AsPhiDiff[i] ;
 	
 	AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + AePhiDiff1[i]*AePhiDiff1[i]/(AsPhiDiff1[i]*AsPhiDiff1[i]));
-	//AePhiDiffR[i] = Sqrt(AePhiDiff[i]*AePhiDiff[i] + AePhiDiff1[i]*AePhiDiff1[i]);
+
       }
          
     
