@@ -313,21 +313,22 @@ Int_t  TSim::SortEvents(TString fileNumber){
     ltHB[i] = 0.;
     mintHBErr[i] = 0.;
     maxtHBErr[i] = 0.;
-
+    
+    nb_ComptA[i] = 0;
+    nb_ComptB[i] = 0;
+    
+  }
+  
+  for(Int_t i = 0 ; i < 2 ; i++){
     // angle after first Compton scattering 
     // retrieved from the simulation = 'sim theta'
     simtHA[i] = 180;
     simtHB[i] = 180;
-
+    
     simPhiA[i] = 999;
     simPhiB[i] = 999;
-
-    nb_ComptA[i] = 0;
-    nb_ComptB[i] = 0;
-
-
   }
-
+  
   //============================================
   // New variables
   TString tempString = "";
@@ -337,7 +338,7 @@ Int_t  TSim::SortEvents(TString fileNumber){
 
   tempString.Form("EB[%d]/D", nCrystals);
   sortDataTree->Branch("EB", EB, tempString);
-
+  
   tempString.Form("etHA[%d]/F",nCrystals);
   sortDataTree->Branch("etHA",etHA,tempString);
 
@@ -360,40 +361,42 @@ Int_t  TSim::SortEvents(TString fileNumber){
   tempString.Form("mintHBErr[%d]/F",nCrystals);
   sortDataTree->Branch("mintHBErr",mintHBErr,tempString);
 
-  tempString.Form("simtHA[%d]/D",nCrystals);
-  sortDataTree->Branch("simtHA", simtHA, tempString);
-
-  tempString.Form("simtHB[%d]/D",nCrystals);
-  sortDataTree->Branch("simtHB", simtHB, tempString);
-
-  tempString.Form("simPhiA[%d]/D",nCrystals);
-  sortDataTree->Branch("simPhiA", simPhiA, tempString);
-
-  tempString.Form("simPhiB[%d]/D",nCrystals);
-  sortDataTree->Branch("simPhiB", simPhiB, tempString);
-
+  
   tempString.Form("nb_ComptA[%d]/I",nCrystals);
   sortDataTree->Branch("nb_ComptA", nb_ComptA, tempString);
 
   tempString.Form("nb_ComptB[%d]/I",nCrystals);
   sortDataTree->Branch("nb_ComptB", nb_ComptB, tempString);
 
-  tempString.Form("XposA[%d]/D",nCrystals);
+  tempString.Form("simtHA[%d]/D",2);
+  sortDataTree->Branch("simtHA", simtHA, tempString);
+
+  tempString.Form("simtHB[%d]/D",2);
+  sortDataTree->Branch("simtHB", simtHB, tempString);
+
+  tempString.Form("simPhiA[%d]/D",2);
+  sortDataTree->Branch("simPhiA", simPhiA, tempString);
+
+  tempString.Form("simPhiB[%d]/D",2);
+  sortDataTree->Branch("simPhiB", simPhiB, tempString);
+
+
+  tempString.Form("XposA[%d]/D",2);
   sortDataTree->Branch("XposA", XposA, tempString);
 
-  tempString.Form("YposA[%d]/D",nCrystals);
+  tempString.Form("YposA[%d]/D",2);
   sortDataTree->Branch("YposA", YposA, tempString);
 
-  tempString.Form("ZposA[%d]/D",nCrystals);
+  tempString.Form("ZposA[%d]/D",2);
   sortDataTree->Branch("ZposA", ZposA, tempString);
-
-  tempString.Form("XposB[%d]/D",nCrystals);
+  
+  tempString.Form("XposB[%d]/D",2);
   sortDataTree->Branch("XposB", XposB, tempString);
 
-  tempString.Form("YposB[%d]/D",nCrystals);
+  tempString.Form("YposB[%d]/D",2);
   sortDataTree->Branch("YposB", YposB, tempString);
 
-  tempString.Form("ZposB[%d]/D",nCrystals);
+  tempString.Form("ZposB[%d]/D",2);
   sortDataTree->Branch("ZposB", ZposB, tempString);
 
   // // per event variables
@@ -406,10 +409,17 @@ Int_t  TSim::SortEvents(TString fileNumber){
   Float_t sigmaPar = 2.5;
 
   Long64_t nEvents = simDataTree->GetEntries();
-
+  
   for(Int_t i = 0 ; i < nEvents ; i++){ 
     simDataTree->GetEvent(i);
     
+    cout << endl;
+    cout << endl;
+    cout << endl;
+
+    cout << endl;
+    cout << endl;
+
     Double_t CrystEnergyDep[18] = {edep0,edep1,edep2,
 				   edep3,edep4,edep5,
 				   edep6,edep7,edep8,
@@ -447,23 +457,31 @@ Int_t  TSim::SortEvents(TString fileNumber){
       nb_ComptA[j] = nb_Compt[j];
       nb_ComptB[j] = nb_Compt[j + nCrystals];
       
-      // same for all array elements
-      // to do: make single variable
-      simtHA[j] = ThetaA_1st;
-      simtHB[j] = ThetaB_1st;
-
-      simPhiA[j] = PhiA_1st;
-      simPhiB[j] = PhiB_1st;
-      
-      XposA[j] = XposA_1st;
-      YposA[j] = YposA_1st;
-      ZposA[j] = ZposA_1st;
-
-      XposB[j] = XposB_1st;
-      YposB[j] = YposB_1st;
-      ZposB[j] = ZposB_1st;
-
     }
+    
+    simtHA[0] = ThetaA_1st;
+    simtHB[0] = ThetaB_1st;
+    simtHA[1] = ThetaA_2nd;
+    simtHB[1] = ThetaB_2nd;
+    
+    simPhiA[0] = PhiA_1st;
+    simPhiB[0] = PhiB_1st;
+    simPhiA[1] = PhiA_2nd;
+    simPhiB[1] = PhiB_2nd;
+    
+    XposA[0] = XposA_1st;
+    YposA[0] = YposA_1st;
+    ZposA[0] = ZposA_1st;
+    XposB[0] = XposB_1st;
+    YposB[0] = YposB_1st;
+    ZposB[0] = ZposB_1st;
+
+    XposA[1] = XposA_2nd;
+    YposA[1] = YposA_2nd;
+    ZposA[1] = ZposA_2nd;
+    XposB[1] = XposB_2nd;
+    YposB[1] = YposB_2nd;
+    ZposB[1] = ZposB_2nd;
     
     etHA[4] = ElectronEnergyToTheta(CrystEnergyDep[4]);
     etHB[4] = ElectronEnergyToTheta(CrystEnergyDep[13]);
@@ -474,21 +492,22 @@ Int_t  TSim::SortEvents(TString fileNumber){
     mintHAErr[4] = ElectronEnergyToTheta(CrystEnergyDep[4] - (sigmaPar*sigmaA[4]*Sqrt(CrystEnergyDep[4])));
     maxtHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] + (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));
     mintHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] - (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));				 
-
+    
     // introduce additional conditions
     /*Int_t nHits = 0;
-
-    for (Int_t j = 0 ; j < nCrystals; j++){
+      
+      for (Int_t j = 0 ; j < nCrystals; j++){
       if (EA[j] > 0) nHits++;
       if (EB[j] > 0) nHits++;}
-
-    if (nHits > 3){
+      
+      if (nHits > 3){
       sortDataTree->Fill();
       }*/
-
-    sortDataTree->Fill();
-  } // end of: for(Int_t i = 0 ; i < nEvents     
     
+  sortDataTree->Fill();
+  
+  } // end of: for(Int_t i = 0 ; i < nEvents     
+  
   //=========================
   sortDataTree->Write();
       
@@ -554,13 +573,28 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
-  //! works for 2 x 2 mm^2 crystals
+  Float_t crystalHalfSizeYZ = 2.0;
+  
   posYZ = Abs(posYZ);
 
-  if( posYZ < 2.)
+  if(posYZ < crystalHalfSizeYZ)
     centralYZ = kTRUE;
-
+  
   return centralYZ;
+}
+
+Bool_t TSim::OuterYZ(Double_t posYZ){
+  
+  Bool_t outerYZ = kFALSE;
+  
+  Float_t crystalHalfSizeYZ = 2.0;
+  
+  posYZ = Abs(posYZ);
+  
+  if(posYZ > crystalHalfSizeYZ )
+    outerYZ = kTRUE;
+
+  return outerYZ;
 }
 
 // original simulation had 3 x 4 x 22 mm crystals
@@ -584,10 +618,11 @@ Float_t TSim::CrystalToPhi(Int_t crystal){
   Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
 			      270. ,  -1. , 90.,
 			      -1.  , 180. , -1.};
-  //!!!  
-//   Float_t crystalToPhi[9] = { -45.  ,  -1  ,  45.,
-// 			      -1.   ,  -1. ,  -1.,
-// 			      -135. ,  -1. , 135.};
+  
+  ///!!! temporary
+  // Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
+// 			       -1. ,  -1. , -1. ,
+// 			       270.,  -1. , 180. };
   
   Float_t phi = crystalToPhi[crystal];
 
@@ -746,19 +781,19 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     
     hTitle.Form("hDPhiRes00_%d",th);
     hDPhiRes00[th] = new TH1F(hTitle,hTitle,
-			      64, -180.,180.);
+			      32, -180.,180.);
     
     hTitle.Form("hDPhiRes90_%d",th);
     hDPhiRes90[th] = new TH1F(hTitle,hTitle,
-			      64, -180.,180.);
+			      32, -180.,180.);
     
     hTitle.Form("hDPhiRes00_TL_%d",th);
     hDPhiRes00_TL[th] = new TH1F(hTitle,hTitle,
-				 64, -180.,180.);
+				 32, -180.,180.);
     
     hTitle.Form("hDPhiRes90_TL_%d",th);
     hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
-				 64, -180.,180.);
+				 32, -180.,180.);
     
   }
   
@@ -877,27 +912,25 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      thBin = GetThetaBin(ltHA[4]);
      
      for (Int_t i = 0 ; i < nCrystals ; i++){
-	if ( (i!=4)                  && 
-	     (thBin>-1)              && 
-	     (ltHA[i]<ThMax[thBin])  &&
-	     (ltHA[i]>ThMin[thBin]) ){
-	  phiA = CrystalToPhi(i);
-	  indexA = i;
-	}
-	if ( (i!=4)                  &&
-	     (thBin>-1)              &&
-	     (ltHB[i]<ThMax[thBin])  &&
-	     (ltHB[i]>ThMin[thBin]) ){
-	  phiB = CrystalToPhi(i);
-	  indexB = i;
-	}	
-      }
-    } // end of : if (GetThetaBin(ltHA
-    
-    
-    //!!!!S
-    // randomise phiB
-    // TRandom1 * rand1 = new TRandom1(); 
+       if ( (i!=4)                  && 
+	    (thBin>-1)              && 
+	    (ltHA[i]<ThMax[thBin])  &&
+	    (ltHA[i]>ThMin[thBin]) ){
+	 phiA = CrystalToPhi(i);
+	 indexA = i;
+       }
+       if ( (i!=4)                  &&
+	    (thBin>-1)              &&
+	    (ltHB[i]<ThMax[thBin])  &&
+	    (ltHB[i]>ThMin[thBin]) ){
+	 phiB = CrystalToPhi(i);
+	 indexB = i;
+       }	
+     }
+   } // end of : if (GetThetaBin(ltHA
+   
+   // randomise phiB
+   // TRandom1 * rand1 = new TRandom1(); 
     // phiB = rand1->Uniform()*360;
     // if     ( phiB < 90 ){
     //   phiB = 0.;
@@ -926,8 +959,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     if ( (phiA > -1) && 
 	 (phiB > -1) ){
       
-      histThD->Fill(etHA[4],simtHA[4]-etHA[4]);
-      histThD->Fill(etHB[4],simtHB[4]-etHB[4]);
+      histThD->Fill(etHA[4],simtHA[0]-etHA[4]);
+      histThD->Fill(etHB[4],simtHB[0]-etHB[4]);
       
       hLEdiff->Fill(etHA[4],ltHA[4] - etHA[4]);
       hLEdiff->Fill(etHA[indexA],ltHA[indexA] - etHA[indexA]);
@@ -945,7 +978,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       
       phiDiff   = phiB - phiA;
       
-      dPhiXact  = simPhiA[4] + simPhiB[4];
+      dPhiXact  = simPhiA[0] + simPhiB[0];
       if(dPhiXact < 0)
 	dPhiXact = dPhiXact + 360.;
       
@@ -957,7 +990,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	AsymMatrix[thBin][0] += 1;
 	n000++;
 	
-	hThRes00[thBin]->Fill(simtHA[4]);
+	hThRes00[thBin]->Fill(simtHA[0]);
 	hDPhiRes00[thBin]->Fill(dPhiXact);	
       }
       if ((phiDiff == 90)||(phiDiff == -270)){
@@ -965,7 +998,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	AsymMatrix[thBin][1] += 1;
 	n090++;
 	
-	hThRes90[thBin]->Fill(simtHA[4]);
+	hThRes90[thBin]->Fill(simtHA[0]);
 	
 	dPhiXact = dPhiXact-90.;
 	
@@ -985,30 +1018,38 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	AsymMatrix[thBin][3] += 1;
 	n270++;}
       
+//       cout << endl;
+//       cout << endl;
+//       cout << " YposA[1] = " << YposA[1] << endl;
+//       cout << endl;
+//       cout << endl;
+      
       // 'true lab' analysis
-      if ( simtHA[4]<ThMax[thBin] && 
-	   simtHA[4]>ThMin[thBin] &&
-	   simtHB[4]<ThMax[thBin] && 
-	   simtHB[4]>ThMin[thBin] &&
-	   CentralYZ(YposA[4])    && 
-	   CentralYZ(ZposA[4])    &&
-	   CentralYZ(YposB[4])    && 
-	   CentralYZ(ZposB[4])    &&
-	   nb_ComptA[4] == 1.     && 
-	   nb_ComptB[4] == 1.    
-	   ){
+      if (
+	  // simtHA[0]<ThMax[thBin] && 
+// 	  simtHA[0]>ThMin[thBin] &&
+// 	  simtHB[0]<ThMax[thBin] && 
+// 	  simtHB[0]>ThMin[thBin] &&
+	  CentralYZ(YposA[0])    && 
+	  CentralYZ(ZposA[0])    &&
+	  CentralYZ(YposB[0])    && 
+	  CentralYZ(ZposB[0])   
+	  // nb_ComptA[4] == 1.     && 
+// 	  nb_ComptB[4] == 1.    
+	  
+	  ){
 	
 	if (phiDiff == 0.){
 	  AsymTrue[thBin][0] += 1;
 	  
-	  hThRes00_TL[thBin]->Fill(simtHA[4]);	
+	  hThRes00_TL[thBin]->Fill(simtHA[0]);	
 	  hDPhiRes00_TL[thBin]->Fill(dPhiXact);	
 	  
 	}
 	if ((phiDiff == 90) || (phiDiff == -270)){
 	  AsymTrue[thBin][1] += 1;
 	  
-	  hThRes90_TL[thBin]->Fill(simtHA[4]);
+	  hThRes90_TL[thBin]->Fill(simtHA[0]);
 		  
 	  if      (phiDiff == 90)
 	    hDPhiRes90_TL[thBin]->Fill(dPhiXact);
@@ -1358,7 +1399,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
   TH1F *hr;
   
-  Float_t maxY = 3.0;
+  Float_t maxY = 4.0;
 
   if(dPhiDiff==180){
     maxY = 6.0;

@@ -79,7 +79,10 @@ class TSim : public TObject{
   //==== conditions =====
   
   Bool_t GoodTheta(Float_t);
+  
   Bool_t CentralYZ(Double_t);
+  Bool_t OuterYZ(Double_t);
+  
   Bool_t CentralZ(Double_t);
   Bool_t CentralXA(Double_t);
   Bool_t CentralXB(Double_t);
@@ -115,11 +118,7 @@ class TSim : public TObject{
   Float_t maxtHAErr[nCrystals];
   Float_t maxtHBErr[nCrystals];
 
-  Double_t simtHA[nCrystals];
-  Double_t simtHB[nCrystals];
-  Double_t simPhiA[nCrystals];
-  Double_t simPhiB[nCrystals];
-
+  
   Int_t nb_ComptA[nCrystals];
   Int_t nb_ComptB[nCrystals];
 
@@ -133,13 +132,19 @@ class TSim : public TObject{
   Int_t bin180 = nPhibinsSim*2/4;
   Int_t bin270 = nPhibinsSim*3/4;
 
-  Double_t XposA[nCrystals];
-  Double_t YposA[nCrystals];
-  Double_t ZposA[nCrystals];
+  Double_t simtHA[2];
+  Double_t simtHB[2];
+  
+  Double_t simPhiA[2];
+  Double_t simPhiB[2];
+  
+  Double_t XposA[2];
+  Double_t YposA[2];
+  Double_t ZposA[2];
 
-  Double_t XposB[nCrystals];
-  Double_t YposB[nCrystals];
-  Double_t ZposB[nCrystals];
+  Double_t XposB[2];
+  Double_t YposB[2];
+  Double_t ZposB[2];
   
   Float_t ThMin[nThbins];
   Float_t ThMax[nThbins];
