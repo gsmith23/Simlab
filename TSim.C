@@ -92,7 +92,10 @@ Int_t TSim::GetThetaBin(Float_t theta){
   Int_t bin = -1;
 
   for (Int_t i = 0 ; i < nThbins ; i++){
-    if ((theta > ThMin[i])&&(theta < ThMax[i])){
+    if ( 
+	(theta > ThMin[i])  &&
+	(theta < ThMax[i])
+	 ){
       bin = i;
     }
   }
@@ -440,15 +443,17 @@ Int_t  TSim::SortEvents(TString fileNumber){
       mintHAErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j] + (sigmaPar*sigmaA[j]*Sqrt(CrystEnergyDep[j])));
       maxtHBErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals] - (sigmaPar*sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals])));
       mintHBErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals] + (sigmaPar*sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals])));
- 
+      
+      nb_ComptA[j] = nb_Compt[j];
+      nb_ComptB[j] = nb_Compt[j + nCrystals];
+      
+      // same for all array elements
+      // to do: make single variable
       simtHA[j] = ThetaA_1st;
       simtHB[j] = ThetaB_1st;
 
       simPhiA[j] = PhiA_1st;
       simPhiB[j] = PhiB_1st;
-      
-      nb_ComptA[j] = nb_Compt[j];
-      nb_ComptB[j] = nb_Compt[j + nCrystals];
       
       XposA[j] = XposA_1st;
       YposA[j] = YposA_1st;
@@ -576,8 +581,14 @@ Float_t TSim::CrystalToPhi(Int_t crystal){
 
   //!! using only 5 crystals
   //works only for a particular detector geometry
-  Float_t crystalToPhi[9] = {-1.,0.,-1.,270.,-1.,90.,-1.,180.,-1.};
-
+  Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
+			      270. ,  -1. , 90.,
+			      -1.  , 180. , -1.};
+  //!!!  
+//   Float_t crystalToPhi[9] = { -45.  ,  -1  ,  45.,
+// 			      -1.   ,  -1. ,  -1.,
+// 			      -135. ,  -1. , 135.};
+  
   Float_t phi = crystalToPhi[crystal];
 
   return phi;
@@ -707,12 +718,14 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH1F * hThRes00_TL[nThbins];
   TH1F * hThRes90_TL[nThbins];
 
-  //!!!! Start Here
-  //TH1F * hDPhiRes00[nThbins];
-  //TH1F * hDPhiRes90[nThbins];
+  TH1F * hDPhiRes00[nThbins];
+  TH1F * hDPhiRes90[nThbins];
+  
+  TH1F * hDPhiRes00_TL[nThbins];
+  TH1F * hDPhiRes90_TL[nThbins];
   
   TString hTitle = "hThRes00";
-
+  
   for( Int_t th = 0 ; th < nThbins ; th++){
     
     hTitle.Form("hThRes00_%d",th);
@@ -731,12 +744,22 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hThRes90_TL[th] = new TH1F(hTitle,hTitle,
 			       128, -10., 180.);
     
-    // hTitle.Form("hDPhiRes00_%d",th);
-//     hThRes00[th] = new TH1F(hTitle,hTitle,
-// 			    128, 0., 360.);
+    hTitle.Form("hDPhiRes00_%d",th);
+    hDPhiRes00[th] = new TH1F(hTitle,hTitle,
+			      64, -180.,180.);
     
+    hTitle.Form("hDPhiRes90_%d",th);
+    hDPhiRes90[th] = new TH1F(hTitle,hTitle,
+			      64, -180.,180.);
     
-  
+    hTitle.Form("hDPhiRes00_TL_%d",th);
+    hDPhiRes00_TL[th] = new TH1F(hTitle,hTitle,
+				 64, -180.,180.);
+    
+    hTitle.Form("hDPhiRes90_TL_%d",th);
+    hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
+				 64, -180.,180.);
+    
   }
   
   cout << endl;
@@ -814,7 +837,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     P_true_lab[j]  = 0.;
     Pq_true_lab[j] = 0.;
   }
-  
 
   Int_t   thBin  = -1;
   Float_t phiA   = -1;
@@ -823,11 +845,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   Int_t   indexB = -1;
   Float_t totEA  = 0;
   Float_t totEB  = 0;
-
+  
   // Float_t phiB_prev = -1;
   // Float_t phiB_this = -1;
 
   Float_t phiDiff = -10.;
+  Float_t dPhiXact = -999.;
   
   //Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
@@ -840,20 +863,20 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    indexB = -1;
    totEA  = 0;
    totEB  = 0;
-    
-    for (Int_t k=0; k<nCrystals; k++){
+   
+   for (Int_t k = 0; k < nCrystals; k++){
       totEA += EA[k];
       totEB += EB[k];
-    }
-    
-    // Select same theta bins and total energy
-    if (GetThetaBin(ltHA[4]) == GetThetaBin(ltHB[4]) &&
-	(totEA > 450) && (totEA < 550)               &&
-	(totEB > 450) && (totEB < 550)){
-      
-      thBin = GetThetaBin(ltHA[4]);
-      
-      for (Int_t i = 0 ; i < nCrystals ; i++){
+   }
+   
+   // Select same theta bins and total energy
+   if (GetThetaBin(ltHA[4]) == GetThetaBin(ltHB[4]) &&
+       (totEA > 450) && (totEA < 550)               &&
+       (totEB > 450) && (totEB < 550)){
+     
+     thBin = GetThetaBin(ltHA[4]);
+     
+     for (Int_t i = 0 ; i < nCrystals ; i++){
 	if ( (i!=4)                  && 
 	     (thBin>-1)              && 
 	     (ltHA[i]<ThMax[thBin])  &&
@@ -866,7 +889,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	     (ltHB[i]<ThMax[thBin])  &&
 	     (ltHB[i]>ThMin[thBin]) ){
 	  phiB = CrystalToPhi(i);
-	  indexB = i;}	
+	  indexB = i;
+	}	
       }
     } // end of : if (GetThetaBin(ltHA
     
@@ -920,21 +944,39 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       hMEdiff->Fill(etHB[indexB],maxtHBErr[indexB] - etHB[indexB]);
       
       phiDiff   = phiB - phiA;
-	
+      
+      dPhiXact  = simPhiA[4] + simPhiB[4];
+      if(dPhiXact < 0)
+	dPhiXact = dPhiXact + 360.;
+      
       if (phiDiff == 0.) {
+       
+	if (dPhiXact > 180.)
+	  dPhiXact = dPhiXact - 360. ;
 	
 	AsymMatrix[thBin][0] += 1;
 	n000++;
-
-	hThRes00[thBin]->Fill(simtHA[4]);	
+	
+	hThRes00[thBin]->Fill(simtHA[4]);
+	hDPhiRes00[thBin]->Fill(dPhiXact);	
       }
       if ((phiDiff == 90)||(phiDiff == -270)){
 	
 	AsymMatrix[thBin][1] += 1;
 	n090++;
 	
-	hThRes90[thBin]->Fill(simtHA[4]);	
-
+	hThRes90[thBin]->Fill(simtHA[4]);
+	
+	dPhiXact = dPhiXact-90.;
+	
+	if(dPhiXact < 0)
+	  dPhiXact = dPhiXact + 360.;
+	
+	if (dPhiXact > 180.)
+	  dPhiXact =  dPhiXact - 360. ;
+	
+	hDPhiRes90[thBin]->Fill(dPhiXact);
+	
       }
       if ((phiDiff == 180)||(phiDiff == -180)){
 	AsymMatrix[thBin][2] += 1;
@@ -942,16 +984,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if ((phiDiff == -90)||(phiDiff == 270)){
 	AsymMatrix[thBin][3] += 1;
 	n270++;}
-      
-      if (phiDiff == 0   ||
-	  phiDiff == 90  ||
-	  phiDiff == 180 ||
-	  phiDiff == 270   
-	  ){
-	// Calculate Weighted and Unweighted Rates
-	P_lab[thBin]   =  P_lab[thBin] + 1.0;
-	//Pq_lab[thBin] += Cos(2*dPhi_1st);
-      }
       
       // 'true lab' analysis
       if ( simtHA[4]<ThMax[thBin] && 
@@ -965,42 +997,34 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	   nb_ComptA[4] == 1.     && 
 	   nb_ComptB[4] == 1.    
 	   ){
-
-	
 	
 	if (phiDiff == 0.){
 	  AsymTrue[thBin][0] += 1;
 	  
 	  hThRes00_TL[thBin]->Fill(simtHA[4]);	
+	  hDPhiRes00_TL[thBin]->Fill(dPhiXact);	
 	  
 	}
 	if ((phiDiff == 90) || (phiDiff == -270)){
 	  AsymTrue[thBin][1] += 1;
 	  
 	  hThRes90_TL[thBin]->Fill(simtHA[4]);
+		  
+	  if      (phiDiff == 90)
+	    hDPhiRes90_TL[thBin]->Fill(dPhiXact);
+ 	  else if (phiDiff == -270)
+ 	    hDPhiRes90_TL[thBin]->Fill(dPhiXact);
+	  
 	}
 	if ((phiDiff == 180) || (phiDiff == -180))
 	  AsymTrue[thBin][2] += 1;
 	if ((phiDiff == -90) || (phiDiff == 270))
 	  AsymTrue[thBin][3] += 1;
-	
-	
-      if (phiDiff == 0   ||
-	  phiDiff == 90  ||
-	  phiDiff == 180 ||
-	  phiDiff == 270   
-	  ){
-	
-	// Calculate Weighted and Unweighted Rates
-	P_true_lab[thBin]  = P_true_lab[thBin] + 1.0;
-	//Pq_true_lab[thBin] += Cos(2*dPhi_1st);
-
-      }
-      
+		
       }
     }
   }
-
+  
   cout<<"Lab Asymmetry"<<endl;
   cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
   cout<<plotTheta[0]<<" - "<<AsymMatrix[0][0]<<" - "<<AsymMatrix[0][1]<<" - "<<AsymMatrix[0][2]<<" - "<<AsymMatrix[0][3]<<endl;
@@ -1022,16 +1046,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   cout<<plotTheta[5]<<" - "<<AsymTrue[5][0]<<" - "<<AsymTrue[5][1]<<" - "<<AsymTrue[5][2]<<" - "<<AsymTrue[5][3]<<endl;
   cout<<plotTheta[6]<<" - "<<AsymTrue[6][0]<<" - "<<AsymTrue[6][1]<<" - "<<AsymTrue[6][2]<<" - "<<AsymTrue[6][3]<<endl;
   cout<<plotTheta[7]<<" - "<<AsymTrue[7][0]<<" - "<<AsymTrue[7][1]<<" - "<<AsymTrue[7][2]<<" - "<<AsymTrue[7][3]<<endl;
-
-  // for(Int_t j = 0 ; j < nThbins; j++){ 
-//     cout << endl;
-//     cout << " bin            = " << j              << endl;
-//     cout << " P_lab[j]       = " << P_lab[j]       << endl;
-//     cout << " Pq_lab[j]      = " << Pq_lab[j]      << endl;
-//     cout << " P_true_lab[j]  = " << P_true_lab[j]  << endl;
-//     cout << " Pq_true_lab[j] = " << Pq_true_lab[j] << endl;
-//   }
-  
+    
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				1500,1000);
 
@@ -1075,51 +1090,78 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   canvas->Divide(4,2);
   
   for( Int_t th = 0 ; th < nThbins ; th++){
-  //for( Int_t th = 0 ; th < 4 ; th++){
-    
-    canvas->cd(th+1);
 
     hThRes00[th]->SetLineColor(kBlue);
+    hDPhiRes00[th]->SetLineColor(kBlue);
+
     hThRes90[th]->SetLineColor(kRed);
+    hDPhiRes90[th]->SetLineColor(kRed);
     
     hThRes00_TL[th]->SetLineColor(kBlue);
+    hDPhiRes00_TL[th]->SetLineColor(kBlue);
+    
     hThRes90_TL[th]->SetLineColor(kRed);
+    hDPhiRes90_TL[th]->SetLineColor(kRed);
     
     hThRes00[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
+    hDPhiRes00[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
+
     hThRes90[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
-    
+    hDPhiRes90[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
+
     hThRes00_TL[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
+    hDPhiRes00_TL[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
+    
     hThRes90_TL[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
+    hDPhiRes90_TL[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
     
     hThRes00[th]->GetYaxis()->SetTitle("Counts");
+    hDPhiRes00[th]->GetYaxis()->SetTitle("Counts");
+    
     hThRes90[th]->GetYaxis()->SetTitle("Counts");
-    
+    hDPhiRes90[th]->GetYaxis()->SetTitle("Counts");
+      
     hThRes00_TL[th]->GetYaxis()->SetTitle("Counts");
-    hThRes90_TL[th]->GetYaxis()->SetTitle("Counts");
+    hDPhiRes00_TL[th]->GetYaxis()->SetTitle("Counts");
     
-    hThRes90[th]->Draw("");
-    hThRes00[th]->Draw("same");  
+    hThRes90_TL[th]->GetYaxis()->SetTitle("Counts");
+    hDPhiRes90_TL[th]->GetYaxis()->SetTitle("Counts");
+    
   }    
   
-  sprintf(plotN,"../Plots/hThRes_%d.pdf",inputFileInt);
-  
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
+    hThRes90[th]->Draw("");
+    hThRes00[th]->Draw("same");  
+  }
   plotName = "../Plots/hThRes_" + inputFileNumber;
   plotName += ".pdf";
-
   canvas->SaveAs(plotName);
   
-  //canvas->Clear();
   for( Int_t th = 0 ; th < nThbins ; th++){
-    
     canvas->cd(th+1);
-    
     hThRes90_TL[th]->Draw("");
     hThRes00_TL[th]->Draw("same");  
   }
-
-  sprintf(plotN,"../Plots/hThRes_TL_%d.pdf",inputFileInt);
-
   plotName = "../Plots/hThRes_TL_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
+
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
+    hDPhiRes90[th]->Draw("");
+    hDPhiRes00[th]->Draw("same");  
+  }
+  plotName = "../Plots/hDPhiRes_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
+
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
+    hDPhiRes90_TL[th]->Draw("");
+    hDPhiRes00_TL[th]->Draw("same");  
+  }
+  plotName = "../Plots/hDPhiRes_TL_" + inputFileNumber;
   plotName += ".pdf";
   canvas->SaveAs(plotName);
   
@@ -1517,8 +1559,8 @@ void TSim::CalculateABC_True(){
       fABC_True[i][j] = fABC_True[i][j]/4.;
       pABC_True[i][j] = fABC_True[i][j]/fABC_True[i][bin000];
             
-      cout << " pABC_True["<< i << "][" << j << "] = " 
-	   <<  pABC_True[i][j] << endl;
+//       cout << " pABC_True["<< i << "][" << j << "] = " 
+// 	   <<  pABC_True[i][j] << endl;
     }
     
   } // end of: for(Int_t i = 0 ; i < nThbins ;
@@ -1552,19 +1594,19 @@ void TSim::CalculateABC_Lab(){
     fABC_Lab[i][1] -=  AsymMatrix[i][2];
     fABC_Lab[i][2] -=  AsymMatrix[i][3];
     
-    cout << endl;
-    for(Int_t j = 0 ; j < 3 ; j++){
-      //fABC_Lab[i][j] = 1.0*fABC_Lab[i][j]/4.;
-      pABC_Lab[i][j] = 1.0*fABC_Lab[i][j]/fABC_Lab[i][0];
+//     cout << endl;
+//     for(Int_t j = 0 ; j < 3 ; j++){
+//       //fABC_Lab[i][j] = 1.0*fABC_Lab[i][j]/4.;
+//       pABC_Lab[i][j] = 1.0*fABC_Lab[i][j]/fABC_Lab[i][0];
       
-      cout << " pABC_Lab["<< i << "][" << j << "] = " 
-	   <<  pABC_Lab[i][j] << endl;
-    }
+//       cout << " pABC_Lab["<< i << "][" << j << "] = " 
+// 	   <<  pABC_Lab[i][j] << endl;
+//     }
     
-    for(Int_t j = 0 ; j < 4 ; j++){
-      cout << " AsymMatrix["<< i << "][" << j << "] = " 
-	   <<  AsymMatrix[i][j] << endl;
-    }
+//     for(Int_t j = 0 ; j < 4 ; j++){
+//       cout << " AsymMatrix["<< i << "][" << j << "] = " 
+// 	   <<  AsymMatrix[i][j] << endl;
+//     }
     
   }
 }
@@ -1744,7 +1786,8 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
       thetaA   = ThetaA_2nd;
       thetaB   = ThetaB_1st;
       thetaABS = ThetaA_1st;
-      
+      //!!!!!
+      // warning - check it is never negative
       dPhi =  PhiB_1st + PhiA_2nd;
     }
     
@@ -1763,6 +1806,8 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 	thetaB   = ThetaB_2nd;
 	thetaABS = ThetaB_1st;
 	
+	//!!!!!
+	// warning - check it is never negative
 	dPhi = PhiB_2nd + PhiA_1st;	
       }
     }
