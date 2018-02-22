@@ -413,13 +413,6 @@ Int_t  TSim::SortEvents(TString fileNumber){
   for(Int_t i = 0 ; i < nEvents ; i++){ 
     simDataTree->GetEvent(i);
     
-    cout << endl;
-    cout << endl;
-    cout << endl;
-
-    cout << endl;
-    cout << endl;
-
     Double_t CrystEnergyDep[18] = {edep0,edep1,edep2,
 				   edep3,edep4,edep5,
 				   edep6,edep7,edep8,
