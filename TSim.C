@@ -413,13 +413,6 @@ Int_t  TSim::SortEvents(TString fileNumber){
   for(Int_t i = 0 ; i < nEvents ; i++){ 
     simDataTree->GetEvent(i);
     
-    cout << endl;
-    cout << endl;
-    cout << endl;
-
-    cout << endl;
-    cout << endl;
-
     Double_t CrystEnergyDep[18] = {edep0,edep1,edep2,
 				   edep3,edep4,edep5,
 				   edep6,edep7,edep8,
@@ -613,16 +606,14 @@ Bool_t TSim::CentralZ(Double_t posZ){
 
 Float_t TSim::CrystalToPhi(Int_t crystal){
 
-  //!! using only 5 crystals
-  //works only for a particular detector geometry
   Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
-			      270. ,  -1. , 90.,
-			      -1.  , 180. , -1.};
+  			      270. ,  -1. , 90.,
+  			      -1.  , 180. , -1.};
   
-  ///!!! temporary
+  // //!!! use corner crystals
   // Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
-// 			       -1. ,  -1. , -1. ,
-// 			       270.,  -1. , 180. };
+  // 			       -1. ,  -1. , -1. ,
+  // 			       270.,  -1. , 180. };
   
   Float_t phi = crystalToPhi[crystal];
 
