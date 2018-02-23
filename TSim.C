@@ -751,6 +751,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH1F * hDPhiRes00_TL[nThbins];
   TH1F * hDPhiRes90_TL[nThbins];
   
+  TH1F * hBeta[nThbins];
+  
   TString hTitle = "hThRes00";
   
   for( Int_t th = 0 ; th < nThbins ; th++){
@@ -786,7 +788,9 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hTitle.Form("hDPhiRes90_TL_%d",th);
     hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
 				 32, -180.,180.);
-    
+  
+    hBeta[th] = new TH1F(hTitle,hTitle,
+			 32,-0.0, 10.0);
   }
   
   cout << endl;
