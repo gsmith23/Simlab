@@ -566,6 +566,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
+  //!!
   Float_t crystalHalfSizeYZ = 2.0;
   
   posYZ = Abs(posYZ);
@@ -606,14 +607,14 @@ Bool_t TSim::CentralZ(Double_t posZ){
 
 Float_t TSim::CrystalToPhi(Int_t crystal){
 
-  Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
-			      270. ,  -1. , 90.,
-			      -1.  , 180. , -1.};
+//   Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
+// 			      270. ,  -1. , 90.,
+// 			      -1.  , 180. , -1.};
   
   // !! Use corner crystals
-  // Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
-// 			       -1. ,  -1. , -1. ,
-// 			       270.,  -1. , 180. };
+  Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
+			       -1. ,  -1. , -1. ,
+			       270.,  -1. , 180. };
   
   Float_t phi = crystalToPhi[crystal];
 
@@ -1236,6 +1237,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   // A(90) = P(90)/P(0) 
   Int_t   dPhiDiff = 90;
   
+  Float_t thetaLowEdge  = 10.;
+  Float_t thetaHighEdge = 170.;
+  
   CalculateABC_Lab();
   CalculateABC_True();
   
@@ -1280,6 +1284,8 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   Float_t AsTrueR[nThbins] = {0.};
   Float_t AeTrueR[nThbins] = {0.};
   
+  Float_t mu[nThbins]={0};
+  Float_t muE[nThbins]={0};
 
   for (Int_t file = 0 ; file < nFiles ; file++){
     
@@ -1288,6 +1294,10 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
     for (Int_t i = 0 ; i < nThbins ; i++){
       if (AsymMatrix[i][0] != 0){
+	
+	mu[i] = (AsymMatrix[i][1] - AsymMatrix[i][0]);
+	mu[i] = mu[i]/(AsymMatrix[i][1] + AsymMatrix[i][0]);
+	
 	if (dPhiDiff  == 90){
 	  AsPhiDiff[i] = AsymMatrix[i][1]/AsymMatrix[i][0];
 	  AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
@@ -1405,6 +1415,8 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
   TGraphErrors *grAsym[3];
   
+  TGraphErrors * grMu = new TGraphErrors(nThbins,plotTheta,mu,0,muE);
+
   if     (nFiles==1)
     grAsym[0] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
   else if(nFiles == 2)
@@ -1497,7 +1509,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   maxY =  0.6;
   minY = -0.4;
     
-  hr = canvas->DrawFrame(10,minY,170,maxY);
+  hr = canvas->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
   hr->GetYaxis()->SetTitle("cos(2#Delta#phi) coefficient");
   hr->GetYaxis()->SetTitleOffset(0.7);
@@ -1513,6 +1525,21 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     
   canvas->SaveAs(plotName);
   
+    // mu plot
+  hr = canvas->DrawFrame(thetaLowEdge,-0.2,
+			  thetaHighEdge,0.5);
+  
+  hr->GetXaxis()->SetTitle("#theta (deg)");
+
+  sprintf(yAxis,"(N(%d^{o})-N(0^{o})/(N(%d^{o})+N(0^{o})",
+	  dPhiDiff,dPhiDiff);
+  hr->GetYaxis()->SetTitle(yAxis);
+
+  plotName.Form("../Plots/Mu_%d_%d.pdf",inputFileInt1,dPhiDiff);
+
+  grMu->Draw("P E");
+
+  canvas->SaveAs(plotName);
   
   cout << "  GraphAsymmetryLab   " << endl;
   cout << "--------------------- " << endl;
@@ -2118,9 +2145,11 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   // Theory Curve
   Float_t aTheory[nThbins];
-  //half resolution in phi
+  
+  // half resolution in phi: from delta phi binning
   Float_t alpha1 = DegToRad()*halfBinSize/Sqrt(2);
-  //half resolution in theta
+  
+  // half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
   
   Char_t theoryLegendTitle[128];
@@ -2132,7 +2161,9 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   alpha1 = RadToDeg()*alpha1;
   
-  sprintf(theoryLegendTitle, "theory curve #alpha_{#phi} = %.1f^{o}", alpha1);  
+  sprintf(theoryLegendTitle,
+	  "theory curve #alpha_{#phi} = %.1f^{o}",
+	  alpha1);  
   
   Float_t maxY = 1.8;
   Float_t minY = 0.8;

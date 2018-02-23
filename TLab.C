@@ -1054,6 +1054,8 @@ void TLab::GraphAsymmetry(Char_t option){
   // !!to do - access alpha1 from user input
 
   Float_t alpha1   = DegToRad()*26.0*2.355/2.;
+  // 
+  alpha1 = 50.;
   
   // half resolution in theta
 
