@@ -1055,9 +1055,6 @@ void TLab::GraphAsymmetry(Char_t option){
 
   Float_t alpha1   = DegToRad()*26.0*2.355/2.;
   
-  //!!! very temporary
-  //alpha1 = alpha1*1.5;
-
   // half resolution in theta
 
   Float_t semiSpan = thetaBinWidth/2.*DegToRad()*2;
@@ -1247,9 +1244,6 @@ void TLab::GraphAsymmetry(Char_t option){
   
   TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,0,muE);
   
-  //!!!!!!!!!!!!!!!!!
-  // temporary 
-  //!!!!!!!!!!!!!!!
   if( divideByUnPol)
     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
   else

@@ -606,16 +606,14 @@ Bool_t TSim::CentralZ(Double_t posZ){
 
 Float_t TSim::CrystalToPhi(Int_t crystal){
 
-  //!! using only 5 crystals
-  //works only for a particular detector geometry
-  Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
-			      270. ,  -1. , 90.,
-			      -1.  , 180. , -1.};
+//   Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
+// 			      270. ,  -1. , 90.,
+// 			      -1.  , 180. , -1.};
   
-  ///!!! temporary
-  // Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
-// 			       -1. ,  -1. , -1. ,
-// 			       270.,  -1. , 180. };
+  // !! Use corner crystals
+  Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
+			       -1. ,  -1. , -1. ,
+			       270.,  -1. , 180. };
   
   Float_t phi = crystalToPhi[crystal];
 
