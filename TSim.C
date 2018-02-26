@@ -799,7 +799,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 			 32,-0.0, 5.0);
     
     hTitle.Form("hXYA_%d",th);
-    hXY00[th] = new TH2F(hTitle,hTitle,
+    hXY[th] = new TH2F(hTitle,hTitle,
 			 10, 25.0, 55.0,
 			 10,-2.5, 2.5);
     
