@@ -793,20 +793,26 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hTitle.Form("hDPhiRes90_TL_%d",th);
     hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
 				 32, -180.,180.);
-  
+    
     hTitle.Form("hBeta_%d",th);
     hBeta[th] = new TH1F(hTitle,hTitle,
 			 32,-0.0, 5.0);
     
     hTitle.Form("hXYA_%d",th);
+    hXY00[th] = new TH2F(hTitle,hTitle,
+			 10, 25.0, 55.0,
+			 10,-2.5, 2.5);
+    
+    hTitle.Form("hXYA_%d",th);
     hXY[th] = new TH2F(hTitle,hTitle,
-		       16, 25.0, 55.0,
-		       16,-2.5, 2.5);
+		       10, 25.0, 55.0,
+		       10,-2.5, 2.5);
+    
     
     hTitle.Form("hYZ_%d",th);
     hYZ[th] = new TH2F(hTitle,hTitle,
-		       16,-2.5, 2.5,
-		       16,-2.5, 2.5);
+		       10,-2.5, 2.5,
+		       10,-2.5, 2.5);
   }
   
   cout << endl;
@@ -900,8 +906,9 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
   Float_t phiDiff = -10.;
   Float_t dPhiXact = -999.;
-  
-  //Event loop
+  Float_t betaA = -99;
+
+  // Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     sortDataTree->GetEvent(ientry);
       
@@ -990,12 +997,16 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       hMEdiff->Fill(etHB[4],maxtHBErr[4] - etHB[4]);
       hMEdiff->Fill(etHB[indexB],maxtHBErr[indexB] - etHB[indexB]);
       
-//       betaA = YposA
-//       hBeta[thBin]->Fill(betaA);
+      betaA = (YposA[0]*YposA[0] + ZposA[0]*ZposA[0]);
+      betaA = Sqrt(betaA);
+      betaA = betaA/XposA[0];
+      betaA = ATan(betaA);
+      betaA = betaA*RadToDeg();
       
       phiDiff   = phiB - phiA;
       
       dPhiXact  = simPhiA[0] + simPhiB[0];
+      
       if(dPhiXact < 0)
 	dPhiXact = dPhiXact + 360.;
       
@@ -1003,6 +1014,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	
 	hXY[thBin]->Fill(Abs(XposA[0]),YposA[0]);
 	hYZ[thBin]->Fill(YposA[0],ZposA[0]);
+	hBeta[thBin]->Fill(betaA);
 	
 	if (dPhiXact > 180.)
 	  dPhiXact = dPhiXact - 360. ;
@@ -1241,7 +1253,16 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   plotName = "../Plots/hYZ_" + inputFileNumber;
   plotName += ".pdf";
   canvas->SaveAs(plotName);
+  
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
+    hBeta[th]->Draw("colz");
+  }
+  plotName = "../Plots/hBeta_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
 
+  
   
 
   return 0;
