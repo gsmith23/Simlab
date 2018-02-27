@@ -567,7 +567,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   Bool_t centralYZ = kFALSE;
   
   //!!
-  Float_t crystalHalfSizeYZ = 1.0;
+  Float_t crystalHalfSizeYZ = 2.0;
   
   posYZ = Abs(posYZ);
 
@@ -757,6 +757,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
   // angle to normal of detector surface
   TH1F * hBeta[nThbins];
+  TH1F * hBeta_TL[nThbins];
   
   TH2F * hYZ[nThbins];
 
@@ -811,6 +812,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hTitle.Form("hBeta_%d",th);
     hBeta[th] = new TH1F(hTitle,hTitle,
 			 32,-0.0, 5.0);
+
+    hTitle.Form("hBeta_TL_%d",th);
+    hBeta_TL[th] = new TH1F(hTitle,hTitle,
+			    32,-0.0, 5.0);
     
     hTitle.Form("hXYA_%d",th);
     hXY[th] = new TH2F(hTitle,hTitle,
@@ -1030,11 +1035,13 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
       hDPhi[thBin]->Fill(dPhiXact);
       
+      hBeta[thBin]->Fill(betaA);
+
       if (phiDiff == 0.) {
 	
 	hXY[thBin]->Fill(Abs(XposA[0]),YposA[0]);
 	hYZ[thBin]->Fill(YposA[0],ZposA[0]);
-	hBeta[thBin]->Fill(betaA);
+	
 	
 	AsymMatrix[thBin][0] += 1;
 	n000++;
@@ -1188,8 +1195,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   for( Int_t th = 0 ; th < nThbins ; th++){
 
     hDPhi[th]->SetLineColor(kBlue);
+    hDPhi[th]->SetMinimum(0.0);
+
     hDPhi_TL[th]->SetLineColor(kBlue);
-    
+    hDPhi_TL[th]->SetMinimum(0.0);
+
     hDPhiRes90[th]->Scale(1./2);
     hDPhiRes90_TL[th]->Scale(1./2);
       
