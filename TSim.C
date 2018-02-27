@@ -1041,9 +1041,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	
 	hThRes00[thBin]->Fill(simtHA[0]);
 	
-// 	if (dPhiXact2 > 180.)
-// 	  dPhiXact2 = dPhiXact2 - 360. ;
-	
 	dPhiXact2 = dPhiXact2 + 90.;
 	if(dPhiXact2 > 360.)
 	  dPhiXact2 = dPhiXact2 - 360.;
@@ -1058,14 +1055,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	
 	hThRes90[thBin]->Fill(simtHA[0]);
 	
-	//dPhiXact2 = dPhiXact2-90.;
-	
-// 	if(dPhiXact2 < 0)
-// 	  dPhiXact2 = dPhiXact2 + 360.;
-	
-// 	if (dPhiXact2 > 180.)
-// 	  dPhiXact2 =  dPhiXact2 - 360. ;
-	
 	hDPhiRes90[thBin]->Fill(dPhiXact2);
 	
       }
@@ -1073,6 +1062,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	AsymMatrix[thBin][2] += 1;
 	n180++;}
       if ((phiDiff == -90)||(phiDiff == 270)){
+	
+	dPhiXact2 = dPhiXact2 - 180.;
+	
+	hDPhiRes90[thBin]->Fill(dPhiXact2);	
+	
 	AsymMatrix[thBin][3] += 1;
 	n270++;}
       
@@ -1112,21 +1106,20 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	  AsymTrue[thBin][1] += 1;
 	  
 	  hThRes90_TL[thBin]->Fill(simtHA[0]);
-		  
-	  if      (phiDiff == 90)
-	    hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
- 	  else if (phiDiff == -270)
- 	    hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
-	  
+	  hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
+	    
 	}
 	if ((phiDiff == 180) || (phiDiff == -180))
 	  AsymTrue[thBin][2] += 1;
-	if ((phiDiff == -90) || (phiDiff == 270))
+	if ((phiDiff == -90) || (phiDiff == 270)){
+	  hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
 	  AsymTrue[thBin][3] += 1;
-		
+	}
+	
       }
     }
   }
+  
   
   cout<<"Lab Asymmetry"<<endl;
   cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
@@ -1196,7 +1189,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
     hDPhi[th]->SetLineColor(kBlue);
     hDPhi_TL[th]->SetLineColor(kBlue);
-
+    
+    hDPhiRes90[th]->Scale(1./2);
+    hDPhiRes90_TL[th]->Scale(1./2);
+      
     hThRes00[th]->SetLineColor(kBlue);
     hDPhiRes00[th]->SetLineColor(kBlue);
 
