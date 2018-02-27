@@ -28,7 +28,10 @@ Int_t main(int argc, char **argv){
        ( strcmp(argv[1],"2")==0 && argc != 3) &&
        ( strcmp(argv[1],"2")==0 && argc != 4) 
        )                                         ||
-      ( strcmp(argv[1],"3")==0 && argc != 4)     ||
+      (
+       ( strcmp(argv[1],"3")==0 && argc != 4) &&
+       ( strcmp(argv[1],"3")==0 && argc != 5) 
+       )                                         ||
       ( strcmp(argv[1],"4")==0 && argc != 4)     ||
       ( strcmp(argv[1],"5")==0 && argc != 3)     ||
       ( strcmp(argv[1],"6")==0 && argc != 2)     ||
@@ -353,9 +356,12 @@ Int_t main(int argc, char **argv){
     cout << " Calculating & Plotting Asymmetry " << endl;
     
     TLab *data;
-
-    data = new TLab(argv[2],argv[3]);
-
+    
+    if     (argc == 4)
+      data = new TLab(argv[2],argv[3]);
+    else if(argc == 5)
+      data = new TLab(argv[2],argv[3],argv[4]);
+    
     Char_t overwrite = 'n';
     Char_t option    = 'b';
     

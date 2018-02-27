@@ -567,7 +567,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   Bool_t centralYZ = kFALSE;
   
   //!!
-  Float_t crystalHalfSizeYZ = 2.0;
+  Float_t crystalHalfSizeYZ = 1.0;
   
   posYZ = Abs(posYZ);
 
@@ -1214,7 +1214,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   
   canvas->Clear();
   
-  canvas->Divide(4,2);
+  canvas->Divide(5,2);
   
   for( Int_t th = 0 ; th < nThbins ; th++){
 
@@ -1543,10 +1543,15 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
   Float_t alpha1 = DegToRad()*26.0*2.34/2.;
 
+  //!! 
+  alpha1 = DegToRad()*45.;
 
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
-
+    
+  //!!
+  //semiSpan = DegToRad()*(ThMax[0] - ThMin[0]);
+  
   TTheory *theory = new TTheory();
 
   //calculating theory curve
@@ -1572,7 +1577,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
   TH1F *hr;
   
-  Float_t maxY = 4.0;
+  Float_t maxY = 2.0;
 
   if(dPhiDiff==180){
     maxY = 6.0;

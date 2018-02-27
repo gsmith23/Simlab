@@ -21,7 +21,6 @@ class TLab : public TObject{
   //======================
   
   void SetFilenames(TString);
-  void SetFilenames(TString,TString,TString);
 
   Bool_t RawROOTFileExists();
 
@@ -160,6 +159,7 @@ class TLab : public TObject{
   
   Int_t runNumberInt;
   TString simRun;
+  TString simRunU;
 
   ifstream *inData;
 

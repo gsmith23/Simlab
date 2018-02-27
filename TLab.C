@@ -26,20 +26,14 @@ TLab::TLab(TString runNumber,
 // option for use with multiple raw files
 // per run
 TLab::TLab(TString runNumber,
-	   TString fileNumStart,
-	   TString fileNumFinish) {
+	   TString simNumber,
+	   TString simNumberU) {
   
-  cout << endl;
-  cout << " fileNumStart  = " << fileNumStart  << endl;
-  cout << " fileNumFinish = " << fileNumFinish << endl;
+  simRun  = simNumber;
+  simRunU = simNumberU;
+  SetFilenames(runNumber);
   
-  fileNumStart  = "_" + fileNumStart;
-  fileNumFinish = "_" + fileNumFinish;
   
-  SetFilenames(runNumber,
-	       fileNumStart,
-	       fileNumFinish);
-
 }
 
 //-------------------------------------------------
@@ -72,36 +66,6 @@ void TLab::SetFilenames(TString runNumber){
 
 }
 
-void TLab::SetFilenames(TString runNumber,
-			TString fileNumStart,
-			TString fileNumFinish) {
-
-  cout << endl;
-  cout << " TLab object has been created " << endl;
-
-  runNumberInt = runNumber.Atoi();
-  
-  cout << endl;
-  cout << " Run Number    = " << runNumberInt  << endl;
-
-  textFileName    = runNumber + fileNumStart;
-  rootFileRawName = runNumber + fileNumStart;  
-  rootFileCalName = runNumber + fileNumStart;
-
-  textFileName    = textFileName    + fileNumFinish;
-  rootFileRawName = rootFileRawName + fileNumFinish;  
-  rootFileCalName = rootFileCalName + fileNumFinish;
-
-  textFileName    = textFileName    + ".txt";
-  rootFileRawName = rootFileRawName + ".root";  
-  rootFileCalName = rootFileCalName + ".root";
-  
-  textFileName    = "../Data/run" + textFileName;
-  rootFileRawName = "../Data/run" + rootFileRawName;
-  rootFileCalName = "../Data/cal" + rootFileCalName;
-
-  cout << " rootFileRawName = " << rootFileRawName << endl;
-}
 
 /** Public member functions *********/
 
@@ -1040,12 +1004,11 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
 
   
-  Float_t maxY = 2.5;
-  Float_t minY = 0.5;
+  Float_t maxY = 1.8;
+  Float_t minY = 0.8;
 
   if(dPhiDiff==180)
     maxY = 6.0;
-  
   
   // Theory curve
   Float_t aTheory[nThBins];
@@ -1053,10 +1016,11 @@ void TLab::GraphAsymmetry(Char_t option){
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
 
-  Float_t alpha1   = DegToRad()*26.0*2.355/2.;
-  // 
-  alpha1 = 50.;
-  
+  // 35.0 is result from Chloe Schoolings fits
+  // are likely an underestimate due to distribution
+  // wings
+  Float_t alpha1   = DegToRad()*35.0*2.355/2.;
+    
   // half resolution in theta
 
   Float_t semiSpan = thetaBinWidth/2.*DegToRad()*2;
@@ -1074,6 +1038,13 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimE[nThBins]={0};
   Float_t aSimTrue[nThBins]={0};
   Float_t aSimTrueE[nThBins]={0};
+  
+  Float_t aSimU[nThBins]={0};
+  Float_t aSimUE[nThBins]={0};
+  Float_t aSimUTrue[nThBins]={0};
+  Float_t aSimUTrueE[nThBins]={0};
+  
+
   Float_t AsPhiDiffR[nThBins]={0};
   Float_t AePhiDiffR[nThBins]={0};
 
@@ -1164,27 +1135,62 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << endl;
     cout << " Calculating theory curve " << endl;
     cout << " and simulation results ... " << endl;
-    TSim *simData = new TSim(simRun);
-    simData->CalculateAsymmetryLab(simRun);
-
+    TSim *simData ;
+      
+    if(divideByUnPol){
+      simData = new TSim(simRun,simRunU);
+      
+      // unpolarised first
+      simData->CalculateAsymmetryLab(simRunU);
+    }
+    else{
+      simData = new TSim(simRun);
+      simData->CalculateAsymmetryLab(simRun);
+    }
+    
     for(Int_t i = 0 ; i < nThBins ; i++){
       plotTheta[i] = plotTheta[i]*DegToRad();
       
-      aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);            
+      aTheory[i]   = theory->rho2(plotTheta[i],semiSpan,alpha1);            
       plotTheta[i] = plotTheta[i]*RadToDeg();
 
-      aSim[i]    = simData->GetAsymLab(dPhiDiff,i);
-      aSimE[i]   = simData->GetAsymLabErr(dPhiDiff,i);
+      aSim[i]        = simData->GetAsymLab(dPhiDiff,i);
+      aSimE[i]       = simData->GetAsymLabErr(dPhiDiff,i);
       aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
       aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
       
-      //AsPhiDiffR[i]= AsPhiDiffR[i]/1.3;
-      
-      //AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i])*1.3;
       AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i]);
-      
       AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
+    
+      if(divideByUnPol){
+	aSimU[i]      = aSim[i];
+	aSimUE[i]     = aSimE[i];
+	aSimUTrue[i]  = aSimTrue[i];
+	aSimUTrueE[i] = aSimTrueE[i];
+      }
+    
+    }
+    
+    if(divideByUnPol){
       
+      // the polarised data
+      simData->CalculateAsymmetryLab(simRun);
+      
+      for(Int_t i = 0 ; i < nThBins ; i++){
+	aSim[i]        = simData->GetAsymLab(dPhiDiff,i);
+	aSimE[i]       = simData->GetAsymLabErr(dPhiDiff,i);
+	aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
+	aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
+	
+	// calculate the errors first
+	aSimE[i] = (aSim[i]/aSimU[i])*Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
+	
+	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i])*Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/(aSimUTrue[i]*aSimUTrue[i]) + aSimTrueE[i]*aSimTrueE[i]/(aSimTrue[i]*aSimTrue[i]));
+	
+	// now the actual values
+	aSim[i]  = aSim[i]/aSimU[i];
+	aSimTrue[i]  = aSimTrue[i]/aSimUTrue[i];
+      }
     }
 
   }// end of:  if( option=='t' || option=='T'
