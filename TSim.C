@@ -567,7 +567,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   Bool_t centralYZ = kFALSE;
   
   //!!
-  Float_t crystalHalfSizeYZ = 2.0;
+  Float_t crystalHalfSizeYZ = 1.0;
   
   posYZ = Abs(posYZ);
 
@@ -738,19 +738,23 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH2F* hMEdiff = new TH2F("hMEdiff","max/min - energy theta",
 			   160,10,170,120,-50,70);
 
+
+  TH1F * hDPhi[nThbins];
+  TH1F * hDPhi_TL[nThbins];
   
-  TH1F * hThRes00[nThbins];
-  TH1F * hThRes90[nThbins];
-
-  TH1F * hThRes00_TL[nThbins];
-  TH1F * hThRes90_TL[nThbins];
-
   TH1F * hDPhiRes00[nThbins];
   TH1F * hDPhiRes90[nThbins];
   
   TH1F * hDPhiRes00_TL[nThbins];
   TH1F * hDPhiRes90_TL[nThbins];
+    
+  TH1F * hThRes00[nThbins];
+  TH1F * hThRes90[nThbins];
+
+  TH1F * hThRes00_TL[nThbins];
+  TH1F * hThRes90_TL[nThbins];
   
+
   // angle to normal of detector surface
   TH1F * hBeta[nThbins];
   
@@ -761,6 +765,32 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TString hTitle = "hThRes00";
   
   for( Int_t th = 0 ; th < nThbins ; th++){
+    
+    hTitle.Form("hDPhi_%d",th);
+    hDPhi[th] = new TH1F(hTitle,hTitle,
+			 32, 0.,360.);
+
+    hTitle.Form("hDPhi_TL_%d",th);
+    hDPhi_TL[th] = new TH1F(hTitle,hTitle,
+			 32, 0.,360.);
+    
+
+    hTitle.Form("hDPhiRes00_%d",th);
+    hDPhiRes00[th] = new TH1F(hTitle,hTitle,
+			      32, 0.,360.);
+    
+    hTitle.Form("hDPhiRes90_%d",th);
+    hDPhiRes90[th] = new TH1F(hTitle,hTitle,
+			      32, 0.,360.);
+    
+    hTitle.Form("hDPhiRes00_TL_%d",th);
+    hDPhiRes00_TL[th] = new TH1F(hTitle,hTitle,
+				 32, 0.,360.);
+    
+    hTitle.Form("hDPhiRes90_TL_%d",th);
+    hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
+				 32, 0.,360.);
+
     
     hTitle.Form("hThRes00_%d",th);
     hThRes00[th] = new TH1F(hTitle,hTitle,
@@ -778,22 +808,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hThRes90_TL[th] = new TH1F(hTitle,hTitle,
 			       128, -10., 180.);
     
-    hTitle.Form("hDPhiRes00_%d",th);
-    hDPhiRes00[th] = new TH1F(hTitle,hTitle,
-			      32, -180.,180.);
-    
-    hTitle.Form("hDPhiRes90_%d",th);
-    hDPhiRes90[th] = new TH1F(hTitle,hTitle,
-			      32, -180.,180.);
-    
-    hTitle.Form("hDPhiRes00_TL_%d",th);
-    hDPhiRes00_TL[th] = new TH1F(hTitle,hTitle,
-				 32, -180.,180.);
-    
-    hTitle.Form("hDPhiRes90_TL_%d",th);
-    hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
-				 32, -180.,180.);
-    
     hTitle.Form("hBeta_%d",th);
     hBeta[th] = new TH1F(hTitle,hTitle,
 			 32,-0.0, 5.0);
@@ -802,12 +816,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hXY[th] = new TH2F(hTitle,hTitle,
 			 10, 25.0, 55.0,
 			 10,-2.5, 2.5);
-    
-    hTitle.Form("hXYA_%d",th);
-    hXY[th] = new TH2F(hTitle,hTitle,
-		       10, 25.0, 55.0,
-		       10,-2.5, 2.5);
-    
     
     hTitle.Form("hYZ_%d",th);
     hYZ[th] = new TH2F(hTitle,hTitle,
@@ -898,15 +906,15 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   Int_t   indexB = -1;
   Float_t totEA  = 0;
   Float_t totEB  = 0;
-
   
-
   // Float_t phiB_prev = -1;
   // Float_t phiB_this = -1;
 
   Float_t phiDiff = -10.;
   Float_t dPhiXact = -999.;
+  Float_t dPhiXact2 = -999.;
   Float_t betaA = -99;
+  Float_t betaB = -99;
 
   // Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
@@ -919,6 +927,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    indexB = -1;
    totEA  = 0;
    totEB  = 0;
+   betaA = -99;
+   betaB = -99;
    
    for (Int_t k = 0; k < nCrystals; k++){
       totEA += EA[k];
@@ -1002,6 +1012,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       betaA = betaA/XposA[0];
       betaA = ATan(betaA);
       betaA = betaA*RadToDeg();
+
+      betaB = (YposB[0]*YposB[0] + ZposB[0]*ZposB[0]);
+      betaB = Sqrt(betaB);
+      betaB = betaB/XposB[0];
+      betaB = ATan(betaB);
+      betaB = betaB*RadToDeg();
       
       phiDiff   = phiB - phiA;
       
@@ -1010,20 +1026,30 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if(dPhiXact < 0)
 	dPhiXact = dPhiXact + 360.;
       
+      dPhiXact2 = dPhiXact;
+
+      hDPhi[thBin]->Fill(dPhiXact);
+      
       if (phiDiff == 0.) {
 	
 	hXY[thBin]->Fill(Abs(XposA[0]),YposA[0]);
 	hYZ[thBin]->Fill(YposA[0],ZposA[0]);
 	hBeta[thBin]->Fill(betaA);
 	
-	if (dPhiXact > 180.)
-	  dPhiXact = dPhiXact - 360. ;
-	
 	AsymMatrix[thBin][0] += 1;
 	n000++;
 	
 	hThRes00[thBin]->Fill(simtHA[0]);
-	hDPhiRes00[thBin]->Fill(dPhiXact);	
+	
+// 	if (dPhiXact2 > 180.)
+// 	  dPhiXact2 = dPhiXact2 - 360. ;
+	
+	dPhiXact2 = dPhiXact2 + 90.;
+	if(dPhiXact2 > 360.)
+	  dPhiXact2 = dPhiXact2 - 360.;
+	
+	hDPhiRes00[thBin]->Fill(dPhiXact2);	
+	
       }
       if ((phiDiff == 90)||(phiDiff == -270)){
 	
@@ -1032,15 +1058,15 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	
 	hThRes90[thBin]->Fill(simtHA[0]);
 	
-	dPhiXact = dPhiXact-90.;
+	//dPhiXact2 = dPhiXact2-90.;
 	
-	if(dPhiXact < 0)
-	  dPhiXact = dPhiXact + 360.;
+// 	if(dPhiXact2 < 0)
+// 	  dPhiXact2 = dPhiXact2 + 360.;
 	
-	if (dPhiXact > 180.)
-	  dPhiXact =  dPhiXact - 360. ;
+// 	if (dPhiXact2 > 180.)
+// 	  dPhiXact2 =  dPhiXact2 - 360. ;
 	
-	hDPhiRes90[thBin]->Fill(dPhiXact);
+	hDPhiRes90[thBin]->Fill(dPhiXact2);
 	
       }
       if ((phiDiff == 180)||(phiDiff == -180)){
@@ -1066,16 +1092,20 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	  CentralYZ(ZposA[0])    &&
 	  CentralYZ(YposB[0])    && 
 	  CentralYZ(ZposB[0])   
+	  //betaA < 1.0 &&
+	  //betaB < 1.0
 	  // nb_ComptA[4] == 1.     && 
 // 	  nb_ComptB[4] == 1.    
 	  
 	  ){
+
+	hDPhi_TL[thBin]->Fill(dPhiXact);
 	
 	if (phiDiff == 0.){
 	  AsymTrue[thBin][0] += 1;
 	  
 	  hThRes00_TL[thBin]->Fill(simtHA[0]);	
-	  hDPhiRes00_TL[thBin]->Fill(dPhiXact);	
+	  hDPhiRes00_TL[thBin]->Fill(dPhiXact2);	
 	  
 	}
 	if ((phiDiff == 90) || (phiDiff == -270)){
@@ -1084,9 +1114,9 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	  hThRes90_TL[thBin]->Fill(simtHA[0]);
 		  
 	  if      (phiDiff == 90)
-	    hDPhiRes90_TL[thBin]->Fill(dPhiXact);
+	    hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
  	  else if (phiDiff == -270)
- 	    hDPhiRes90_TL[thBin]->Fill(dPhiXact);
+ 	    hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
 	  
 	}
 	if ((phiDiff == 180) || (phiDiff == -180))
@@ -1164,6 +1194,9 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   
   for( Int_t th = 0 ; th < nThbins ; th++){
 
+    hDPhi[th]->SetLineColor(kBlue);
+    hDPhi_TL[th]->SetLineColor(kBlue);
+
     hThRes00[th]->SetLineColor(kBlue);
     hDPhiRes00[th]->SetLineColor(kBlue);
 
@@ -1200,6 +1233,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hThRes90_TL[th]->GetYaxis()->SetTitle("Counts");
     hDPhiRes90_TL[th]->GetYaxis()->SetTitle("Counts");
     
+    
+
   }    
   
   for( Int_t th = 0 ; th < nThbins ; th++){
@@ -1256,15 +1291,28 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   
   for( Int_t th = 0 ; th < nThbins ; th++){
     canvas->cd(th+1);
-    hBeta[th]->Draw("colz");
+    hBeta[th]->Draw("");
   }
   plotName = "../Plots/hBeta_" + inputFileNumber;
   plotName += ".pdf";
   canvas->SaveAs(plotName);
 
-  
-  
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
+    hDPhi[th]->Draw("");
+  }
+  plotName = "../Plots/hDPhi_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
 
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
+    hDPhi_TL[th]->Draw("");
+  }
+  plotName = "../Plots/hDPhi_TL_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
+  
   return 0;
 }
 
