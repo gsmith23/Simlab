@@ -21,7 +21,6 @@ class TLab : public TObject{
   //======================
   
   void SetFilenames(TString);
-  void SetFilenames(TString,TString,TString);
 
   Bool_t RawROOTFileExists();
 
@@ -31,14 +30,14 @@ class TLab : public TObject{
 
   void MakeCalibratedDataTreeFile();
   
-  void SetPedestals();
+  void    SetPedestals();
   Float_t GetPedestal(Int_t);
+  Int_t   DefaultPedestalRun(Int_t);
   
-  void FitPhotopeaks();
+  void    FitPhotopeaks();
   Float_t GetPhotopeak(Int_t);
-  Int_t DefaultPhotopeakRun(Int_t);
+  Int_t   DefaultPhotopeakRun(Int_t);
   
-    
   Bool_t GoodTiming(Float_t);
   Bool_t GoodTheta(Float_t);
 
@@ -160,6 +159,7 @@ class TLab : public TObject{
   
   Int_t runNumberInt;
   TString simRun;
+  TString simRunU;
 
   ifstream *inData;
 

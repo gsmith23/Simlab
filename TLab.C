@@ -23,23 +23,16 @@ TLab::TLab(TString runNumber,
   SetFilenames(runNumber);
 }
 
-// option for use with multiple raw files
-// per run
+// option for use with two simulated files
+// one being unpolarised
 TLab::TLab(TString runNumber,
-	   TString fileNumStart,
-	   TString fileNumFinish) {
+	   TString simNumber,
+	   TString simNumberU) {
   
-  cout << endl;
-  cout << " fileNumStart  = " << fileNumStart  << endl;
-  cout << " fileNumFinish = " << fileNumFinish << endl;
+  simRun  = simNumber;
+  simRunU = simNumberU;
+  SetFilenames(runNumber);
   
-  fileNumStart  = "_" + fileNumStart;
-  fileNumFinish = "_" + fileNumFinish;
-  
-  SetFilenames(runNumber,
-	       fileNumStart,
-	       fileNumFinish);
-
 }
 
 //-------------------------------------------------
@@ -72,36 +65,6 @@ void TLab::SetFilenames(TString runNumber){
 
 }
 
-void TLab::SetFilenames(TString runNumber,
-			TString fileNumStart,
-			TString fileNumFinish) {
-
-  cout << endl;
-  cout << " TLab object has been created " << endl;
-
-  runNumberInt = runNumber.Atoi();
-  
-  cout << endl;
-  cout << " Run Number    = " << runNumberInt  << endl;
-
-  textFileName    = runNumber + fileNumStart;
-  rootFileRawName = runNumber + fileNumStart;  
-  rootFileCalName = runNumber + fileNumStart;
-
-  textFileName    = textFileName    + fileNumFinish;
-  rootFileRawName = rootFileRawName + fileNumFinish;  
-  rootFileCalName = rootFileCalName + fileNumFinish;
-
-  textFileName    = textFileName    + ".txt";
-  rootFileRawName = rootFileRawName + ".root";  
-  rootFileCalName = rootFileCalName + ".root";
-  
-  textFileName    = "../Data/run" + textFileName;
-  rootFileRawName = "../Data/run" + rootFileRawName;
-  rootFileCalName = "../Data/cal" + rootFileCalName;
-
-  cout << " rootFileRawName = " << rootFileRawName << endl;
-}
 
 /** Public member functions *********/
 
@@ -147,10 +110,10 @@ void TLab::MakeRawDataTreeFile(){
   
   TString nameHist;
   TString titleHist;
-
   
   for(Int_t i = 0 ; i < nChannels ; i++ ){
 
+    // usually three runs: OR, AND, OR
     for(Int_t run = 0 ; run < nRuns ; run++ ){    
 
       nameHist.Form("hQ%d_%d",i,run);
@@ -202,9 +165,12 @@ void TLab::MakeRawDataTreeFile(){
 	   << T[4+index] << " " 
 	   << endl;
     }
-    
+
+    // raw text file has event data over two lines  
+    // with five channels per line
     for(Int_t i = index ; i < (index+5) ; i++ ){
-      
+    
+      // one histogram per channel and per run
       if      ( eventNumber < nOR1 )
 	hQ[i][0]->Fill(Q[i]);
       else if ( eventNumber > (nOR1+nAND)){
@@ -251,7 +217,8 @@ Bool_t TLab::CalibratedROOTFileExists(){
 Int_t TLab::Chan2ArrayA(Int_t channel){
   
   Int_t crystal = -1;
-  
+
+
   if     (channel == 0)
     crystal = 1;
   else if(channel == 1)
@@ -613,15 +580,16 @@ Float_t TLab::GetPhotopeak(Int_t channel){
   return phoQ[channel][DefaultPhotopeakRun(channel)]; 
 }
 
+Int_t TLab::DefaultPedestalRun(Int_t channel){  
+  return DefaultPhotopeakRun(channel);
+}
 
-Int_t TLab::DefaultPhotopeakRun(Int_t channel){
-  
+Int_t TLab::DefaultPhotopeakRun(Int_t channel){  
   
   if(channel == 2 || channel == 7 )
     return 1;
-
-  else 
-    return 0;
+  else  // !!! Should this not be 2?
+    return 2;
 }
 
 Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
@@ -645,22 +613,24 @@ Float_t TLab::ThetaToThetaError(Float_t theta,
   Float_t theta_min = 0.;
   Float_t theta_max = 0.;
   
-  //Channels 2 and 7 correspond to central crystals
+  // Channels 2 and 7 correspond to central crystals
 
   // This function calculates the theta difference
   // at energy +- HWHM and returns the largest value as theta error
-  if ((channel!=2)&&(channel!=7)){
-    energy = ThetaToPhotonEnergy(theta);
+  if ( (channel!=2) &&
+       (channel!=7) ){
+    energy     = ThetaToPhotonEnergy(theta);
     energy_max = energy + EnergyRes*Sqrt(energy);
-    theta_min = theta -  PhotonEnergyToTheta(energy_max);
+    theta_min  = theta -  PhotonEnergyToTheta(energy_max);
     energy_min = energy - EnergyRes*Sqrt(energy);
-    theta_max = PhotonEnergyToTheta(energy_min)- theta;}
+    theta_max  = PhotonEnergyToTheta(energy_min)- theta;
+  }
   else{
-    energy = ThetaToElectronEnergy(theta);
+    energy     = ThetaToElectronEnergy(theta);
     energy_max = energy + EnergyRes*Sqrt(energy);
-    theta_max = ElectronEnergyToTheta(energy_max) - theta;
+    theta_max  = ElectronEnergyToTheta(energy_max) - theta;
     energy_min = energy - EnergyRes*Sqrt(energy);
-    theta_min = theta - ElectronEnergyToTheta(energy_min);
+    theta_min  = theta - ElectronEnergyToTheta(energy_min);
   }
   return (theta_max>theta_min? theta_max : theta_min);
 }
@@ -985,7 +955,6 @@ Float_t TLab::PhotonEnergyToTheta(Float_t energy){
 
   // cos(theta)
   theta = 2 - m/energy;
-
   theta = ACos(theta);
   theta = RadToDeg()*theta;
   
@@ -1040,12 +1009,11 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
 
   
-  Float_t maxY = 2.5;
-  Float_t minY = 0.5;
+  Float_t maxY = 1.8;
+  Float_t minY = 0.8;
 
   if(dPhiDiff==180)
     maxY = 6.0;
-  
   
   // Theory curve
   Float_t aTheory[nThBins];
@@ -1053,10 +1021,11 @@ void TLab::GraphAsymmetry(Char_t option){
   // half resolution in dPhi 
   // !!to do - access alpha1 from user input
 
-  Float_t alpha1   = DegToRad()*26.0*2.355/2.;
-  // 
-  alpha1 = 50.;
-  
+  // 35.0 is result from Chloe Schoolings fits
+  // are likely an underestimate due to distribution
+  // wings
+  Float_t alpha1   = DegToRad()*35.0*2.355/2.;
+    
   // half resolution in theta
 
   Float_t semiSpan = thetaBinWidth/2.*DegToRad()*2;
@@ -1074,6 +1043,13 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimE[nThBins]={0};
   Float_t aSimTrue[nThBins]={0};
   Float_t aSimTrueE[nThBins]={0};
+  
+  Float_t aSimU[nThBins]={0};
+  Float_t aSimUE[nThBins]={0};
+  Float_t aSimUTrue[nThBins]={0};
+  Float_t aSimUTrueE[nThBins]={0};
+  
+
   Float_t AsPhiDiffR[nThBins]={0};
   Float_t AePhiDiffR[nThBins]={0};
 
@@ -1164,27 +1140,62 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << endl;
     cout << " Calculating theory curve " << endl;
     cout << " and simulation results ... " << endl;
-    TSim *simData = new TSim(simRun);
-    simData->CalculateAsymmetryLab(simRun);
-
+    TSim *simData ;
+      
+    if(divideByUnPol){
+      simData = new TSim(simRun,simRunU);
+      
+      // unpolarised first
+      simData->CalculateAsymmetryLab(simRunU);
+    }
+    else{
+      simData = new TSim(simRun);
+      simData->CalculateAsymmetryLab(simRun);
+    }
+    
     for(Int_t i = 0 ; i < nThBins ; i++){
       plotTheta[i] = plotTheta[i]*DegToRad();
       
-      aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);            
+      aTheory[i]   = theory->rho2(plotTheta[i],semiSpan,alpha1);            
       plotTheta[i] = plotTheta[i]*RadToDeg();
 
-      aSim[i]    = simData->GetAsymLab(dPhiDiff,i);
-      aSimE[i]   = simData->GetAsymLabErr(dPhiDiff,i);
+      aSim[i]        = simData->GetAsymLab(dPhiDiff,i);
+      aSimE[i]       = simData->GetAsymLabErr(dPhiDiff,i);
       aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
       aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
       
-      //AsPhiDiffR[i]= AsPhiDiffR[i]/1.3;
-      
-      //AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i])*1.3;
       AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i]);
-      
       AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
+    
+      if(divideByUnPol){
+	aSimU[i]      = aSim[i];
+	aSimUE[i]     = aSimE[i];
+	aSimUTrue[i]  = aSimTrue[i];
+	aSimUTrueE[i] = aSimTrueE[i];
+      }
+    
+    }
+    
+    if(divideByUnPol){
       
+      // the polarised data
+      simData->CalculateAsymmetryLab(simRun);
+      
+      for(Int_t i = 0 ; i < nThBins ; i++){
+	aSim[i]        = simData->GetAsymLab(dPhiDiff,i);
+	aSimE[i]       = simData->GetAsymLabErr(dPhiDiff,i);
+	aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
+	aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
+	
+	// calculate the errors first
+	aSimE[i] = (aSim[i]/aSimU[i])*Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
+	
+	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i])*Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/(aSimUTrue[i]*aSimUTrue[i]) + aSimTrueE[i]*aSimTrueE[i]/(aSimTrue[i]*aSimTrue[i]));
+	
+	// now the actual values
+	aSim[i]  = aSim[i]/aSimU[i];
+	aSimTrue[i]  = aSimTrue[i]/aSimUTrue[i];
+      }
     }
 
   }// end of:  if( option=='t' || option=='T'
