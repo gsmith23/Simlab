@@ -1542,7 +1542,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   //half resolution in dPhi
 
   Float_t alpha1 = DegToRad()*26.0*2.34/2.;
-
+  
+  //  from selected events analysis HWHM_dphi ~= 50.
+  alpha1 = DegToRad()*50./Sqrt(2);
 
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
