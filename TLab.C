@@ -513,10 +513,10 @@ void TLab::FitPhotopeaks(){
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
   TString histName = "";
-  Char_t plotName[128];
-
+  Char_t  plotName[128];
+  
   Double_t maxv = 0.;
-
+  
   TF1 *phoQfit = nullptr;
   
   for(Int_t run = 0 ; run < nRuns ; run++){
@@ -524,9 +524,7 @@ void TLab::FitPhotopeaks(){
       
       histName.Form("hQ%d_%d",i,run);
       hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
-      
       hQ[i][run]->GetXaxis()->SetRangeUser(2400,4000);
-      
       maxv = hQ[i][run]->GetXaxis()->
 	GetBinCenter(hQ[i][run]->GetMaximumBin());
       
@@ -551,11 +549,9 @@ void TLab::FitPhotopeaks(){
 	      runNumberInt,
 	      i,run);
       
-
       canvas->SaveAs(plotName);
       
       phoQ[i][run] = phoQfit->GetParameter(1.);
-
       HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
 
     }
@@ -588,7 +584,7 @@ Int_t TLab::DefaultPhotopeakRun(Int_t channel){
   
   if(channel == 2 || channel == 7 )
     return 1;
-  else  // !!! Should this not be 2?
+  else  
     return 2;
 }
 
@@ -671,20 +667,25 @@ Bool_t TLab::GoodTheta(Float_t theta){
 }
 
 void TLab::CalculateAsymmetry(){
-
+  
+  cout << endl;
+  cout << " Calculating Asymmetry  " << endl;
+  
   GetThetaBinValues();
   
   // this function will calculate values
   // for the following data members:
- for(Int_t j = 0 ; j <nThBins; j++){
+  for(Int_t j = 0 ; j <nThBins; j++){
     for(Int_t k = 0 ; k < nPhiBins; k++){
-      AsymMatrix[j][k] = 0;}
+      AsymMatrix[j][k] = 0;
+    }
  }
 
   for(Int_t j = 0 ; j <nThBins; j++){
     for(Int_t k = 0 ; k < nPhiBins; k++){
-      muMatrix[j][k] = 0;}
- }
+      muMatrix[j][k] = 0;
+    }
+  }
   
   
   rootFileCalData = new TFile(rootFileCalName);
@@ -703,232 +704,249 @@ void TLab::CalculateAsymmetry(){
   calDataTree->SetBranchAddress("TA",&TA);
   calDataTree->SetBranchAddress("TB",&TB);
   
-  // 
-  Bool_t A[nCrystals];
-  Bool_t B[nCrystals];
-  
+  Bool_t    A[nCrystals],  B[nCrystals];
   Long64_t nA[nCrystals], nB[nCrystals];
   
   for ( Int_t i = 0 ; i < nCrystals ; i++ ){
     A[i]  = kFALSE;
     B[i]  = kFALSE;
-    nA[i] = 0.;
-    nB[i] = 0.;
+    nA[i] = 0;
+    nB[i] = 0;
   }
+  
   Bool_t AB000 = kFALSE, AB090 = kFALSE,
     AB180 = kFALSE, AB270 = kFALSE;
   
   Long64_t maxEntry = calDataTree->GetEntries();
-
-  cout << endl;
-  cout << " Calculating Asymmetry  " << endl;
-
-
+  
   Int_t nDuplicates = 0;
-
-  //TRandom1 * rand1 = new TRandom1(); 
+  
+  Float_t phiB;
+  Bool_t  randomisePhiB = kFALSE;
   
   Float_t minE = 450.;
   Float_t maxE = 550.;
 
+  Float_t totEA = 0.;
+  Float_t totEB = 0.;
+  Int_t   thBin = -1.;
+    
   for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
     
     calDataTree->GetEvent(nEntry);
-    Float_t totEA = 0.;
-    Float_t totEB = 0.;
-    Int_t   thBin = -1.;
-
+    
+    totEA = 0.;
+    totEB = 0.;
+    thBin = -1.;
+    
     for (Int_t i = 0 ; i < nCrystals; i++){
       totEA += EA[i];
       totEB += EB[i];
     }
     
-    AB000 = kFALSE, AB090 = kFALSE, 
-      AB180 = kFALSE, AB270 = kFALSE;
-
-    // !!!!
-    // randomise second phi
-    // Float_t phiB = rand1->Uniform()*360;
-    // if     ( phiB < 90 ){
-    //   phiB = 0.;
-    // }
-    // else if( phiB >= 90  &&
-    // 	     phiB < 180){
-    //   phiB = 90.;
-    // }
-    // else if( phiB >= 180 &&
-    // 	     phiB < 270){
-    //   phiB = 180.;
-    // }
-    // else if( phiB >= 270 &&
-    // 	     phiB < 360.){
-    //   phiB = 270.;
-    // }
-
-    //check total energy deposited per array
-    //check if theta A and theta B are in the same bin
-    if ((totEA > minE) && 
-	(totEA < maxE) &&
-	(totEB > minE) &&
-	(totEB < maxE)){
- 
-      A[4] = kFALSE;
-      B[4] = kFALSE;
-      for (Int_t k=0 ; k < nThBins; k++){
-	if( ( GoodTheta(tHA[4]) ) &&
-	    ( tHA[4] > ThMin[k] ) &&
-	    ( tHA[4] < ThMax[k] )){
-	  A[4] = kTRUE;
-	  nA[4]++;
-	  thBin = k;
-	}
-      }
-
-      if((A[4]) &&
-	 ( GoodTheta(tHB[4]) ) &&
-	 ( tHB[4] > ThMin[thBin] ) &&
-	 ( tHB[4] < ThMax[thBin] )){
-	B[4] = kTRUE;
-	nB[4]++;
-      }
-      
-   
-      for (Int_t j = 0 ; j < nCrystals ; j++){
-	
-	if(j!=4){
-	  A[j] = kFALSE;  
-	  B[j] = kFALSE;
-	  
-	  // conditions on theta for outer crystals 
-	  if( ( GoodTheta(tHA[j]) ) &&
-	      ( tHA[j] > ThMin[thBin] ) &&
-	      ( tHA[j] < ThMax[thBin] )){
-	    A[j] = kTRUE;
-	    nA[j]++;
-	  }
-	  
-	  if( ( GoodTheta(tHB[j]) ) &&
-	      ( tHB[j] > ThMin[thBin] ) &&
-	      ( tHB[j] < ThMax[thBin] )){
-	    B[j] = kTRUE;
-	    nB[j]++;
-	  }
-	  
-	  // !!! TEMPORARY !!!
-	  // conditions on summed central 
-	  // and(/or) outer crystal energies
-	  // to select delta phi
-	  if( 
-	     ( GoodTheta(tHA[j]) )     &&
-	     ( (EA[j]+EA[4]) > minE )  &&
-	     ( (EA[j]+EA[4]) < maxE )  &&
-	     ( tHA[j] > ThMin[thBin] ) &&
-	     ( tHA[j] < ThMax[thBin] )
-	      ){
-	    A[j] = kTRUE;
-	    nA[j]++;
-	  }
-	  
-	  if( 
-	     ( GoodTheta(tHB[j]) )     &&
-	     ( (EB[j]+EB[4]) > minE )  &&
-	     ( (EB[j]+EB[4]) < maxE )  &&
-	     ( tHB[j] > ThMin[thBin] ) &&
-	     ( tHB[j] < ThMax[thBin] )
-	      ){
-	    B[j] = kTRUE;
-	    nB[j]++;
-	  }
-	  	  
-	}
-      } // end of: for (Int_t j = 0 ; j < nCrystals  
-   
-      // Central Crystals are always required
-      if( !A[4] || !B[4] )
-	continue;
-      
-      // // !!!!
-      // // Randomise
-
-      // for(Int_t r = 0 ; r < nCrystals ; r++)
-      // 	B[r] = kFALSE;
-	      
-      // if      (phiB ==  0.){
-      // 	B[1] = kTRUE;
-      // }
-      // else if (phiB == 90.){
-      // 	B[3] = kTRUE;
-      // }
-      // else if (phiB == 180.){
-      // 	B[5] = kTRUE;
-      // }
-      // else if (phiB == 270.){
-      // 	B[7] = kTRUE;	
-      // }
-	
-      if((A[1]&&B[1])||
-	 (A[3]&&B[3])||
-	 (A[5]&&B[5])||
-	 (A[7]&&B[7]))
-	AB000 = kTRUE;
-      
-      if((A[1]&&B[3])||
-	 (A[3]&&B[7])||
-	 (A[7]&&B[5])||
-	 (A[5]&&B[1]))
-	AB090 = kTRUE;
+    //---------------------------
+    // Event Selection
     
-      if((A[1]&&B[7])||
-	 (A[3]&&B[5])||
-	 (A[7]&&B[1])||
-	 (A[5]&&B[3]))
-	AB180 = kTRUE;
-      
-      if((A[1]&&B[5])||
-	 (A[5]&&B[7])||
-	 (A[7]&&B[3])||
-	 (A[3]&&B[1]))
-	AB270 = kTRUE;
-      
-      // check that only one combination
-      // is satisfied
-      if( (AB000 && AB090) || 
-	  (AB000 && AB180) ||
-	  (AB000 && AB270) ||
-	  (AB090 && AB180) ||
-	  (AB090 && AB270) ||
-	  (AB180 && AB270) ){
-	nDuplicates++;
-	continue;
-      }
+    if ((totEA < minE) ||
+	(totEA > maxE) ||
+	(totEB < minE) ||
+	(totEB > maxE))
+      continue;
     
-      if     (AB000)
-	AsymMatrix[thBin][0]+=1.;
-      else if(AB090)
-	AsymMatrix[thBin][1]+=1.;
-      else if(AB180)
-	AsymMatrix[thBin][2]+=1.;
-      else if(AB270)
-	AsymMatrix[thBin][3]+=1.;
-
+    A[4] = kFALSE;
+    B[4] = kFALSE;
+    
+    // Central crystal selections first
+    // as they are essential 
+    
+    // assign theta bin to array A  
+    // central crystal
+    for (Int_t k = 0 ; k < nThBins; k++){
+      if( ( GoodTheta(tHA[4]) ) &&
+	  ( tHA[4] > ThMin[k] ) &&
+	  ( tHA[4] < ThMax[k] )){
+	A[4] = kTRUE;
+	nA[4]++;
+	thBin = k;
+      }
+    }
+    
+    // assign theta bin to array B
+    // central crystal 
+    if((A[4]) &&
+       ( GoodTheta(tHB[4]) ) &&
+       ( tHB[4] > ThMin[thBin] ) &&
+       ( tHB[4] < ThMax[thBin] )){
+      B[4] = kTRUE;
+      nB[4]++;
+    }
+    
+    // Central Crystals are always required
+    if( !A[4] || !B[4] )
+      continue;
+    
+    
+    //  Outer crystal selections
+    for (Int_t j = 0 ; j < nCrystals ; j++){
       
-    }//end of : if (totEA...
+      if(j!=4){
+	A[j] = kFALSE;  
+	B[j] = kFALSE;
+	
+	// Conditions on summed central 
+	// and summed crystal energies
+	// to assign phi
+	// theta bin must match central
+	// crystals
+	if( 
+	   ( GoodTheta(tHA[j]) )     &&
+	   ( (EA[j]+EA[4]) > minE )  &&
+	   ( (EA[j]+EA[4]) < maxE )  &&
+	   ( tHA[j] > ThMin[thBin] ) &&
+	   ( tHA[j] < ThMax[thBin] )
+	    ){
+	  A[j] = kTRUE;
+	  nA[j]++;
+	}
+	
+	if( 
+	   ( GoodTheta(tHB[j]) )     &&
+	   ( (EB[j]+EB[4]) > minE )  &&
+	   ( (EB[j]+EB[4]) < maxE )  &&
+	   ( tHB[j] > ThMin[thBin] ) &&
+	   ( tHB[j] < ThMax[thBin] )
+	    ){
+	  B[j] = kTRUE;
+	  nB[j]++;
+	}
+	
+      }
+    } // end of: for (Int_t j = 0 ; j < nCrystals  
+    
+      // optional check for bugs
+    if( randomisePhiB ){
+      phiB = RandomLabPhi();
+      
+      for(Int_t r = 0 ; r < nCrystals ; r++)
+	B[r] = RandomGoodLabPhi(phiB,r);
+    }
+    
+    AB000 = kFALSE;
+    AB090 = kFALSE;
+    AB180 = kFALSE; 
+    AB270 = kFALSE;
+    
+    // determine  delta phi
+    // is for this event
+    if((A[1]&&B[1])||
+       (A[3]&&B[3])||
+       (A[5]&&B[5])||
+       (A[7]&&B[7]))
+      AB000 = kTRUE;
+    
+    if((A[1]&&B[3])||
+       (A[3]&&B[7])||
+       (A[7]&&B[5])||
+       (A[5]&&B[1]))
+      AB090 = kTRUE;
+    
+    if((A[1]&&B[7])||
+       (A[3]&&B[5])||
+       (A[7]&&B[1])||
+       (A[5]&&B[3]))
+      AB180 = kTRUE;
+    
+    if((A[1]&&B[5])||
+       (A[5]&&B[7])||
+       (A[7]&&B[3])||
+       (A[3]&&B[1]))
+      AB270 = kTRUE;
+    
+    // check that only one combination
+    // is satisfied
+    if( (AB000 && AB090) || 
+	(AB000 && AB180) ||
+	(AB000 && AB270) ||
+	(AB090 && AB180) ||
+	(AB090 && AB270) ||
+	(AB180 && AB270) ){
+      nDuplicates++;
+      continue;
+    }
+    
+    if     (AB000)
+      AsymMatrix[thBin][0]+=1.;
+    else if(AB090)
+      AsymMatrix[thBin][1]+=1.;
+    else if(AB180)
+      AsymMatrix[thBin][2]+=1.;
+    else if(AB270)
+      AsymMatrix[thBin][3]+=1.;
+    
   } // end of : for(Int_t i = 0 ; i < calDa...
 
+  if(nDuplicates!=0)
+    cout << " nDuplicates = " << nDuplicates << endl;
   
-  cout << " nDuplicates = " << nDuplicates << endl;
-
   cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
-  cout<<plotTheta[0]<<" - "<<AsymMatrix[0][0]<<" - "<<AsymMatrix[0][1]<<" - "<<AsymMatrix[0][2]<<" - "<<AsymMatrix[0][3]<<endl;
-  cout<<plotTheta[1]<<" - "<<AsymMatrix[1][0]<<" - "<<AsymMatrix[1][1]<<" - "<<AsymMatrix[1][2]<<" - "<<AsymMatrix[1][3]<<endl;
-  cout<<plotTheta[2]<<" - "<<AsymMatrix[2][0]<<" - "<<AsymMatrix[2][1]<<" - "<<AsymMatrix[2][2]<<" - "<<AsymMatrix[2][3]<<endl;
-  cout<<plotTheta[3]<<" - "<<AsymMatrix[3][0]<<" - "<<AsymMatrix[3][1]<<" - "<<AsymMatrix[3][2]<<" - "<<AsymMatrix[3][3]<<endl;
-  cout<<plotTheta[4]<<" - "<<AsymMatrix[4][0]<<" - "<<AsymMatrix[4][1]<<" - "<<AsymMatrix[4][2]<<" - "<<AsymMatrix[4][3]<<endl;
-  cout<<plotTheta[5]<<" - "<<AsymMatrix[5][0]<<" - "<<AsymMatrix[5][1]<<" - "<<AsymMatrix[5][2]<<" - "<<AsymMatrix[5][3]<<endl;
-  cout<<plotTheta[6]<<" - "<<AsymMatrix[6][0]<<" - "<<AsymMatrix[6][1]<<" - "<<AsymMatrix[6][2]<<" - "<<AsymMatrix[6][3]<<endl;
-  cout<<plotTheta[7]<<" - "<<AsymMatrix[7][0]<<" - "<<AsymMatrix[7][1]<<" - "<<AsymMatrix[7][2]<<" - "<<AsymMatrix[7][3]<<endl;
-
+  for (Int_t i = 0 ; i < 8 ; i++)
+    cout << plotTheta[i]     << " - " 
+	 << AsymMatrix[i][0] << " - " 
+	 << AsymMatrix[i][1] << " - "
+	 << AsymMatrix[i][2] << " - "
+	 << AsymMatrix[i][3] << endl;
+    
 }
+
+Float_t RandomiseLabPhi(){
+  
+  TRandom1 * rand1 = new TRandom1(); 
+  Float_t phi = rand1->Uniform()*360;
+  
+  if     ( phi < 90 ){
+    phi = 0.;
+  }
+  else if( phi >= 90  &&
+	   phi < 180){
+    phi = 90.;
+  }
+  else if( phi >= 180 &&
+	   phi < 270){
+    phi = 180.;
+  }
+  else if( phi >= 270 &&
+	   phi < 360.){
+    phi = 270.;
+  }
+  
+  return phi;
+}
+
+Bool_t  RandomGoodLabPhi(Float_t phi, 
+			 Int_t crystal){
+  
+  Bool_t  good = kFALSE;
+
+  if      (phi     ==  0.  && 
+	   crystal == 1){
+    good = kTRUE;
+  }
+  else if (phi     == 90.  &&
+	   crystal == 3){
+    good = kTRUE;
+  }
+  else if (phi     == 180. &&
+	   crystal == 5){
+    good = kTRUE;
+  }
+  else if (phi     == 270. &&
+	   crystal == 7){
+    good = kTRUE;	
+  }
+  
+  return good;
+}
+
 
 Float_t TLab::ElectronEnergyToTheta(Float_t energy){
 

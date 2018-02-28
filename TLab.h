@@ -58,7 +58,10 @@ class TLab : public TObject{
   void GraphAsymmetry(Char_t);
   
   void SetStyle();
-  
+
+  Float_t RandomLabPhi();
+  Bool_t  RandomGoodLabPhi(Float_t, Int_t);
+
   //======================
   //======================
   //==== Data Members ====
