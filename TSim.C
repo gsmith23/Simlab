@@ -1760,6 +1760,12 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   simDataTree->SetBranchAddress("PhiA_2nd",&PhiA_2nd);
   simDataTree->SetBranchAddress("PhiB_1st",&PhiB_1st);
   simDataTree->SetBranchAddress("PhiB_2nd",&PhiB_2nd);
+  simDataTree->SetBranchAddress("XposA_1st", &XposA_1st);
+  simDataTree->SetBranchAddress("YposA_1st", &YposA_1st);
+  simDataTree->SetBranchAddress("ZposA_1st", &ZposA_1st);
+  simDataTree->SetBranchAddress("XposB_1st", &XposB_1st);
+  simDataTree->SetBranchAddress("YposB_1st", &YposB_1st);
+  simDataTree->SetBranchAddress("ZposB_1st", &ZposB_1st);
   
   for(Int_t j = 0 ; j <nThbins; j++)
     for(Int_t k = 0 ; k < nPhibinsSim; k++)
@@ -1770,6 +1776,14 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   Long64_t nEntries = simDataTree->GetEntries();
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     simDataTree->GetEvent(ientry);
+    
+    // Ensure first hits are in central crystals
+    // We know there was an energy deposit there
+    if( !CentralYZ(YposA_1st) ||
+	!CentralYZ(ZposA_1st) ||
+	!CentralYZ(YposB_1st) ||
+	!CentralYZ(ZposB_1st) )
+      continue;
     
     Float_t dPhi_1st = PhiA_1st + PhiB_1st;
     if(dPhi_1st<0)
@@ -1896,6 +1910,15 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
     
     simDataTree->GetEvent(ientry);
     
+    // Ensure first hits are in central crystals
+    // We know there was an energy deposit there
+    if( !CentralYZ(YposA_1st) ||
+	!CentralYZ(ZposA_1st) ||
+	!CentralYZ(YposB_1st) ||
+	!CentralYZ(ZposB_1st) )
+      continue;
+    
+
     // scattering in array A
     if ( PhiA_2nd   < 499. && 
 	 ThetaA_2nd < 499. ){
@@ -1905,8 +1928,7 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
       thetaA   = ThetaA_2nd;
       thetaB   = ThetaB_1st;
       thetaABS = ThetaA_1st;
-      //!!!!!
-      // warning - check it is never negative
+
       dPhi =  PhiB_1st + PhiA_2nd;
     }
     
@@ -1925,9 +1947,8 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 	thetaB   = ThetaB_2nd;
 	thetaABS = ThetaB_1st;
 	
-	//!!!!!
-	// warning - check it is never negative
 	dPhi = PhiB_2nd + PhiA_1st;	
+	
       }
     }
     
