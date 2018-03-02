@@ -227,8 +227,16 @@ Int_t main(int argc, char **argv){
       
       if     (strcmp(argv[1],"9")==0 ||
 	      strcmp(argv[1],"0")==0)   {
+	
+	cout << " Option " << argv[1] 
+	     << " requires the raw text file." << endl;
+	
 	return 1;
       }
+    }
+    else{
+      cout << endl;
+      cout << " Text file of raw data does exist   " << endl;
     }
     
     cout << endl;
@@ -265,8 +273,8 @@ Int_t main(int argc, char **argv){
     if( strcmp(argv[1],"1")==0 || 
 	strcmp(argv[1],"0")==0 ){
       
-      // //////////////////////////////////////////
-      // // Create calibrated ROOT file
+      //////////////////////////////////////////
+      // Create calibrated ROOT file
       
       cout << endl;
       cout << "    Calibrate data " << endl; 
