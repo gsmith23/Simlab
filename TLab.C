@@ -119,26 +119,40 @@ void SetEventNumbers(Int_t run){
     nAND = 38528184; // 454 - AND, collimators, 0.1 mV HV drift
     nOR2 = 1459920;  // 456 - OR, closest no collimator run after
   }
-  else if(run == 1457 ){ // no collimators
+  // ------------------------------------------
+  // NB Now crystals - source = 3.0 cm 
+  // Collimators were also removed
+  // check logbook for previous values
+  // ------------------------------------------
+  else if(run == 1457 ){ 
     // Runs: 456 (OR), 457 (AND), 458 (OR)
-    nOR1 = ;
-    nAND = 47142893;
-    nOR2 = 1228535;
+    nOR1 = 1524550;  // 456 - OR, 
+    nAND = 65734400; // 457 - AND
+    nOR2 = 1572198;  // 458 - OR
   }
-  else if(run == 1460){
+  // ------------------------------------------
+  // ------------------------------------------
+  // NB Best runs from here on. 
+  // Central channels thesholds 
+  // set to 100 mV 
+  // and crystals at 3.0 cm
+  // ------------------------------------------
+  // ------------------------------------------
+  else if(run == 1460){ // !!!!! REDO THIS RUN
     nOR1 = 1395877;
     nAND = 47142893;
     nOR2 = 1228535;
   }
-  else if(run == 1460){
-    nOR1 = 1395877;
-    nAND = 47142893;
-    nOR2 = 1228535;
+  else if(run == 1470){
+    // Runs: 467 (or), 469 (AND), 470 (OR)
+    nOR1 = 1121370;   // 467 - OR prior to power up/down 
+    nAND = 170907253; // 469 - AND (468 was interupted)
+    nOR2 = 1269750;   // 470 - OR
   }
-  else if(run == 1460){
-    nOR1 = 1395877;
-    nAND = 47142893;
-    nOR2 = 1228535;
+  else if(run == 123){
+    nOR1 = 11111111;
+    nAND = 22222222;
+    nOR2 = 33333333;
   }
   
   eventSum = nOR1 + nAND + nOR2;
@@ -157,7 +171,6 @@ void SetEventNumbers(Int_t run){
 
 void TLab::MakeRawDataTreeFile(){
 
-  //!!!!
   SetEventNumbers(runNumberInt);
 
   TString textFile = "??";
@@ -679,15 +692,15 @@ Float_t TLab::ThetaToElectronEnergy(Float_t theta){
 Float_t TLab::ThetaToThetaError(Float_t theta,
 				Int_t channel){
   
-  // !! Use the post AND data result for now
-  // ie use HWHM[channel][2]
-
-  Float_t EnergyRes = HWHM[channel][2]/Sqrt(511.);
-  Float_t energy = 0.;
+  Float_t EnergyRes = 0.;
+  EnergyRes = HWHM[channel][DefaultPhotopeakRun(channel)];
+  EnergyRes = EnergyRes/Sqrt(511.);
+  
+  Float_t energy     = 0.;
   Float_t energy_max = 0.;
   Float_t energy_min = 0.;
-  Float_t theta_min = 0.;
-  Float_t theta_max = 0.;
+  Float_t theta_min  = 0.;
+  Float_t theta_max  = 0.;
   
   // Channels 2 and 7 correspond to central crystals
   

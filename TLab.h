@@ -85,52 +85,6 @@ class TLab : public TObject{
   Long64_t nOR2 = 0;
   Long64_t eventSum = 0;
 
-
-  // AKA RUN 1457   
-  /* static const Long64_t nOR1 = 1360796; */
-  /* static const Long64_t nAND = 38528184;  */
-  /* static const Long64_t nOR2 = 1459920; */
-
-  /* // RUN 456 (OR), 457 (AND), 458 (OR) */
-  /* // AKA RUN 1457  */
-  /*
-  static const Long64_t nOR1 = 1524550;
-  static const Long64_t nAND = 65734400;
-  static const Long64_t nOR2 = 1572198;
-  */
-  /* static const Long64_t nOR1 = 1524550; */
-  /* static const Long64_t nAND = 65734400;  */
-  /* static const Long64_t nOR2 = 1572198; */
-
-  //---------------------------------------------
-  //---------------------------------------------
-  // From here are the best runs 
-  // with arrays 3.0 cm from source
-  // and lower trigger levels for
-  // central channels
-  //---------------------------------------------
-  //---------------------------------------------
-  
-
-  // Run 1460, combined:
-  // Run 459 (OR), 460 (AND), 461 (OR)
-  
-  // ????????????????
-  // check the run numbers against logbook
-  /* // RUN 463 (OR), 460 (AND), 461 (OR) */
-  /* // AKA RUN 1460 */
-  /* static const Long64_t nOR1 = 0; */
-  /* static const Long64_t nAND = 46057346; */
-  /* static const Long64_t nOR2 = 1018759; */
-  // ????????????????
-
-
-  /* // run 467 (or), 469 (AND), 470 (OR) */
-  /* // AKA RUN 1470 */
-  /*   static const Long64_t nOR1 = 1121370; */
-  /*   static const Long64_t nAND = 170907253; */
-  /*   static const Long64_t nOR2 = 1269750;  */
-  
   // For Graphing
   static const Int_t nPhiBins = 4;
   static const Int_t nThBins  = 8;
