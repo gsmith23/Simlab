@@ -218,6 +218,20 @@ Int_t main(int argc, char **argv){
     Char_t option    = 'b';
     
     cout << endl;
+    cout << " Checking if Text file exists " << endl; 
+      
+    if(!(data->RawTextFileExists())){
+      cout << endl;
+      cout << " ...                                   " << endl;
+      cout << " Text File of raw data does not exist. " << endl;
+      
+      if     (strcmp(argv[1],"9")==0 ||
+	      strcmp(argv[1],"0")==0)   {
+	return 1;
+      }
+    }
+    
+    cout << endl;
     cout << " Checking if ROOT file exists " << endl; 
     
     if(!(data->RawROOTFileExists())){

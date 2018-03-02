@@ -68,6 +68,13 @@ void TLab::SetFilenames(TString runNumber){
 
 /** Public member functions *********/
 
+Bool_t TLab::RawTextFileExists(){
+  
+  TFile *file = TFile::Open(textFileName);
+    
+  return file;
+}
+
 Bool_t TLab::RawROOTFileExists(){
   
   TFile *file = TFile::Open(rootFileRawName);
@@ -75,14 +82,23 @@ Bool_t TLab::RawROOTFileExists(){
   return file;
 }
 
+
 void TLab::SetEventNumbers(Int_t run){
 
   nOR1 = 0;
   nAND = 0;
   nOR2 = 0;
-    
-  if     (run == 0){
+  eventSum = 0.;
   
+  if     (run == 0){
+    cout << endl;
+    cout << " Is your mind entangled ?? " << endl; 
+  }
+  else if(run == 423){
+    // Runs: 423 - testing code
+    nOR1 = 0; 
+    nAND = 210910;
+    nOR2 = 0;  
   }
   // ------------------------------------------
   // NB from here all thresholds were at 300 mV
@@ -148,6 +164,7 @@ void TLab::SetEventNumbers(Int_t run){
     nOR2 = 33333333;
   }
   
+
   eventSum = nOR1 + nAND + nOR2;
 
   cout << endl;
@@ -387,6 +404,10 @@ void TLab::MakeCalibratedDataTreeFile(){
   rawDataTree->SetBranchAddress("Q",Q);
   rawDataTree->SetBranchAddress("T",T);
   rawDataTree->SetBranchAddress("eventNumber",&eventNumber);
+  
+  calDataTree->Branch("eventNumber",
+		      &eventNumber,
+		      "eventNumber/L");
   
   tempString.Form("EA[%d]/F",nCrystals);
   calDataTree->Branch("EA",EA,tempString);
@@ -630,8 +651,8 @@ void TLab::FitPhotopeaks(){
       //phoQfit->SetParLimits(2.,100.,300.);
       
       hQ[i][run]->Fit("phoQfit","RQ");
-    
-      sprintf(plotName,"../Plots/Run_%d_hQ%d_%d.pdf",
+      
+      sprintf(plotName,"../Plots/%d_hQ%d_%d.pdf",
 	      runNumberInt,
 	      i,run);
       
@@ -1346,7 +1367,7 @@ void TLab::GraphAsymmetry(Char_t option){
  
   grDPhi->Draw("P E");
   
-  sprintf(plotName,"../Plots/DeltaPhi_%d.pdf",runNumberInt);
+  sprintf(plotName,"../Plots/%d_DeltaPhi.pdf",runNumberInt);
   canvas1->SaveAs(plotName);
  
   // Asymmetry
@@ -1449,7 +1470,7 @@ void TLab::GraphAsymmetry(Char_t option){
   
   leg->Draw();
   
-  sprintf(plotName,"../Plots/A_%d_%d.pdf",
+  sprintf(plotName,"../Plots/%d_A_%d.pdf",
 	  runNumberInt,dPhiDiff);
   
   canvas1->SaveAs(plotName);
@@ -1464,7 +1485,7 @@ void TLab::GraphAsymmetry(Char_t option){
 	  dPhiDiff,dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
 
-  sprintf(plotName,"../Plots/Mu_%d_%d.pdf",
+  sprintf(plotName,"../Plots/%d_Mu_%d.pdf",
 	  runNumberInt,dPhiDiff);
   
   grMu->Draw("P E");

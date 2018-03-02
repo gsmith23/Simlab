@@ -22,6 +22,7 @@ class TLab : public TObject{
   
   void SetFilenames(TString);
 
+  Bool_t RawTextFileExists();
   Bool_t RawROOTFileExists();
 
   Bool_t CalibratedROOTFileExists();
