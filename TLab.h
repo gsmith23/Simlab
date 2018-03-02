@@ -32,7 +32,7 @@ class TLab : public TObject{
   
   void    SetPedestals();
   Float_t GetPedestal(Int_t);
-  Int_t   DefaultPedestalRun(Int_t);
+  Int_t   DefaultPedestalRun();
   
   void    FitPhotopeaks();
   Float_t GetPhotopeak(Int_t);
@@ -157,8 +157,6 @@ class TLab : public TObject{
   Float_t ThMax[nThBins];
   Float_t plotTheta[nThBins]; 
   Float_t AsymMatrix[nThBins][nPhiBins];
-
-  Float_t muMatrix[nThBins][nPhiBins];
   
   Int_t runNumberInt;
   TString simRun;

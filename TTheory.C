@@ -99,10 +99,10 @@ void TTheory::GraphFiniteAsymmetry(Int_t   nBins,
   TH1F * hr = new TH1F();
   
   // Plot as a function of energy or theta
-  if     ( xVariable=='t') hr = canvas->DrawFrame(0.0,0.5,180.0,3.0);
+  if     ( xVariable=='t') 
+    hr = canvas->DrawFrame(0.0,0.5,180.0,3.0);
   else if( xVariable=='e'){ 
-    hr = canvas->DrawFrame(0.0,0.5,
-			   511.,3.0);
+    hr = canvas->DrawFrame(0.0,0.5, 511.,3.0);
   }
 
   TGraphErrors * gr[3];
@@ -124,25 +124,25 @@ void TTheory::GraphFiniteAsymmetry(Int_t   nBins,
   
   // To Do: determine resolution
   // of detector system using simulation
-  Float_t alpha1   = 0.1;
-  Float_t alpha2   = 5.;
-  Float_t alpha3   = 20.;
+  Float_t alpha1   = 20.;
+  Float_t alpha2   = 30.;
+  Float_t alpha3   = 40.;
   
   TLegend * leg =  new TLegend(0.6,0.7,0.8,0.85);
   
   TString legTit;
-  legTit.Form("#sigma_{ #theta }  = %.1f ^{o}",
+  legTit.Form("semi span #theta  = %.1f ^{o}",
 	      semiSpan);
   
   leg->AddEntry((TObject*)0,legTit, "");
 
   TString legStr[3];
   
-  legStr[0].Form("#sigma_{#Delta #phi} = %.1f ^{o}",
+  legStr[0].Form("#alpha_{#phi} = %.1f ^{o}",
 		 alpha1);
-  legStr[1].Form("#sigma_{#Delta #phi} = %.1f ^{o}",
+  legStr[1].Form("#alpha_{#phi} = %.1f ^{o}",
 		 alpha2);
-  legStr[2].Form("#sigma_{#Delta #phi} = %.1f ^{o}",
+  legStr[2].Form("#alpha_{#phi} = %.1f ^{o}",
 		 alpha3);
   
   
@@ -152,10 +152,13 @@ void TTheory::GraphFiniteAsymmetry(Int_t   nBins,
   
   semiSpan = DegToRad()*semiSpan;
   
+  Float_t centreTh = 94.;
+  
   for(Int_t i = 0 ; i < nBins ; i++){
     
-    // symmetric bins around 90 deg
-    theta[i]  = 90. - (nBins-1)*semiSpan*RadToDeg() + i*2*semiSpan*RadToDeg();
+    // symmetric bins around centreTh
+    theta[i]    = centreTh - (nBins-1)*semiSpan*RadToDeg();
+    theta[i]    = theta[i] +  i*2*semiSpan*RadToDeg();
     elecNRG[i]  = ThetaToElectronEnergy(theta[i]);
     gammaNRG[i] = ThetaToPhotonEnergy(theta[i]);
     
@@ -238,9 +241,9 @@ void TTheory::GraphFiniteAsymmetry(Int_t   nBins,
   Char_t plotName[128]; 
     
   if     ( xVariable=='t')
-    sprintf(plotName,"../Plots/FiniteAsymmetry_%d_theta.pdf", nBins);
+    sprintf(plotName,"../Plots/A_Theory_%d_bins_theta.pdf", nBins);
   else if( xVariable=='e')
-    sprintf(plotName,"../Plots/FiniteAsymmetry_%d_energy.pdf", nBins);
+    sprintf(plotName,"../Plots/A_Theory_%d_bins_energy.pdf", nBins);
   
 
   leg->AddEntry(gr[0],legStr[0],plotStyle);

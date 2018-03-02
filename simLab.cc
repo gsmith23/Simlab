@@ -144,9 +144,38 @@ Int_t main(int argc, char **argv){
   
     TTheory * theory = new TTheory();
     
+    Char_t  xVariable = 't';
+    
+    cout << endl;
+    cout << " Graphing Asymmetry " << endl;
+    cout << endl;
+    cout << " Enter plot type: "       << endl;
+    cout << " e - by energy "          << endl;
+    cout << " t - by theta (default) " << endl;
+    cin  >> xVariable;
+    
+    if     (xVariable=='T')
+      xVariable = 't';
+    else if(xVariable=='E')
+      xVariable = 'e';
+    
+    if(xVariable !='e' && 
+       xVariable !='t' )
+      xVariable = 't';
+    
+    cout << endl;
     Int_t   nBins = 6;
     Float_t semiSpan = 10;
-    Char_t  xVariable = 'e';
+    
+    cout << " Plotting in "             << nBins 
+	 << " "                         << (2*semiSpan)
+	 << " degrees wide theta bins " << endl;
+    
+    if     (xVariable=='t')
+      cout << " as a function of theta " << endl;
+    else if(xVariable=='e')
+      cout << " as a function of energy " << endl;
+    cout << endl;
     
     theory->GraphFiniteAsymmetry(nBins,
 				 semiSpan,

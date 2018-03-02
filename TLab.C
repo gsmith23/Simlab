@@ -296,9 +296,7 @@ void TLab::MakeCalibratedDataTreeFile(){
   TString tempString = ""; 
   
   rawDataTree->SetBranchAddress("Q",Q);
-
   rawDataTree->SetBranchAddress("T",T);
-
   rawDataTree->SetBranchAddress("eventNumber",&eventNumber);
   
   tempString.Form("EA[%d]/F",nCrystals);
@@ -416,12 +414,11 @@ void TLab::MakeCalibratedDataTreeFile(){
       
       // We presume the photons interacted 
       // in the central crystal first
-      
       // for all apart from centre crystal
+
       tHA[cryA] = PhotonEnergyToTheta(EA[cryA]);
       tHB[cryB] = PhotonEnergyToTheta(EB[cryB]);
-
-
+      
       tHAErr[cryA] = ThetaToThetaError(tHA[cryA],chaA);
       tHBErr[cryB] = ThetaToThetaError(tHB[cryB],chaB);
     }
@@ -453,11 +450,11 @@ void TLab::MakeCalibratedDataTreeFile(){
 void TLab::SetPedestals(){
 
   // This method takes the value 
-  // in the maximum bin which will work
+  // in the maximum bin which works
   // for data taken with OR trigger
   
-  // To Do: take pedestals for AND trigger
-  // data from OR data file/s
+  // Calibrations use the
+  // second OR run pedestals
   
   cout << endl;
   cout << " Setting Pedestals " << endl;
@@ -494,7 +491,7 @@ void TLab::SetPedestals(){
 }
 
 Float_t TLab::GetPedestal(Int_t channel){
-  return pedQ[channel][2]; 
+  return pedQ[channel][DefaultPedestalRun()]; 
 }
 
 void TLab::FitPhotopeaks(){
@@ -576,8 +573,8 @@ Float_t TLab::GetPhotopeak(Int_t channel){
   return phoQ[channel][DefaultPhotopeakRun(channel)]; 
 }
 
-Int_t TLab::DefaultPedestalRun(Int_t channel){  
-  return DefaultPhotopeakRun(channel);
+Int_t TLab::DefaultPedestalRun(){  
+  return 2;
 }
 
 Int_t TLab::DefaultPhotopeakRun(Int_t channel){  
@@ -610,16 +607,17 @@ Float_t TLab::ThetaToThetaError(Float_t theta,
   Float_t theta_max = 0.;
   
   // Channels 2 and 7 correspond to central crystals
-
+  
   // This function calculates the theta difference
-  // at energy +- HWHM and returns the largest value as theta error
+  // at energy +- HWHM and returns the largest 
+  // value as theta error
   if ( (channel!=2) &&
        (channel!=7) ){
     energy     = ThetaToPhotonEnergy(theta);
     energy_max = energy + EnergyRes*Sqrt(energy);
-    theta_min  = theta -  PhotonEnergyToTheta(energy_max);
+    theta_min  = theta  - PhotonEnergyToTheta(energy_max);
     energy_min = energy - EnergyRes*Sqrt(energy);
-    theta_max  = PhotonEnergyToTheta(energy_min)- theta;
+    theta_max  = PhotonEnergyToTheta(energy_min) - theta;
   }
   else{
     energy     = ThetaToElectronEnergy(theta);
@@ -674,19 +672,12 @@ void TLab::CalculateAsymmetry(){
   GetThetaBinValues();
   
   // this function will calculate values
-  // for the following data members:
+  // for the following data member:
   for(Int_t j = 0 ; j <nThBins; j++){
     for(Int_t k = 0 ; k < nPhiBins; k++){
       AsymMatrix[j][k] = 0;
     }
  }
-
-  for(Int_t j = 0 ; j <nThBins; j++){
-    for(Int_t k = 0 ; k < nPhiBins; k++){
-      muMatrix[j][k] = 0;
-    }
-  }
-  
   
   rootFileCalData = new TFile(rootFileCalName);
   
@@ -785,7 +776,6 @@ void TLab::CalculateAsymmetry(){
     if( !A[4] || !B[4] )
       continue;
     
-    
     //  Outer crystal selections
     for (Int_t j = 0 ; j < nCrystals ; j++){
       
@@ -823,7 +813,7 @@ void TLab::CalculateAsymmetry(){
       }
     } // end of: for (Int_t j = 0 ; j < nCrystals  
     
-      // optional check for bugs
+    // optional check for bugs
     if( randomisePhiB ){
       phiB = RandomLabPhi();
       
@@ -836,8 +826,8 @@ void TLab::CalculateAsymmetry(){
     AB180 = kFALSE; 
     AB270 = kFALSE;
     
-    // determine  delta phi
-    // is for this event
+    // determine delta phi
+    // for this event
     if((A[1]&&B[1])||
        (A[3]&&B[3])||
        (A[5]&&B[5])||
@@ -1009,7 +999,7 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
-  // A(90) = P(90)/P(0) 
+  // A(90) = N(90)/N(0) 
   Int_t   dPhiDiff = 90;
 
   Float_t  phi[nPhiBins];
@@ -1021,12 +1011,13 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaLowEdge  = 10.;
   Float_t thetaHighEdge = 170.;
   
+  // for delta phi graph
   Float_t phiLowEdge  = -45.0;
   Float_t phiHighEdge = 315.0;
 
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
-
   
+  // Asymmetry plot range
   Float_t maxY = 1.8;
   Float_t minY = 0.8;
 
@@ -1036,18 +1027,13 @@ void TLab::GraphAsymmetry(Char_t option){
   // Theory curve
   Float_t aTheory[nThBins];
 
-  // half resolution in dPhi 
-  // !!to do - access alpha1 from user input
-
   // 35.0 is result from Chloe Schoolings fits
-  // are likely an underestimate due to distribution
+  // perhaps an underestimate due to distribution
   // wings
   Float_t alpha1   = DegToRad()*35.0*2.355/2.;
     
-  // half resolution in theta
-
-  Float_t semiSpan = thetaBinWidth/2.*DegToRad()*2;
-  //Float_t semiSpan = thetaBinWidth/2.*DegToRad()*4.;
+  // theta half width for theory
+  Float_t semiSpan = thetaBinWidth/2.*DegToRad();
   
   cout << endl;
   cout << " semiSpan = " << semiSpan*RadToDeg() << endl;
@@ -1056,7 +1042,6 @@ void TLab::GraphAsymmetry(Char_t option){
   TTheory * theory =  new TTheory();
   
   // Simulation results
-  
   Float_t aSim[nThBins]={0};
   Float_t aSimE[nThBins]={0};
   Float_t aSimTrue[nThBins]={0};
@@ -1067,12 +1052,15 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimUTrue[nThBins]={0};
   Float_t aSimUTrueE[nThBins]={0};
   
-
   Float_t AsPhiDiffR[nThBins]={0};
   Float_t AePhiDiffR[nThBins]={0};
 
   Float_t mu[nThBins]={0};
+  // To Do:
   Float_t muE[nThBins]={0};
+  
+  // use 90 and 270 for 90 degrees?
+  Bool_t use270 = kTRUE;
   
   //  lab calculation (not theory only)
   if( option!='t' && option!='T'){
@@ -1091,17 +1079,19 @@ void TLab::GraphAsymmetry(Char_t option){
 	mu[i] = mu[i]/(AsymMatrix[i][1] + AsymMatrix[i][0]);
 
 	if (dPhiDiff  == 90){
-	  AsPhiDiff[i] =
-	    AsymMatrix[i][1]/AsymMatrix[i][0];
-	  AePhiDiff[i] =
-	    AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
-       
-	  //using average 90 and 270
-	  //comment out if only dPhi = 90 needed
-	  AsPhiDiff[i] =
-	    (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
-	  AePhiDiff[i] =
-	  AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
+	  
+	  if(!use270){
+	    AsPhiDiff[i] =
+	      AsymMatrix[i][1]/AsymMatrix[i][0];
+	    AePhiDiff[i] =
+	      AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
+	  }
+	  else{
+	    AsPhiDiff[i] =
+	      (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
+	    AePhiDiff[i] =
+	      AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
+	  }
 	}
 	if (dPhiDiff  == 180){
 	  AsPhiDiff[i] =
