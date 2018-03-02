@@ -70,7 +70,7 @@ void TLab::SetFilenames(TString runNumber){
 
 Bool_t TLab::RawTextFileExists(){
   
-  TFile *file = TFile::Open(textFileName);
+  ifstream ifile(textFileName);
     
   return file;
 }
