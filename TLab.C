@@ -63,6 +63,8 @@ void TLab::SetFilenames(TString runNumber){
   rootFileRawName = "../Data/run" + rootFileRawName;
   rootFileCalName = "../Data/cal" + rootFileCalName;
 
+  SetNRuns(runNumberInt);
+  
 }
 
 
@@ -75,7 +77,88 @@ Bool_t TLab::RawROOTFileExists(){
   return file;
 }
 
+void SetNRuns(Int_t run){
+  
+  nRuns = 3;
+  
+  cout << endl;
+  cout << " This file consists of " 
+       << nRuns << " runs " << endl;
+  
+}
+
+void SetEventNumbers(Int_t run){
+
+  if     (run == 0){
+  
+  }
+  // ------------------------------------------
+  // NB from here all thresholds were at 300 mV
+  // ------------------------------------------
+  else if(run == 400){ // collimator run
+    // Runs: 451 (OR), 452 (AND), 450 (OR)
+    nOR1 = 1019283; // 451 - OR collimators
+    nAND = 6675453; // 452 - AND collimators
+    nOR2 = 890963;  // 450 - closest previous no collimators run
+  }
+  else if(run == 449){
+    // Runs: 449 (OR + AND), 450 (OR)
+    nOR1 = 500000;  // start of run 449 was OR
+    nAND = 6580429; // rest of 449 was AND
+    nOR2 = 890963;  // 450 OR 
+  }
+  else if(run == 454){
+    // Runs: 451 (OR), 452 (AND), 453 (OR) 
+    nOR1 = 1019283; // 451 - OR collimators (unclear photopeaks)
+    nAND = 6675453; // 452 - AND collimators
+    nOR2 = 1360796; // 453 - OR collimators (unclear photopeaks)
+  }
+  else if(run == 1454){ // longest collimator run
+    // Runs: 453 (OR), 454 (AND), 456 (OR)
+    nOR1 = 1360796;  // 453 - OR, collimators
+    nAND = 38528184; // 454 - AND, collimators, 0.1 mV HV drift
+    nOR2 = 1459920;  // 456 - OR, closest no collimator run after
+  }
+  else if(run == 1457 ){ // no collimators
+    // Runs: 456 (OR), 457 (AND), 458 (OR)
+    nOR1 = ;
+    nAND = 47142893;
+    nOR2 = 1228535;
+  }
+  else if(run == 1460){
+    nOR1 = 1395877;
+    nAND = 47142893;
+    nOR2 = 1228535;
+  }
+  else if(run == 1460){
+    nOR1 = 1395877;
+    nAND = 47142893;
+    nOR2 = 1228535;
+  }
+  else if(run == 1460){
+    nOR1 = 1395877;
+    nAND = 47142893;
+    nOR2 = 1228535;
+  }
+  
+  eventSum = nOR1 + nAND + nOR2;
+
+  cout << endl;
+  cout << " The first calibration run had " 
+       << nOR1 << " events " << endl;
+  cout << " The main run had " 
+       << nAND  << " events " << endl;
+  cout << " The second calibration run had " 
+       << nOR2 << " events " << endl;
+  cout << " In total there are  " 
+       << eventSum << " events " << endl;
+  
+}
+
 void TLab::MakeRawDataTreeFile(){
+
+  //!!!!
+  SetEventNumbers(runNumberInt);
 
   TString textFile = "??";
   TString rootFile = "??";

@@ -61,6 +61,9 @@ class TLab : public TObject{
 
   Float_t RandomLabPhi();
   Bool_t  RandomGoodLabPhi(Float_t, Int_t);
+  
+  void SetNRuns(Int_t);
+  void SetEventNumbers(Int_t);
 
   //======================
   //======================
@@ -75,33 +78,14 @@ class TLab : public TObject{
   static const Int_t nChannels = 10;
   
   // OR, AND, OR
-  static const Int_t nRuns = 3;
-  
-  // RUN 449 (OR + AND), 450 (OR)
-  // AKA RUN 458
-/*   static const Long64_t nOR1 = 500000; */
-/*   static const Long64_t nAND = 6580429;  */
-/*   static const Long64_t nOR2 = 890963; */
+  Int_t    nRuns = 1;
 
-  // RUN 451 (OR), 452 (AND), 453 (OR) 
-  // AKA RUN 454
-/*   static const Long64_t nOR1 = 1019283; */
-/*   static const Long64_t nAND = 6675453;  */
-/*   static const Long64_t nOR2 = 1360796; */
+  Long64_t nOR1 = 0;
+  Long64_t nAND = 0;
+  Long64_t nOR2 = 0;
+  Long64_t eventSum = 0;
 
-/*   // RUN 451 (OR), 452 (AND), 450 (OR) */
-/*   // AKA RUN 400  */
-  /* static const Long64_t nOR1 = 1019283; */
-  /* static const Long64_t nAND = 6675453; */
-  /* static const Long64_t nOR2 = 890963; */
 
-  // RUN 453 (OR), 454 (AND), 456 (OR)
-  // AKA RUN 1454 
-  /*  static const Long64_t nOR1 = 1360796;
-  static const Long64_t nAND = 38528184; 
-  static const Long64_t nOR2 = 1459920;*/
-
-  // RUN 456 (OR), 457 (AND), 458 (OR)
   // AKA RUN 1457   
   /* static const Long64_t nOR1 = 1360796; */
   /* static const Long64_t nAND = 38528184;  */
@@ -127,12 +111,10 @@ class TLab : public TObject{
   //---------------------------------------------
   //---------------------------------------------
   
-  // RUN 459 (OR), 460 (AND), 461 (OR)
-  // AKA RUN 1460
-  static const Long64_t nOR1 = 1395877;
-  static const Long64_t nAND = 47142893;
-  static const Long64_t nOR2 = 1228535;
 
+  // Run 1460, combined:
+  // Run 459 (OR), 460 (AND), 461 (OR)
+  
   // ????????????????
   // check the run numbers against logbook
   /* // RUN 463 (OR), 460 (AND), 461 (OR) */
