@@ -998,7 +998,7 @@ void TLab::CalculateAsymmetry(){
     
 }
 
-Float_t RandomiseLabPhi(){
+Float_t TLab::RandomLabPhi(){
   
   TRandom1 * rand1 = new TRandom1(); 
   Float_t phi = rand1->Uniform()*360;
@@ -1022,8 +1022,8 @@ Float_t RandomiseLabPhi(){
   return phi;
 }
 
-Bool_t  RandomGoodLabPhi(Float_t phi, 
-			 Int_t crystal){
+Bool_t  TLab::RandomGoodLabPhi(Float_t phi, 
+			       Int_t crystal){
   
   Bool_t  good = kFALSE;
 
