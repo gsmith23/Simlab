@@ -69,10 +69,10 @@ void TLab::SetFilenames(TString runNumber){
 /** Public member functions *********/
 
 Bool_t TLab::RawTextFileExists(){
+
+  inData = new ifstream(textFileName);
   
-  TFile *file = TFile::Open(textFileName);
-    
-  return file;
+  return inData;
 }
 
 Bool_t TLab::RawROOTFileExists(){
@@ -316,6 +316,7 @@ void TLab::MakeRawDataTreeFile(){
 }
 
 Bool_t TLab::CalibratedROOTFileExists(){
+  
   TFile *file = TFile::Open(rootFileCalName);
   return file;
 }
