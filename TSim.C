@@ -20,7 +20,6 @@ TSim::TSim(TString fileNumber){
   
 }
 
-//option for use with two input files
 TSim::TSim(TString fileNumber1, TString fileNumber2){
   
   cout << endl;
@@ -38,8 +37,6 @@ TSim::TSim(TString fileNumber1, TString fileNumber2){
   rootFileRawName2 = rootFileRawName2 + ".root";
   rootFileSortName2 = rootFileSortName2 + ".root";
 
-  //  Initialise();
-  
 }
 
 
@@ -56,18 +53,6 @@ Bool_t TSim::SortedROOTFileExists(){
 
   return file;
 }
-
-void TSim::Loop()
-{
-  
-   Long64_t nentries = simDataTree->GetEntriesFast();
-
-   for (Long64_t i = 0 ; i < nentries ; i++) {
-     simDataTree->GetEntry(i);
-           
-   }
-}
-
 
 Float_t TSim::ElectronEnergyToTheta(Double_t nrg){
   return RadToDeg()*ACos(2. - 511./(511. - nrg));
@@ -101,76 +86,6 @@ Int_t TSim::GetThetaBin(Float_t theta){
   }
   
   return bin;
-}
-
-
-void TSim::Initialise(){
-  
-  cout << endl;
-  cout << " Connecting Branches " << endl;
-  
-  theFile = new TFile(rootFileRawName);
-  //  name of the Tree?
-  simDataTree = (TTree*)theFile->Get("Tangle2");
-
-  simDataTree->SetBranchAddress("edep0", &edep0, &b_edep0);
-  simDataTree->SetBranchAddress("edep1", &edep1, &b_edep1);
-  simDataTree->SetBranchAddress("edep2", &edep2, &b_edep2);
-  simDataTree->SetBranchAddress("edep3", &edep3, &b_edep3);
-  simDataTree->SetBranchAddress("edep4", &edep4, &b_edep4);
-  simDataTree->SetBranchAddress("edep5", &edep5, &b_edep5);
-  simDataTree->SetBranchAddress("edep6", &edep6, &b_edep6);
-  simDataTree->SetBranchAddress("edep7", &edep7, &b_edep7);
-  simDataTree->SetBranchAddress("edep8", &edep8, &b_edep8);
-  simDataTree->SetBranchAddress("edep9", &edep9, &b_edep9);
-  simDataTree->SetBranchAddress("edep10", &edep10, &b_edep10);
-  simDataTree->SetBranchAddress("edep11", &edep11, &b_edep11);
-  simDataTree->SetBranchAddress("edep12", &edep12, &b_edep12);
-  simDataTree->SetBranchAddress("edep13", &edep13, &b_edep13);
-  simDataTree->SetBranchAddress("edep14", &edep14, &b_edep14);
-  simDataTree->SetBranchAddress("edep15", &edep15, &b_edep15);
-  simDataTree->SetBranchAddress("edep16", &edep16, &b_edep16);
-  simDataTree->SetBranchAddress("edep17", &edep17, &b_edep17);
-  simDataTree->SetBranchAddress("nb_Compt0", &nb_Compt0, &b_nb_Compt0);
-  simDataTree->SetBranchAddress("nb_Compt1", &nb_Compt1, &b_nb_Compt1);
-  simDataTree->SetBranchAddress("nb_Compt2", &nb_Compt2, &b_nb_Compt2);
-  simDataTree->SetBranchAddress("nb_Compt3", &nb_Compt3, &b_nb_Compt3);
-  simDataTree->SetBranchAddress("nb_Compt4", &nb_Compt4, &b_nb_Compt4);
-  simDataTree->SetBranchAddress("nb_Compt5", &nb_Compt5, &b_nb_Compt5);
-  simDataTree->SetBranchAddress("nb_Compt6", &nb_Compt6, &b_nb_Compt6);
-  simDataTree->SetBranchAddress("nb_Compt7", &nb_Compt7, &b_nb_Compt7);
-  simDataTree->SetBranchAddress("nb_Compt8", &nb_Compt8, &b_nb_Compt8);
-  simDataTree->SetBranchAddress("nb_Compt9", &nb_Compt9, &b_nb_Compt9);
-  simDataTree->SetBranchAddress("nb_Compt10", &nb_Compt10, &b_nb_Compt10);
-  simDataTree->SetBranchAddress("nb_Compt11", &nb_Compt11, &b_nb_Compt11);
-  simDataTree->SetBranchAddress("nb_Compt12", &nb_Compt12, &b_nb_Compt12);
-  simDataTree->SetBranchAddress("nb_Compt13", &nb_Compt13, &b_nb_Compt13);
-  simDataTree->SetBranchAddress("nb_Compt14", &nb_Compt14, &b_nb_Compt14);
-  simDataTree->SetBranchAddress("nb_Compt15", &nb_Compt15, &b_nb_Compt15);
-  simDataTree->SetBranchAddress("nb_Compt16", &nb_Compt16, &b_nb_Compt16);
-  simDataTree->SetBranchAddress("nb_Compt17", &nb_Compt17, &b_nb_Compt17);
-  simDataTree->SetBranchAddress("XposA_1st", &XposA_1st, &b_XposA_1st);
-  simDataTree->SetBranchAddress("YposA_1st", &YposA_1st, &b_YposA_1st);
-  simDataTree->SetBranchAddress("ZposA_1st", &ZposA_1st, &b_ZposA_1st);
-  simDataTree->SetBranchAddress("XposA_2nd", &XposA_2nd, &b_XposA_2nd);
-  simDataTree->SetBranchAddress("YposA_2nd", &YposA_2nd, &b_YposA_2nd);
-  simDataTree->SetBranchAddress("ZposA_2nd", &ZposA_2nd, &b_ZposA_2nd);
-  simDataTree->SetBranchAddress("XposB_1st", &XposB_1st, &b_XposB_1st);
-  simDataTree->SetBranchAddress("YposB_1st", &YposB_1st, &b_YposB_1st);
-  simDataTree->SetBranchAddress("ZposB_1st", &ZposB_1st, &b_ZposB_1st);
-  simDataTree->SetBranchAddress("XposB_2nd", &XposB_2nd, &b_XposB_2nd);
-  simDataTree->SetBranchAddress("YposB_2nd", &YposB_2nd, &b_YposB_2nd);
-  simDataTree->SetBranchAddress("ZposB_2nd", &ZposB_2nd, &b_ZposB_2nd);
-  simDataTree->SetBranchAddress("ThetaA_1st", &ThetaA_1st, &b_ThetaA_1st);
-  simDataTree->SetBranchAddress("PhiA_1st", &PhiA_1st, &b_PhiA_1st);
-  simDataTree->SetBranchAddress("ThetaB_1st", &ThetaB_1st, &b_ThetaB_1st);
-  simDataTree->SetBranchAddress("PhiB_1st", &PhiB_1st, &b_PhiB_1st);
-  simDataTree->SetBranchAddress("dPhi_1st", &dPhi_1st, &b_dPhi_1st);
-  simDataTree->SetBranchAddress("ThetaA_2nd", &ThetaA_2nd, &b_ThetaA_2nd);
-  simDataTree->SetBranchAddress("PhiA_2nd", &PhiA_2nd, &b_PhiA_2nd);
-  simDataTree->SetBranchAddress("ThetaB_2nd", &ThetaB_2nd, &b_ThetaB_2nd);
-  simDataTree->SetBranchAddress("PhiB_2nd", &PhiB_2nd, &b_PhiB_2nd);
-  
 }
 
 Int_t  TSim::SortEvents(TString fileNumber){
@@ -208,7 +123,6 @@ Int_t  TSim::SortEvents(TString fileNumber){
   // read in output from 
   // Geant4 simulation
 
-  //TTree* simDataTree =(TTree*)inputFile->Get("Tangle2");
   simDataTree =(TTree*)inputFile->Get("Tangle2");
   simDataTree->SetBranchAddress("edep0", &edep0, &b_edep0);
   simDataTree->SetBranchAddress("edep1", &edep1, &b_edep1);
@@ -267,12 +181,82 @@ Int_t  TSim::SortEvents(TString fileNumber){
   simDataTree->SetBranchAddress("PhiA_2nd", &PhiA_2nd, &b_PhiA_2nd);
   simDataTree->SetBranchAddress("ThetaB_2nd", &ThetaB_2nd, &b_ThetaB_2nd);
   simDataTree->SetBranchAddress("PhiB_2nd", &PhiB_2nd, &b_PhiB_2nd);
-  
-  //write to
 
+
+  //============================================
+  // write to
   sortDataTree = new TTree("sortDataTree",
 			   "Sorted simulation events");
 
+  // New variables
+  TString tempString = "";
+
+  tempString.Form("EA[%d]/D", nCrystals);
+  sortDataTree->Branch("EA", EA, tempString);
+
+  tempString.Form("EB[%d]/D", nCrystals);
+  sortDataTree->Branch("EB", EB, tempString);
+  
+  tempString.Form("etHA[%d]/F",nCrystals);
+  sortDataTree->Branch("etHA",etHA,tempString);
+
+  tempString.Form("ltHA[%d]/F",nCrystals);
+  sortDataTree->Branch("ltHA",ltHA,tempString);
+
+  tempString.Form("maxtHAErr[%d]/F",nCrystals);
+  sortDataTree->Branch("maxtHAErr",maxtHAErr,tempString);
+
+  tempString.Form("mintHAErr[%d]/F",nCrystals);
+  sortDataTree->Branch("mintHAErr",mintHAErr,tempString);
+  
+  tempString.Form("etHB[%d]/F",nCrystals);
+  sortDataTree->Branch("etHB",etHB,tempString);
+
+  tempString.Form("ltHB[%d]/F",nCrystals);
+  sortDataTree->Branch("ltHB",ltHB,tempString);
+
+  tempString.Form("maxtHBErr[%d]/F",nCrystals);
+  sortDataTree->Branch("maxtHBErr",maxtHBErr,tempString);
+
+  tempString.Form("mintHBErr[%d]/F",nCrystals);
+  sortDataTree->Branch("mintHBErr",mintHBErr,tempString);
+
+  tempString.Form("nb_ComptA[%d]/I",nCrystals);
+  sortDataTree->Branch("nb_ComptA", nb_ComptA, tempString);
+
+  tempString.Form("nb_ComptB[%d]/I",nCrystals);
+  sortDataTree->Branch("nb_ComptB", nb_ComptB, tempString);
+
+  tempString.Form("simtHA[%d]/D",2);
+  sortDataTree->Branch("simtHA", simtHA, tempString);
+
+  tempString.Form("simtHB[%d]/D",2);
+  sortDataTree->Branch("simtHB", simtHB, tempString);
+
+  tempString.Form("simPhiA[%d]/D",2);
+  sortDataTree->Branch("simPhiA", simPhiA, tempString);
+
+  tempString.Form("simPhiB[%d]/D",2);
+  sortDataTree->Branch("simPhiB", simPhiB, tempString);
+
+  tempString.Form("XposA[%d]/D",2);
+  sortDataTree->Branch("XposA", XposA, tempString);
+
+  tempString.Form("YposA[%d]/D",2);
+  sortDataTree->Branch("YposA", YposA, tempString);
+
+  tempString.Form("ZposA[%d]/D",2);
+  sortDataTree->Branch("ZposA", ZposA, tempString);
+  
+  tempString.Form("XposB[%d]/D",2);
+  sortDataTree->Branch("XposB", XposB, tempString);
+
+  tempString.Form("YposB[%d]/D",2);
+  sortDataTree->Branch("YposB", YposB, tempString);
+
+  tempString.Form("ZposB[%d]/D",2);
+  sortDataTree->Branch("ZposB", ZposB, tempString);
+  
   //============================================
   //--------------------------------------------
   // Variable declarations
@@ -296,22 +280,24 @@ Int_t  TSim::SortEvents(TString fileNumber){
   // Initial array initialisations
   for (Int_t i = 0; i < nCrystals; i++){
 
-    //smeared energy
+    // smeared energy
     EA[i] = 0; 
     EB[i] = 0;
 
-    //angle calculated from exact energy deposit = 'energy theta'
+    // angle calculated from exact energy deposit = 'energy theta'
     etHA[i] = 0;
-    //angle calculated from the smeared energy deposit = 'lab theta'
-    ltHA[i] = 0;
-    //angle calculated from exact energy - a*sigma
-    mintHAErr[i] = 0.;
-    //angle calculated from exact energy + a*sigma
-    maxtHAErr[i] = 0.;
-    
     etHB[i] = 0.;
+    
+    // angle calculated from the smeared energy deposit = 'lab theta'
+    ltHA[i] = 0;
     ltHB[i] = 0.;
+    
+    // angle calculated from exact energy - a*sigma
+    mintHAErr[i] = 0.;
     mintHBErr[i] = 0.;
+    
+    // angle calculated from exact energy + a*sigma
+    maxtHAErr[i] = 0.;
     maxtHBErr[i] = 0.;
     
     nb_ComptA[i] = 0;
@@ -328,79 +314,6 @@ Int_t  TSim::SortEvents(TString fileNumber){
     simPhiA[i] = 999;
     simPhiB[i] = 999;
   }
-  
-  //============================================
-  // New variables
-  TString tempString = "";
-
-  tempString.Form("EA[%d]/D", nCrystals);
-  sortDataTree->Branch("EA", EA, tempString);
-
-  tempString.Form("EB[%d]/D", nCrystals);
-  sortDataTree->Branch("EB", EB, tempString);
-  
-  tempString.Form("etHA[%d]/F",nCrystals);
-  sortDataTree->Branch("etHA",etHA,tempString);
-
-  tempString.Form("ltHA[%d]/F",nCrystals);
-  sortDataTree->Branch("ltHA",ltHA,tempString);
-
-  tempString.Form("maxtHAErr[%d]/F",nCrystals);
-  sortDataTree->Branch("maxtHAErr",maxtHAErr,tempString);
-  tempString.Form("mintHAErr[%d]/F",nCrystals);
-  sortDataTree->Branch("mintHAErr",mintHAErr,tempString);
-  
-  tempString.Form("etHB[%d]/F",nCrystals);
-  sortDataTree->Branch("etHB",etHB,tempString);
-
-  tempString.Form("ltHB[%d]/F",nCrystals);
-  sortDataTree->Branch("ltHB",ltHB,tempString);
-
-  tempString.Form("maxtHBErr[%d]/F",nCrystals);
-  sortDataTree->Branch("maxtHBErr",maxtHBErr,tempString);
-  tempString.Form("mintHBErr[%d]/F",nCrystals);
-  sortDataTree->Branch("mintHBErr",mintHBErr,tempString);
-
-  
-  tempString.Form("nb_ComptA[%d]/I",nCrystals);
-  sortDataTree->Branch("nb_ComptA", nb_ComptA, tempString);
-
-  tempString.Form("nb_ComptB[%d]/I",nCrystals);
-  sortDataTree->Branch("nb_ComptB", nb_ComptB, tempString);
-
-  tempString.Form("simtHA[%d]/D",2);
-  sortDataTree->Branch("simtHA", simtHA, tempString);
-
-  tempString.Form("simtHB[%d]/D",2);
-  sortDataTree->Branch("simtHB", simtHB, tempString);
-
-  tempString.Form("simPhiA[%d]/D",2);
-  sortDataTree->Branch("simPhiA", simPhiA, tempString);
-
-  tempString.Form("simPhiB[%d]/D",2);
-  sortDataTree->Branch("simPhiB", simPhiB, tempString);
-
-
-  tempString.Form("XposA[%d]/D",2);
-  sortDataTree->Branch("XposA", XposA, tempString);
-
-  tempString.Form("YposA[%d]/D",2);
-  sortDataTree->Branch("YposA", YposA, tempString);
-
-  tempString.Form("ZposA[%d]/D",2);
-  sortDataTree->Branch("ZposA", ZposA, tempString);
-  
-  tempString.Form("XposB[%d]/D",2);
-  sortDataTree->Branch("XposB", XposB, tempString);
-
-  tempString.Form("YposB[%d]/D",2);
-  sortDataTree->Branch("YposB", YposB, tempString);
-
-  tempString.Form("ZposB[%d]/D",2);
-  sortDataTree->Branch("ZposB", ZposB, tempString);
-
-  // // per event variables
-  // sortDataTree->Branch("dPhi_1st",&dPhi_1st, "dPhi_1st/D");
   
   TRandom *rand = new TRandom();
 
@@ -486,24 +399,12 @@ Int_t  TSim::SortEvents(TString fileNumber){
     maxtHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] + (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));
     mintHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] - (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));				 
     
-    // introduce additional conditions
-    /*Int_t nHits = 0;
-      
-      for (Int_t j = 0 ; j < nCrystals; j++){
-      if (EA[j] > 0) nHits++;
-      if (EB[j] > 0) nHits++;}
-      
-      if (nHits > 3){
-      sortDataTree->Fill();
-      }*/
-    
-  sortDataTree->Fill();
+    sortDataTree->Fill();
   
   } // end of: for(Int_t i = 0 ; i < nEvents     
   
   //=========================
   sortDataTree->Write();
-      
   
   outputFile->Write();
   
@@ -515,9 +416,7 @@ Int_t  TSim::SortEvents(TString fileNumber){
 
   return 0;
   
-} //Closes the program
-
-
+} 
 
 Bool_t TSim::GoodTheta(Float_t theta){
   
@@ -566,8 +465,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
-  //!!
-  Float_t crystalHalfSizeYZ = 1.0;
+  Float_t crystalHalfSizeYZ = 2.0;
   
   posYZ = Abs(posYZ);
 
@@ -754,7 +652,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH1F * hThRes00_TL[nThbins];
   TH1F * hThRes90_TL[nThbins];
   
-
   // angle to normal of detector surface
   TH1F * hBeta[nThbins];
   TH1F * hBeta_TL[nThbins];
@@ -795,7 +692,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hTitle.Form("hDPhiRes90_TL_%d",th);
     hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
 				 32, 0.,360.);
-
     
     hTitle.Form("hThRes00_%d",th);
     hThRes00[th] = new TH1F(hTitle,hTitle,
@@ -893,8 +789,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   sortDataTree->SetBranchAddress("XposB",&XposB);
   sortDataTree->SetBranchAddress("YposB",&YposB);
   sortDataTree->SetBranchAddress("ZposB",&ZposB);
-  
-  //sortDataTree->SetBranchAddress("dPhi_1st",&dPhi_1st);
   
   n000 = 0;
   n090 = 0;
@@ -1099,12 +993,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	AsymMatrix[thBin][3] += 1;
 	n270++;
       }
-      
-//       cout << endl;
-//       cout << endl;
-//       cout << " YposA[1] = " << YposA[1] << endl;
-//       cout << endl;
-//       cout << endl;
       
       // 'true lab' analysis
       if (
@@ -1418,7 +1306,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   // To Do:
   //CalculateABC_Lab_Err()
   
-
   for (Int_t i = 0 ; i < nThbins ; i++){
     pA_Lab[i] = pABC_Lab[i][0];
     pB_Lab[i] = pABC_Lab[i][1];
@@ -1864,7 +1751,6 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
 
   TFile* inputFile = new TFile(inputFileName);
   
-  //TTree* simDataTree=(TTree*)inputFile->Get("Tangle2");
   simDataTree=(TTree*)inputFile->Get("Tangle2");
   simDataTree->SetBranchAddress("ThetaA_1st",&ThetaA_1st);
   simDataTree->SetBranchAddress("ThetaA_2nd",&ThetaA_2nd);
