@@ -63,8 +63,6 @@ void TLab::SetFilenames(TString runNumber){
   rootFileRawName = "../Data/run" + rootFileRawName;
   rootFileCalName = "../Data/cal" + rootFileCalName;
 
-  SetNRuns(runNumberInt);
-  
 }
 
 
@@ -77,18 +75,12 @@ Bool_t TLab::RawROOTFileExists(){
   return file;
 }
 
-void SetNRuns(Int_t run){
-  
-  nRuns = 3;
-  
-  cout << endl;
-  cout << " This file consists of " 
-       << nRuns << " runs " << endl;
-  
-}
+void TLab::SetEventNumbers(Int_t run){
 
-void SetEventNumbers(Int_t run){
-
+  nOR1 = 0;
+  nAND = 0;
+  nOR2 = 0;
+    
   if     (run == 0){
   
   }
@@ -138,9 +130,10 @@ void SetEventNumbers(Int_t run){
   // and crystals at 3.0 cm
   // ------------------------------------------
   // ------------------------------------------
-  else if(run == 1460){ // !!!!! REDO THIS RUN
+  else if(run == 1460){ 
+    // Runs: 459 (or), 460 (AND), 461 (OR)
     nOR1 = 1395877;
-    nAND = 47142893;
+    nAND = 47142893; 
     nOR2 = 1228535;
   }
   else if(run == 1470){

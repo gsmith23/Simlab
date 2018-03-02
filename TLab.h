@@ -62,14 +62,17 @@ class TLab : public TObject{
   Float_t RandomLabPhi();
   Bool_t  RandomGoodLabPhi(Float_t, Int_t);
   
-  void SetNRuns(Int_t);
-  void SetEventNumbers(Int_t);
+  void  SetEventNumbers(Int_t);
 
   //======================
   //======================
   //==== Data Members ====
   //======================
   //======================
+
+  
+  // OR, AND, OR
+  const static Int_t nRuns = 3;
   
   // crystals per array
   static const Int_t nCrystals = 9;
@@ -77,18 +80,15 @@ class TLab : public TObject{
   // only five per array are recorded
   static const Int_t nChannels = 10;
   
-  // OR, AND, OR
-  Int_t    nRuns = 1;
-
-  Long64_t nOR1 = 0;
-  Long64_t nAND = 0;
-  Long64_t nOR2 = 0;
-  Long64_t eventSum = 0;
-
   // For Graphing
   static const Int_t nPhiBins = 4;
   static const Int_t nThBins  = 8;
-
+  
+  Long64_t nOR1;
+  Long64_t nAND;
+  Long64_t nOR2;
+  Long64_t eventSum;
+  
   Float_t ThMin[nThBins];
   Float_t ThMax[nThBins];
   Float_t plotTheta[nThBins]; 
