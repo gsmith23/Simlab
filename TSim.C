@@ -1501,11 +1501,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
   TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
   
-  
-  
   TString theoryLegendTitle = " ";
   alpha1 = alpha1*RadToDeg();
-  theoryLegendTitle.Form("theory curve #alpha_{#phi} = %.1f^{o}", alpha1);
+  theoryLegendTitle.Form("theory #alpha_{#phi} = %.1f^{o}", alpha1);
   
   Char_t  plotN[128];
   //TString plotName = "";
@@ -2478,8 +2476,8 @@ void TSim::SetStyle(){
   garyStyle->SetPadColor(kWhite);
   
   //Make more room for X and Y titles
-  garyStyle->SetPadRightMargin(0.16);  //percentage
-  garyStyle->SetPadLeftMargin(0.2);    //percentage
+  garyStyle->SetPadRightMargin(0.1);  //percentage
+  garyStyle->SetPadLeftMargin(0.15);    //percentage
   garyStyle->SetPadBottomMargin(0.14); //percentage
   
   //----------- Histogram
