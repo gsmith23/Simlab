@@ -1436,9 +1436,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   //half resolution in theta
   Float_t semiSpan = DegToRad()*(ThMax[0] - ThMin[0])/2.;
     
-  //!!
-  //semiSpan = DegToRad()*(ThMax[0] - ThMin[0]);
-  
   TTheory *theory = new TTheory();
 
   //calculating theory curve
@@ -1458,13 +1455,13 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     plotTheta[i] = plotTheta[i]*RadToDeg();
   }
     
- 
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
-
+  
   TH1F *hr;
   
-  Float_t maxY = 2.0;
+  Float_t maxY = 2.8;
+  Float_t minY = 0.8;
 
   if(dPhiDiff==180){
     maxY = 6.0;
@@ -1473,8 +1470,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
       }
   }
   
-   
-  hr = canvas->DrawFrame(10,0.5,170,maxY);
+  hr = canvas->DrawFrame(10,minY,170,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
 
   TGraphErrors *grAsym[3];
@@ -1552,7 +1548,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   leg->Clear();
   
   maxY =  1.0;
-  Float_t minY = -1.2;
+  minY = -1.2;
     
   hr = canvas->DrawFrame(10,minY,170,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
