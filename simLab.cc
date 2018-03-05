@@ -46,12 +46,10 @@ Int_t main(int argc, char **argv){
     cout << " 1 - lab data analysis                 " << endl; 
     cout << " 2 - sim data analysis                 " << endl; 
     cout << " 3 - lab and sim data analysis         " << endl;
-    cout << " 4 - single/multiple sim data analysis " << endl;
-    cout << " 5 - sim data scattering analysis      " << endl;
+    cout << " 4 - exact angles sim data analysis    " << endl;
+    cout << " 5 - exact angles scattered analysis   " << endl;
     cout << " 6 - plot theory curve only            " << endl; 
     cout << " 0 - lab data analysis (overwrite)     " << endl; 
-    cout << " 8 - lab data - make raw trees only..  " << endl;
-    cout << "    ..and specify file number limits   " << endl; 
     cout << " 9 - lab data - make raw trees only    " << endl; 
     cout <<                                              endl;
     cout << " ------------------------------------- " << endl;
@@ -61,29 +59,32 @@ Int_t main(int argc, char **argv){
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Examples:                             " << endl; 
-    cout << " ./simLab 1 026                        " << endl; 
+    cout << " ./simLab 1 1470                       " << endl; 
     cout << " ------------------------------------- " << endl;
     cout <<                                              endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Option 2 - one/two further arguments  " << endl; 
-    cout << " simulated data file number/s          " << endl;
+    cout << " simulated data file number, or        " << endl;
+    cout << " entangled/polarised then unpolarised  " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Examples:                             " << endl; 
-    cout << " ./simLab 2 1                          " << endl;
-    cout << " ./simLab 2 1 2                        " << endl;
+    cout << " ./simLab 2 001132000                  " << endl;
+    cout << " ./simLab 2 001132000 000132000        " << endl;
     cout << " ------------------------------------- " << endl;
     cout <<                                              endl;
     cout << " ------------------------------------- " << endl;
-    cout << " Option 3 - two further arguments      " << endl; 
-    cout << "        run lab run number             " << endl;
-    cout << "    simulated data file number         " << endl;
-    cout << "   (lab data normalised to simulated)  " << endl;
+    cout << " Option 3 - two/three further args.    " << endl; 
+    cout << "    lab then sim run numbers           " << endl;
+    cout <<                                              endl;
+    cout << "   lab, tangled sim then unpol sim     " << endl;
+    cout << "  (lab & sim data normalised to unpol) " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
-    cout << " Example:                              " << endl; 
-    cout << " ./simLab 3 026 4                      " << endl;
+    cout << " Examples:                             " << endl; 
+    cout << " ./simLab 3 1470 00113200              " << endl;
+    cout << " ./simLab 3 1470 00113200 000132000    " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
@@ -96,8 +97,19 @@ Int_t main(int argc, char **argv){
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Examples:                             " << endl; 
-    cout << " ./simLab 4 2 3;                       " << endl;
-    cout << " ./simLab 4 2 2;                       " << endl;
+    cout << " ./simLab 4 001132000 000132000;       " << endl;
+    cout << " ./simLab 4 001132000 001132000;       " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " Option 5 - two further arguments      " << endl;
+    cout << " simulated data file number            " << endl;
+    cout << " same simulated data file number       " << endl;
+    cout << " ( modify simLab.cc to set scattering  " << endl;
+    cout << "  angles and number of  bins)          " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << " Examples:                             " << endl; 
+    cout << " ./simLab 5 001132000 001132000;       " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Option 0 - one further argument       " << endl;
@@ -105,25 +117,17 @@ Int_t main(int argc, char **argv){
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Examples:                             " << endl; 
-    cout << " ./simLab 0 026;                       " << endl; 
+    cout << " ./simLab 0 1470;                      " << endl; 
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
-    cout << " Option 8 - three further argument     " << endl;
-    cout << "        raw lab run number             " << endl;
-    cout << "        1st lab file number            " << endl;
-    cout << "        last lab file number           " << endl;
-    cout << " ------------------------------------- " << endl;
-    cout << " ------------------------------------- " << endl;
-    cout << " Examples:                             " << endl; 
-    cout << " ./simLab 8 034 5 16;                  " << endl; 
     cout << " ------------------------------------- " << endl;
     cout << " Option 9 - one further argument       " << endl;
     cout << "        raw lab run number             " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Examples:                             " << endl; 
-    cout << " ./simLab 9 026;                       " << endl; 
+    cout << " ./simLab 9 1470;                      " << endl; 
     cout << " ------------------------------------- " << endl;
     cout <<                                              endl;
     cout <<                                              endl;
@@ -210,13 +214,7 @@ Int_t main(int argc, char **argv){
     cout << "    Raw Data " << endl; 
     
     TLab* data;
-
-    if(strcmp(argv[1],"8")!=0){
-      data = new TLab(argv[2]);
-    }
-    else{
-      data = new TLab(argv[2],argv[3],argv[4]);
-    }
+    data = new TLab(argv[2]);
     
     Char_t overwrite = 'n';
     Char_t option    = 'b';
@@ -244,14 +242,22 @@ Int_t main(int argc, char **argv){
     }
     
     cout << endl;
-    cout << " Checking if ROOT file exists " << endl; 
+    cout << " Checking if Raw ROOT file exists " << endl; 
     
     if(!(data->RawROOTFileExists())){
       cout << endl;
       cout << " ...                                   " << endl;
       cout << " ROOT file of raw data does not exist. " << endl;
-      cout << " I will therefore create one ...       " << endl;
-      data->MakeRawDataTreeFile();
+      cout << " Shall I create one ?                  " << endl;
+      cout << " [answer (y/n)]  (default y)           " << endl;
+      cout << endl;
+      
+      Char_t makeRAWROOTFile = 'y';
+      cin >> makeRAWROOTFile;
+      
+      if(makeRAWROOTFile!='n' &&
+	 makeRAWROOTFile!='N')
+	data->MakeRawDataTreeFile();
     }
     else{
       cout << endl;
@@ -367,9 +373,11 @@ Int_t main(int argc, char **argv){
     
     cout << endl;
     cout << " Analysing : " << argv[2] << endl;
-    
+
+    // To do extend to two files/argument case
     TSim * simData = new TSim(argv[2]);
 
+    // To do - add check for sorted file/s
     Char_t sort = 'n';
     cout << endl;
     cout << " Sorting ROOT file " << endl;
@@ -380,18 +388,15 @@ Int_t main(int argc, char **argv){
     cin  >> sort;
 
     if (sort == 'y' || sort == 'Y' ){
-      
       cout << endl;
       cout << " Sorting data " << endl;
-      
       simData->SortEvents(argv[2]);
     }
     
     cout << endl;
     cout << " Calculating & Plotting Asymmetry " << endl;
-    
-    //simData->CalculateAsymmetryLab(argv[2]);
-    
+
+    // second file unpolarised data
     if     (argc==3)
        simData->GraphAsymmetryLab(argv[2],"??");
     else if(argc==4)
@@ -427,8 +432,17 @@ Int_t main(int argc, char **argv){
       cout << endl;
       cout << " ...                                   " << endl;
       cout << " ROOT file of raw data does not exist. " << endl;
-      cout << " I will therefore create one ...       " << endl;
-      data->MakeRawDataTreeFile();
+      cout << " Shall I create one ?                  " << endl;
+      cout << " [answer (y/n)]  (default y)           " << endl;
+      cout << endl;
+      
+      Char_t makeRAWROOTFile = 'y';
+      cin >> makeRAWROOTFile;
+      
+      if(makeRAWROOTFile!='n' &&
+	 makeRAWROOTFile!='N')
+	data->MakeRawDataTreeFile();
+
     }
     else{
       cout << endl;

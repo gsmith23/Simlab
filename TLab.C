@@ -901,8 +901,8 @@ void TLab::CalculateAsymmetry(){
 	// crystals
 	if( 
 	   ( GoodTheta(tHA[j]) )     &&
-	   ( (EA[j]+EA[4]) > minE )  &&
-	   ( (EA[j]+EA[4]) < maxE )  &&
+	   // ( (EA[j]+EA[4]) > minE )  &&
+	   // ( (EA[j]+EA[4]) < maxE )  &&
 	   ( tHA[j] > ThMin[thBin] ) &&
 	   ( tHA[j] < ThMax[thBin] )
 	    ){
@@ -912,8 +912,8 @@ void TLab::CalculateAsymmetry(){
 	
 	if( 
 	   ( GoodTheta(tHB[j]) )     &&
-	   ( (EB[j]+EB[4]) > minE )  &&
-	   ( (EB[j]+EB[4]) < maxE )  &&
+	   // ( (EB[j]+EB[4]) > minE )  &&
+	   // ( (EB[j]+EB[4]) < maxE )  &&
 	   ( tHB[j] > ThMin[thBin] ) &&
 	   ( tHB[j] < ThMax[thBin] )
 	    ){
@@ -1262,6 +1262,7 @@ void TLab::GraphAsymmetry(Char_t option){
     TSim *simData ;
       
     if(divideByUnPol){
+
       simData = new TSim(simRun,simRunU);
       
       // unpolarised first
@@ -1283,10 +1284,14 @@ void TLab::GraphAsymmetry(Char_t option){
       aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
       aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
       
+      // divide lab data by unpolarised sim
       AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i]);
       AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
     
       if(divideByUnPol){
+	// same values as aSim[i] etc
+	// as they will be overwritten 
+	// below
 	aSimU[i]      = aSim[i];
 	aSimUE[i]     = aSimE[i];
 	aSimUTrue[i]  = aSimTrue[i];
@@ -1295,9 +1300,10 @@ void TLab::GraphAsymmetry(Char_t option){
     
     }
     
+    // divide simulated entangled/polarised by simulated unpolarised
     if(divideByUnPol){
       
-      // the polarised data
+      // the entangled/polarised data
       simData->CalculateAsymmetryLab(simRun);
       
       for(Int_t i = 0 ; i < nThBins ; i++){
@@ -1311,7 +1317,7 @@ void TLab::GraphAsymmetry(Char_t option){
 	
 	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i])*Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/(aSimUTrue[i]*aSimUTrue[i]) + aSimTrueE[i]*aSimTrueE[i]/(aSimTrue[i]*aSimTrue[i]));
 	
-	// now the actual values
+	// divide 
 	aSim[i]  = aSim[i]/aSimU[i];
 	aSimTrue[i]  = aSimTrue[i]/aSimUTrue[i];
       }

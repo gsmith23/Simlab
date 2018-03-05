@@ -1272,7 +1272,11 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 
   // GetThetaBinValues() is implemented in
   // CalculateAsymmetryLab
-    
+
+  // entangled/polarised first
+  // To do: change to have this second
+  // with the unpolarised calculated 
+  // first as is done in TLab.C
   CalculateAsymmetryLab(inputFileNumber1);
   
   Int_t inputFileInt1 = inputFileNumber1.Atoi();
@@ -1287,7 +1291,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     inputFileInt2 = inputFileNumber2.Atoi();
   
   cout << "  " << nFiles << " Files " << endl;
-
+  
   TString plotName;
   plotName = "../Plots/Asym_" + inputFileNumber1;
   plotName = plotName + ".pdf";
@@ -1385,8 +1389,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 	AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + AePhiDiff1[i]*AePhiDiff1[i]/(AsPhiDiff1[i]*AsPhiDiff1[i]));
 
       }
-         
-    
+             
     }
     
     for (Int_t i = 0 ; i < nThbins ; i++){
