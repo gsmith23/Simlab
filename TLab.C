@@ -1102,9 +1102,8 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t  AePhiDiff[nThBins];
   
   Bool_t divideByUnPol = kFALSE;
-  
+
   if(option=='d'){
-    option = 'a';
     divideByUnPol = kTRUE;
   }
   
@@ -1129,8 +1128,8 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
   // Asymmetry plot range
-  Float_t maxY = 1.8;
-  Float_t minY = 0.8;
+  Float_t maxY = 2.75;
+  Float_t minY = 0.75;
 
   if(dPhiDiff==180)
     maxY = 6.0;
@@ -1174,7 +1173,7 @@ void TLab::GraphAsymmetry(Char_t option){
   Bool_t use270 = kTRUE;
   
   //  lab calculation (not theory only)
-  if( option!='t' && option!='T'){
+  if( option!='t' ){
     
     cout << endl;
     cout << " Calculating asymmetry values and " << endl;
@@ -1228,8 +1227,8 @@ void TLab::GraphAsymmetry(Char_t option){
 
 
   // theory and lab
-  if( option=='t' || option=='T' ||
-      option=='b' || option=='B' ){
+  if( option=='t' ||
+      option=='b'  ){
     
     cout << endl;
     cout << " Calculating theory curve ... " << endl;
@@ -1249,12 +1248,14 @@ void TLab::GraphAsymmetry(Char_t option){
  
     }
     
-  }// end of:  if( option=='t' || option=='T'
+  }// end of:  if( option=='t'
+
 
   // sim
-  if( option=='a' || option=='A' ||
-      option=='s' || option=='S' ||
-      option=='c' || option=='C' ){
+  if( option=='a' || 
+      option=='d' || 
+      option=='s' ||
+      option=='c'  ){
     
     cout << endl;
     cout << " Calculating theory curve " << endl;
@@ -1374,7 +1375,7 @@ void TLab::GraphAsymmetry(Char_t option){
  
   grDPhi->Draw("P E");
   
-  sprintf(plotName,"../Plots/%d_DeltaPhi.pdf",runNumberInt);
+  sprintf(plotName,"../Plots/%d_DeltaPhi_%c.pdf",runNumberInt,option);
   canvas1->SaveAs(plotName);
  
   // Asymmetry
@@ -1428,23 +1429,24 @@ void TLab::GraphAsymmetry(Char_t option){
   hr->GetYaxis()->SetTitle(yAxis);
     
   
-  if     (option=='b' || option=='B'){
+  if     (option=='b'){
     leg->AddEntry(grAsym[0],"laboratory","E P");
     leg->AddEntry(grAsym[1],
 		  theoryLegendTitle,"L P");
     grAsym[0]->Draw("P E");
     grAsym[1]->Draw("same P L");
   }
-  else if(option=='l' || option=='L'){
+  else if(option=='l'){
     leg->AddEntry(grAsym[0],"laboratory","E P");
     grAsym[0]->Draw("P E");
   }
-  else if(option == 't' || option == 'T'){
+  else if(option == 't'){
     leg->AddEntry(grAsym[1],
 		  theoryLegendTitle,"L P");
     grAsym[1]->Draw("L P");
   }
-  else if(option=='a' || option=='A'){
+  else if(option=='a' ||
+	  option=='d'){
     leg->AddEntry(grAsym[0],
 		  "laboratory","E P");
     leg->AddEntry(grAsym[1],
@@ -1477,8 +1479,8 @@ void TLab::GraphAsymmetry(Char_t option){
   
   leg->Draw();
   
-  sprintf(plotName,"../Plots/%d_A_%d.pdf",
-	  runNumberInt,dPhiDiff);
+  sprintf(plotName,"../Plots/%d_A_%d_%c.pdf",
+	  runNumberInt,dPhiDiff,option);
   
   canvas1->SaveAs(plotName);
 
@@ -1492,8 +1494,8 @@ void TLab::GraphAsymmetry(Char_t option){
 	  dPhiDiff,dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
 
-  sprintf(plotName,"../Plots/%d_Mu_%d.pdf",
-	  runNumberInt,dPhiDiff);
+  sprintf(plotName,"../Plots/%d_Mu_%d_%c.pdf",
+	  runNumberInt,dPhiDiff,option);
   
   grMu->Draw("P E");
   

@@ -321,34 +321,39 @@ Int_t main(int argc, char **argv){
       cout << " t - Theory only " << endl;
       cout << " ";
       cin  >> option; 
-	
-      if(option!='l' && option!='L' &&
-	 option!='t' && option!='T' ){
+      
+      if     (option == 'l' ||
+	      option == 'L')
+	option = 'l';
+      else if(option == 't' ||
+	      option == 'T')
+	option = 't';
+      else if(option == 'b' ||
+	      option == 'B')
+	option = 'b';
+      else{
+	cout << endl;
+	cout << " invalid choice, setting to default (b) " << endl;
+	option = 'b';
+      }
+      
+      if(option!='l' &&
+	 option!='t'  ){
 	cout << endl;
 	cout << " plotting lab results and theory curve " << endl;
 	cout << " ..... " << endl;
       }
-      else if(option=='l' || option == 'L'){
+      else if(option=='l'){
 	cout << endl;
 	cout << " plotting lab results only " << endl;
 	cout << " ..... " << endl;
       }
-      else if(option=='t' || option == 'T'){
+      else if(option=='t'){
 	cout << endl;
 	cout << " plotting theory results only " << endl;
 	cout << " ..... " << endl;
       }
-	
-      if(option=='a' || option=='A' ||
-	 option=='s' || option=='S' ||
-	 option=='c' || option=='C' ){
-	  
-	cout << endl;
-	cout << " invalid choice, setting to default " << endl;
-	  
-	option = 'b';
-      }
-	
+      
       data->GraphAsymmetry(option);
 	
     }// end of: if( strcmp(argv[1],"1")==0 || ......
@@ -472,16 +477,19 @@ Int_t main(int argc, char **argv){
     cout << " d - Lab, Theory and Simulation: " 
 	 <<  "    Divide Lab Asym by Simulated Asym " << endl;
     cin  >> option;
-
-    if(option!='a' && option!='A' &&
-       option!='d' && option!='D' ){
-      
+    
+    if     (option == 'a' || 
+	    option == 'A')
+      option = 'a';
+    else if(option == 'd' ||
+	    option == 'D')
+      option = 'd';
+    else{
       cout << endl;
-      cout << " invalid choice, setting to default " << endl;
-	  
+      cout << " invalid choice, setting to default (a) " << endl;
       option = 'a';
     }
-	
+    
     data->GraphAsymmetry(option);
     
     delete data;
