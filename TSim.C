@@ -2103,8 +2103,12 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   }
   
   Int_t   nGraphs = 2;
-  if( nThetaSBins!=0 )
+  if( nThetaSBins!=0 ){
     nGraphs = nThetaSBins + 1;
+  }
+//   else if(inputFileNumber1 == inputFileNumber2){
+//     nGraphs = 1;
+//   }
   
   TGraphErrors *grAsym[nGraphs];
   TGraphErrors *grAsymR;

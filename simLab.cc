@@ -46,7 +46,7 @@ Int_t main(int argc, char **argv){
     cout << " 1 - lab data analysis                 " << endl; 
     cout << " 2 - sim data analysis                 " << endl; 
     cout << " 3 - lab and sim data analysis         " << endl;
-    cout << " 4 - multiple sim data analysis        " << endl;
+    cout << " 4 - single/multiple sim data analysis " << endl;
     cout << " 5 - sim data scattering analysis      " << endl;
     cout << " 6 - plot theory curve only            " << endl; 
     cout << " 0 - lab data analysis (overwrite)     " << endl; 
@@ -90,10 +90,14 @@ Int_t main(int argc, char **argv){
     cout << " Option 4 - two further arguments      " << endl;
     cout << " simulated data file number (entangled)" << endl;
     cout << " simulated data file number (polarised)" << endl;
+    cout << " OR, for single file analysis..        " << endl; 
+    cout << " simulated data file number            " << endl;
+    cout << " same simulated data file number       " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Examples:                             " << endl; 
     cout << " ./simLab 4 2 3;                       " << endl;
+    cout << " ./simLab 4 2 2;                       " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Option 0 - one further argument       " << endl;
