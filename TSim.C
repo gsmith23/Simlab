@@ -1079,7 +1079,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
   cout << endl;
   cout << " Lab Asymmetry"<<endl;
-  cout << " theta \t" << "dPhi=0 \t" << "90 \t" << "180 \t" << "270" << endl;
+  cout << " theta \t" << "dPhi=0 \t" 
+       << "90 \t" << "180 \t" << "270" << endl;
   for (Int_t i = 0 ; i < 8 ; i++)
     cout << " " << plotTheta[i]     << "\t"
 	 << " " << AsymMatrix[i][0] << "\t" 
@@ -1088,9 +1089,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	 << " " << AsymMatrix[i][3] << endl;
   
   cout << endl;
-  cout <<" True Asymmetry"<<endl;
-  cout<< " theta \t" << "dPhi=0 \t" << "90 \t" << "180 \t" << "270" << endl;
-  for (Int_t i = 0 ; i < 8 ; i++)
+  cout << " True Asymmetry"<<endl;
+  cout << " theta \t" << "dPhi=0 \t" 
+       << "90 \t" << "180 \t" << "270" << endl;
+    for (Int_t i = 0 ; i < 8 ; i++)
     cout << " " << plotTheta[i]   << "\t "
 	 << " " << AsymTrue[i][0] << "\t "
 	 << " " << AsymTrue[i][1] << "\t " 
