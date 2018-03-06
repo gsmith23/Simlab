@@ -1128,8 +1128,8 @@ void TLab::GraphAsymmetry(Char_t option){
     phi[i] = i*90.;
   
   // Theta range 
-  Float_t thetaLowEdge  = 10.;
-  Float_t thetaHighEdge = 170.;
+  Float_t thetaLowEdge  = 30.;
+  Float_t thetaHighEdge = 150.;
   
   // for delta phi graph
   Float_t phiLowEdge  = -45.0;
