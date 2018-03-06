@@ -1501,20 +1501,31 @@ void TLab::GraphAsymmetry(Char_t option){
     
   grAsym[0]->SetLineColor(kBlue);
   grAsym[0]->SetMarkerColor(kBlue);
+  grAsym[0]->SetFillColor(kBlue);
+  grAsym[0]->SetFillStyle(3000);
+  
   grAsym[1]->SetLineColor(kRed);
   grAsym[1]->SetMarkerColor(kRed);
+  grAsym[1]->SetFillColor(kRed);
+  
+  
   grAsym[2]->SetLineColor(kGreen+2.7);
   grAsym[2]->SetMarkerColor(kGreen+2.7);
+  grAsym[2]->SetFillColor(kGreen+2.7);
   
   if(option!='f'){
     grAsym[3]->SetLineColor(kGreen);
     grAsym[3]->SetMarkerColor(kGreen);
+    grAsym[3]->SetFillColor(kGreen);
+    grAsym[3]->SetFillStyle(3001);
   }
   else{
     grAsym[3]->SetLineColor(kBlue+2.7);
     grAsym[3]->SetMarkerColor(kBlue+2.7);
     grAsym[4]->SetLineColor(kOrange);
     grAsym[4]->SetMarkerColor(kOrange);
+    grAsym[4]->SetFillColor(kOrange);
+    grAsym[4]->SetFillStyle(3002);
   }
   
   cout << " here " << endl;      
@@ -1573,15 +1584,29 @@ void TLab::GraphAsymmetry(Char_t option){
       leg->AddEntry(grAsym[3],
 		    "lab data / f ","E P");
       leg->AddEntry(grAsym[4],
-		    " f = sim data / theory","E P");
+		    " f = sim data / theory","3");
     }
-    grAsym[0]->Draw("L P E");
-    grAsym[1]->Draw("same L P");
-    grAsym[2]->Draw("same L P E");
-    grAsym[3]->Draw("same L P E");
+    // grAsym[0]->Draw("L P E");
+//     grAsym[1]->Draw("same L P");
+//     grAsym[2]->Draw("same L P E");
+//     grAsym[3]->Draw("same L P E");
 
-    if(option=='f')
-      grAsym[4]->Draw("same L P E");
+    // f
+    if(option=='f'){
+      grAsym[4]->Draw("3");
+      // lab
+      grAsym[0]->Draw("same P E");
+    }
+    else 
+      grAsym[0]->Draw("P E");
+    
+    // theory
+    grAsym[1]->Draw("same LP");
+    // sim
+    grAsym[2]->Draw("same EP");
+    // lab/f
+    grAsym[3]->Draw("same EP ");
+    
   }
   else if(option=='c' || option=='C'){
     leg->AddEntry(grAsym[0],
