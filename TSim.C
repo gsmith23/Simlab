@@ -656,10 +656,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH1F * hBeta[nThbins];
   TH1F * hBeta_TL[nThbins];
   
-  TH1F * hBeta000[nThbins];
-  TH1F * hBeta090[nThbins];
-  TH1F * hBeta180[nThbins];
-
+  TH1F * hBeta000[nThbins], hBeta000_TL[nThbins];
+  TH1F * hBeta090[nThbins], hBeta090_TL[nThbins];
+  TH1F * hBeta180[nThbins], hBeta180_TL[nThbins];
+ 
   TH2F * hYZ[nThbins];
 
   TH2F * hXY[nThbins];
