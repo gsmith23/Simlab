@@ -1140,7 +1140,7 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t maxY = 3.5;
   Float_t minY = 0.5;
 
-  if(dPhiDiff==180)
+  if( dPhiDiff==180 )
     maxY = 6.0;
   
   // Theory curve
@@ -1440,24 +1440,29 @@ void TLab::GraphAsymmetry(Char_t option){
   
   Char_t plotName[128];
   // dPhi Plot
-  hr = canvas1->DrawFrame(phiLowEdge,0,phiHighEdge,maxCountsPhi);
+  hr = canvas1->DrawFrame(phiLowEdge,0,
+			  phiHighEdge,maxCountsPhi);
   hr->GetXaxis()->SetTitle("#phi (deg)");
   hr->GetYaxis()->SetTitle("N(#Delta#phi)");
- 
+  
   grDPhi->Draw("P E");
   
-  sprintf(plotName,"../Plots/%d_DeltaPhi_%c.pdf",runNumberInt,option);
+  sprintf(plotName,"../Plots/%d_DeltaPhi_%c.pdf",
+	  runNumberInt,option);
   canvas1->SaveAs(plotName);
  
   // Asymmetry
-  TGraphErrors *grAsym[4];
+
+  TGraphErrors * grAsym[5];
   
-  TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,0,muE);
+  TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,
+					 0,muE);
+
 
   if( correctA ){
     if     (divByF){
-      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,
-				   0,AePhiDiffF);
+      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,
+				   0,AePhiDiff);
       grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory1,
 				   0,0);
     }
@@ -1474,16 +1479,24 @@ void TLab::GraphAsymmetry(Char_t option){
     grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,
 				 0,0);
   }
-  
-  
   for (Int_t k = 0; k<nThBins; k++)
     plotTheta[k] -= 2.;
+  
   grAsym[2] = new TGraphErrors(nThBins,plotTheta,aSim,0,aSimE);
-
+  
   for (Int_t k = 0; k<nThBins; k++)
     plotTheta[k] += 4.;
-  grAsym[3] = new TGraphErrors(nThBins,plotTheta,aSimTrue,0,aSimTrueE);
   
+  if(option!='f')
+    grAsym[3] = new TGraphErrors(nThBins,plotTheta,aSimTrue,
+				 0,aSimTrueE);
+  else{
+    grAsym[3] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,
+				 0,AePhiDiffF);
+    grAsym[4] = new TGraphErrors(nThBins,plotTheta,f_aSim,
+				 0,f_aSimE);
+  }
+
     
   grAsym[0]->SetLineColor(kBlue);
   grAsym[0]->SetMarkerColor(kBlue);
@@ -1491,17 +1504,30 @@ void TLab::GraphAsymmetry(Char_t option){
   grAsym[1]->SetMarkerColor(kRed);
   grAsym[2]->SetLineColor(kGreen+2.7);
   grAsym[2]->SetMarkerColor(kGreen+2.7);
-  grAsym[3]->SetLineColor(kGreen);
-  grAsym[3]->SetMarkerColor(kGreen);
+  
+  if(option!='f'){
+    grAsym[3]->SetLineColor(kGreen);
+    grAsym[3]->SetMarkerColor(kGreen);
+  }
+  else{
+    grAsym[3]->SetLineColor(kBlue+2.7);
+    grAsym[3]->SetMarkerColor(kBlue+2.7);
+    grAsym[4]->SetLineColor(kOrange);
+    grAsym[4]->SetMarkerColor(kOrange);
+  }
+  
+  cout << " here " << endl;      
 
   TLegend *leg =  new TLegend(0.6,0.75,0.9,0.85);
-
-
+  
   TString theoryLegendTitle = " ";
   
   alpha1 = alpha1*RadToDeg();
-
+  
   theoryLegendTitle.Form("theory curve #alpha_{#phi} = %.1f^{o}", alpha1);
+  
+  if(divByF)
+    theoryLegendTitle.Form("theory curve ");
   
   Char_t yAxis[128];
   
@@ -1533,17 +1559,27 @@ void TLab::GraphAsymmetry(Char_t option){
 	  option=='d' ||
 	  option=='f'){
     leg->AddEntry(grAsym[0],
-		  "laboratory","E P");
+		  "lab","E P");
     leg->AddEntry(grAsym[1],
 		  theoryLegendTitle,"L P");
     leg->AddEntry(grAsym[2],
-		  "lab simulation","E P");
-    leg->AddEntry(grAsym[3],
-		  "true lab simulation","E P");
-    grAsym[0]->Draw("P E");
+		  "sim ","E P");
+    if(option!='f')
+      leg->AddEntry(grAsym[3],
+		    "sim (extra)","E P");
+    else{
+      leg->AddEntry(grAsym[3],
+		    "lab data / f ","E P");
+      leg->AddEntry(grAsym[4],
+		    " f = sim data / theory","E P");
+    }
+    grAsym[0]->Draw("L P E");
     grAsym[1]->Draw("same L P");
-    grAsym[2]->Draw("same P E");
-    grAsym[3]->Draw("same P E");
+    grAsym[2]->Draw("same L P E");
+    grAsym[3]->Draw("same L P E");
+
+    if(option=='f')
+      grAsym[4]->Draw("same L P E");
   }
   else if(option=='c' || option=='C'){
     leg->AddEntry(grAsym[0],
