@@ -1459,7 +1459,7 @@ void TLab::GraphAsymmetry(Char_t option){
   else{
     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
     grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
-    ]
+  }
   
   
   for (Int_t k = 0; k<nThBins; k++)
