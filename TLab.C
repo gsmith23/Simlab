@@ -992,7 +992,7 @@ void TLab::CalculateAsymmetry(){
   cout << " Asymmetry"<<endl;
   cout << " theta \t" << "dPhi=0 \t" 
        << "90 \t" << "180 \t" << "270" << endl;
-  for (Int_t i = 0 ; i < 8 ; i++)
+  for (Int_t i = 0 ; i < nThBins ; i++)
     cout << " " << plotTheta[i]     << "\t" 
 	 << " " << AsymMatrix[i][0] << "\t" 
 	 << " " << AsymMatrix[i][1] << "\t"
@@ -1084,9 +1084,6 @@ Float_t TLab::PhotonEnergyToTheta(Float_t energy){
 
 void TLab::GetThetaBinValues(){
   
-  Float_t thetaLowEdge  = 30.;
-  Float_t thetaHighEdge = 150.;
-
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
 
   for (Int_t i = 0 ; i < nThBins ; i++){
@@ -1126,10 +1123,6 @@ void TLab::GraphAsymmetry(Char_t option){
 
   for (Int_t i = 0 ; i < nPhiBins ; i++)
     phi[i] = i*90.;
-  
-  // Theta range 
-  Float_t thetaLowEdge  = 30.;
-  Float_t thetaHighEdge = 150.;
   
   // for delta phi graph
   Float_t phiLowEdge  = -45.0;
@@ -1481,12 +1474,12 @@ void TLab::GraphAsymmetry(Char_t option){
 				 0,0);
   }
   for (Int_t k = 0; k<nThBins; k++)
-    plotTheta[k] -= 2.;
+    plotTheta[k] -= 1.;
   
   grAsym[2] = new TGraphErrors(nThBins,plotTheta,aSim,0,aSimE);
   
   for (Int_t k = 0; k<nThBins; k++)
-    plotTheta[k] += 4.;
+    plotTheta[k] += 2.;
   
   if(option!='f')
     grAsym[3] = new TGraphErrors(nThBins,plotTheta,aSimTrue,
