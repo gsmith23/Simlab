@@ -482,7 +482,7 @@ Int_t main(int argc, char **argv){
     cout << " d - Lab, Theory and Simulation: \n " 
 	 <<  "    Divide Lab Asym by Unpol Sim Asym " << endl;
     cout << " f - Lab, Theory and Simulation: \n " 
-	 <<  "    Divide Lab Asym by (sim/theory) " << endl;
+	 <<  "    Divide Lab Asym by f = (sim/theory) " << endl;
     cin  >> option;
     
     if     (option == 'a' || 
