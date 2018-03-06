@@ -1137,8 +1137,8 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
   // Asymmetry plot range
-  Float_t maxY = 2.8;
-  Float_t minY = 0.8;
+  Float_t maxY = 3.5;
+  Float_t minY = 0.5;
 
   if(dPhiDiff==180)
     maxY = 6.0;
@@ -1513,7 +1513,6 @@ void TLab::GraphAsymmetry(Char_t option){
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
     
-  
   if     (option=='b'){
     leg->AddEntry(grAsym[0],"laboratory","E P");
     leg->AddEntry(grAsym[1],
