@@ -1447,15 +1447,20 @@ void TLab::GraphAsymmetry(Char_t option){
   // !!! temporary  
   if( correctA ){
     
-    if     (divByF)
+    if     (divByF){
       grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,0,AePhiDiffF);
-    else if(divByUnPol)
+      grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory1,0,0);
+    }
+    else if(divByUnPol){
       grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffD,0,AePhiDiffD);
+      grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
+    }
   }
-  else
+  else{
     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
-
-  grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
+    grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
+    ]
+  
   
   for (Int_t k = 0; k<nThBins; k++)
     plotTheta[k] -= 2.;
