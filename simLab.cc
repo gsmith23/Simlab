@@ -474,16 +474,29 @@ Int_t main(int argc, char **argv){
     cout << endl;
     cout << " Enter plot type:   " << endl;
     cout << " a - Lab, Theory and Simulation (default)" << endl;
-    cout << " d - Lab, Theory and Simulation: " 
-	 <<  "    Divide Lab Asym by Simulated Asym " << endl;
+    cout << " d - Lab, Theory and Simulation: \n " 
+	 <<  "    Divide Lab Asym by Unpol Sim Asym " << endl;
+    cout << " f - Lab, Theory and Simulation: \n " 
+	 <<  "    Divide Lab Asym by (sim\theory) " << endl;
     cin  >> option;
     
     if     (option == 'a' || 
 	    option == 'A')
       option = 'a';
     else if(option == 'd' ||
-	    option == 'D')
+	    option == 'D'){
       option = 'd';
+      
+      if(argc != 5){
+	cout << endl;
+	cout << " you must use two simulated data files for this option " << endl;
+	cout << endl;
+	return 1;
+      }
+    }
+    else if(option == 'f' ||
+	    option == 'F')
+      option = 'f';
     else{
       cout << endl;
       cout << " invalid choice, setting to default (a) " << endl;
