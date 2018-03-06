@@ -83,8 +83,12 @@ class TLab : public TObject{
   
   // For Graphing
   static const Int_t nPhiBins = 4;
-  static const Int_t nThBins  = 6;
+  static const Int_t nThBins  = 7;
   
+  // 39, 54, 69, 84, 99, 114, 129
+  Float_t thetaLowEdge  = 31.5;
+  Float_t thetaHighEdge = 136.5;
+
   Long64_t nOR1;
   Long64_t nAND;
   Long64_t nOR2;
