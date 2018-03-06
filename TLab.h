@@ -83,7 +83,7 @@ class TLab : public TObject{
   
   // For Graphing
   static const Int_t nPhiBins = 4;
-  static const Int_t nThBins  = 8;
+  static const Int_t nThBins  = 6;
   
   Long64_t nOR1;
   Long64_t nAND;

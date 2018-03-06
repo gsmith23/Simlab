@@ -1083,8 +1083,9 @@ Float_t TLab::PhotonEnergyToTheta(Float_t energy){
 }
 
 void TLab::GetThetaBinValues(){
-  Float_t thetaLowEdge  = 10.;
-  Float_t thetaHighEdge = 170.;
+  
+  Float_t thetaLowEdge  = 30.;
+  Float_t thetaHighEdge = 150.;
 
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
 
