@@ -1166,8 +1166,8 @@ void TLab::GraphAsymmetry(Char_t option){
   
   Float_t f_aSim[nThBins]={0};
   Float_t f_aSimE[nThBins]={0};
-  Float_t f_aSimTrue[nThBins]={0};
-  Float_t f_aSimTrueE[nThBins]={0};
+  // Float_t f_aSimTrue[nThBins]={0};
+  // Float_t f_aSimTrueE[nThBins]={0};
   
   Float_t aSimU[nThBins]={0};
   Float_t aSimUE[nThBins]={0};
@@ -1317,14 +1317,14 @@ void TLab::GraphAsymmetry(Char_t option){
 	
 	// error for acceptance from theory
 	f_aSimE[i]     = aSimE[i]/aTheory1[i];
-	f_aSimTrueE[i] = aSimTrueE[i]/aTheory1[i];
+	//	f_aSimTrueE[i] = aSimTrueE[i]/aTheory1[i];
 	
 	// acceptance from theory & simulation
 	// divide lab data by this
 	// as alternative to the unpolarised
 	// simulated data
 	f_aSim[i]     = aSim[i]/aTheory1[i];
-	f_aSimTrue[i] = aSimTrue[i]/aTheory1[i];
+	//	f_aSimTrue[i] = aSimTrue[i]/aTheory1[i];
 	
 	AsPhiDiffF[i] = AsPhiDiff[i]/f_aSim[i];
 	AePhiDiffF[i] = AsPhiDiffF[i] * 
