@@ -1101,10 +1101,14 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t  AePhiDiff[nThBins];
   
   Bool_t divideByUnPol = kFALSE;
+  //  Bool_t divideByF     = kFALSE;
 
-  if(option=='d'){
+  if     (option=='d'){
     divideByUnPol = kTRUE;
   }
+//   else if(option=='f'){
+//     divideByF = kTRUE;
+//   }
   
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
@@ -1135,6 +1139,7 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // Theory curve
   Float_t aTheory[nThBins];
+  Float_t aTheory1[nThBins];
 
   // 35.0 is result from Chloe Schoolings fits
   // perhaps an underestimate due to distribution
@@ -1156,6 +1161,11 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimTrue[nThBins]={0};
   Float_t aSimTrueE[nThBins]={0};
   
+  Float_t f_aSim[nThBins]={0};
+  Float_t f_aSimE[nThBins]={0};
+  Float_t f_aSimTrue[nThBins]={0};
+  Float_t f_aSimTrueE[nThBins]={0};
+  
   Float_t aSimU[nThBins]={0};
   Float_t aSimUE[nThBins]={0};
   Float_t aSimUTrue[nThBins]={0};
@@ -1163,6 +1173,9 @@ void TLab::GraphAsymmetry(Char_t option){
   
   Float_t AsPhiDiffR[nThBins]={0};
   Float_t AePhiDiffR[nThBins]={0};
+
+  Float_t AsPhiDiffF[nThBins]={0};
+  Float_t AePhiDiffF[nThBins]={0};
 
   Float_t mu[nThBins]={0};
   // To Do:
@@ -1243,6 +1256,7 @@ void TLab::GraphAsymmetry(Char_t option){
       }
       plotTheta[i] = plotTheta[i]*DegToRad();
       aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);
+      aTheory1[i] = theory->rho1(plotTheta[i],semiSpan);
       plotTheta[i] = plotTheta[i]*RadToDeg();
  
     }
@@ -1277,6 +1291,7 @@ void TLab::GraphAsymmetry(Char_t option){
       plotTheta[i] = plotTheta[i]*DegToRad();
       
       aTheory[i]   = theory->rho2(plotTheta[i],semiSpan,alpha1);            
+      aTheory1[i]  = theory->rho1(plotTheta[i],semiSpan);
       plotTheta[i] = plotTheta[i]*RadToDeg();
 
       aSim[i]        = simData->GetAsymLab(dPhiDiff,i);
@@ -1312,14 +1327,35 @@ void TLab::GraphAsymmetry(Char_t option){
 	aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
 	aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
 	
+	// ----------------------
+	// Acceptance correction
+
 	// calculate the errors first
-	aSimE[i] = (aSim[i]/aSimU[i])*Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
 	
+	// errors for dividing by unpolarised
+	aSimE[i] = (aSim[i]/aSimU[i])*Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
 	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i])*Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/(aSimUTrue[i]*aSimUTrue[i]) + aSimTrueE[i]*aSimTrueE[i]/(aSimTrue[i]*aSimTrue[i]));
 	
-	// divide 
-	aSim[i]  = aSim[i]/aSimU[i];
+	// error for acceptance from theory
+	f_aSimE[i]     = aSimE[i]/aTheory1[i];
+	f_aSimTrueE[i] = aSimTrueE[i]/aTheory1[i];
+	
+	// acceptance from theory & simulation
+	// divide lab data by this
+	// as alternative to the unpolarised
+	// simulated data
+	f_aSim[i]     = aSim[i]/aTheory1[i];
+	f_aSimTrue[i] = aSimTrue[i]/aTheory1[i];
+	
+	AsPhiDiffF[i] = AsPhiDiff[i]/f_aSim[i];
+	AePhiDiffF[i] = AsPhiDiffF[i] * Sqrt(AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + f_aSimE[i]*f_aSimE[i]/(f_aSim[i]*f_aSim[i]) );
+	
+	// acceptance from unpolarised simulation
+	// divide by unpolarised 
+	aSim[i]      = aSim[i]/aSimU[i];
 	aSimTrue[i]  = aSimTrue[i]/aSimUTrue[i];
+	
+	
       }
     }
 
@@ -1381,12 +1417,18 @@ void TLab::GraphAsymmetry(Char_t option){
   TGraphErrors *grAsym[4];
   
   TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,0,muE);
-  
+
+  // !!! temporary  
   if( divideByUnPol)
-    grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+    grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,0,AePhiDiffF);
   else
     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
-  
+
+  //   if( divideByUnPol)
+//     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+//   else
+//     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
+
   grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
   
    

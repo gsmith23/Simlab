@@ -636,7 +636,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH2F* hMEdiff = new TH2F("hMEdiff","max/min - energy theta",
 			   160,10,170,120,-50,70);
 
-
   TH1F * hDPhi[nThbins];
   TH1F * hDPhi_TL[nThbins];
   
@@ -656,12 +655,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH1F * hBeta[nThbins];
   TH1F * hBeta_TL[nThbins];
   
-  TH1F * hBeta000[nThbins], hBeta000_TL[nThbins];
-  TH1F * hBeta090[nThbins], hBeta090_TL[nThbins];
-  TH1F * hBeta180[nThbins], hBeta180_TL[nThbins];
+  TH1F * hBeta000[nThbins], * hBeta000_TL[nThbins];
+  TH1F * hBeta090[nThbins], * hBeta090_TL[nThbins];
+  TH1F * hBeta180[nThbins], * hBeta180_TL[nThbins];
  
-  TH2F * hYZ[nThbins];
-  TH2F * hXY[nThbins];
+  TH2F * hYZ[nThbins], * hYZ_TL[nThbins];
+  TH2F * hXY[nThbins], * hXY_TL[nThbins];
 
   TString hTitle = "hThRes00";
   
@@ -711,6 +710,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hTitle.Form("hBeta_%d",th);
     hBeta[th] = new TH1F(hTitle,hTitle,
 			 32,-0.0, 10.0);
+    
+    hTitle.Form("hBeta_TL_%d",th);
+    hBeta_TL[th] = new TH1F(hTitle,hTitle,
+			    32,-0.0, 10.0);
 
     hTitle.Form("hBeta000_%d",th);
     hBeta000[th] = new TH1F(hTitle,hTitle,
@@ -724,11 +727,19 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hBeta180[th] = new TH1F(hTitle,hTitle,
 			    32,-0.0, 10.0);
 
-    hTitle.Form("hBeta_TL_%d",th);
-    hBeta_TL[th] = new TH1F(hTitle,hTitle,
-			    32,-0.0, 10.0);
+    hTitle.Form("hBeta000_TL_%d",th);
+    hBeta000_TL[th] = new TH1F(hTitle,hTitle,
+			       32,-0.0, 10.0);
     
-    hTitle.Form("hXYA_%d",th);
+    hTitle.Form("hBeta090_TL_%d",th);
+    hBeta090_TL[th] = new TH1F(hTitle,hTitle,
+			       32,-0.0, 10.0);
+    
+    hTitle.Form("hBeta180_TL_%d",th);
+    hBeta180_TL[th] = new TH1F(hTitle,hTitle,
+			       32,-0.0, 10.0);
+    
+    hTitle.Form("hXY_%d",th);
     hXY[th] = new TH2F(hTitle,hTitle,
 			 10, 25.0, 55.0,
 			 10,-6.5, 6.5);
@@ -737,6 +748,16 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hYZ[th] = new TH2F(hTitle,hTitle,
 		       10,-6.5, 6.5,
 		       10,-6.5, 6.5);
+  
+    hTitle.Form("hXY_TL_%d",th);
+    hXY_TL[th] = new TH2F(hTitle,hTitle,
+			  10, 25.0, 55.0,
+			  10,-6.5, 6.5);
+    
+    hTitle.Form("hYZ_TL_%d",th);
+    hYZ_TL[th] = new TH2F(hTitle,hTitle,
+			  10,-6.5, 6.5,
+			  10,-6.5, 6.5);
   }
   
   cout << endl;
@@ -1000,8 +1021,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	
 	hDPhiRes90[thBin]->Fill(dPhiXact2);	
 	hBeta090[thBin]->Fill(betaA);
-		
-	      }
+	
+      }
       
       // 'true lab' analysis
       if (
@@ -1020,57 +1041,63 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	  
 	  ){
 
-	hBeta_TL[thBin]->Fill(betaA);
 	hDPhi_TL[thBin]->Fill(dPhiXact);
-	
+		
+	hBeta_TL[thBin]->Fill(betaA);
+	hXY_TL[thBin]->Fill(Abs(XposA[0]),YposA[0]);
+	hYZ_TL[thBin]->Fill(YposA[0],ZposA[0]);
+      
 	if (phiDiff == 0.){
 	  AsymTrue[thBin][0] += 1;
 	  
 	  hThRes00_TL[thBin]->Fill(simtHA[0]);	
 	  hDPhiRes00_TL[thBin]->Fill(dPhiXact2);	
-	  
+	  hBeta000_TL[thBin]->Fill(betaA);
 	}
 	if ((phiDiff == 90) || (phiDiff == -270)){
 	  AsymTrue[thBin][1] += 1;
 	  
 	  hThRes90_TL[thBin]->Fill(simtHA[0]);
 	  hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
-	    
+	  hBeta090_TL[thBin]->Fill(betaA);	
 	}
-	if ((phiDiff == 180) || (phiDiff == -180))
+	if ((phiDiff == 180) || (phiDiff == -180)){
 	  AsymTrue[thBin][2] += 1;
+	  
+	  hBeta180_TL[thBin]->Fill(betaA);	
+	}
 	if ((phiDiff == -90) || (phiDiff == 270)){
-	  hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
 	  AsymTrue[thBin][3] += 1;
+
+	  hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
+	  hBeta090_TL[thBin]->Fill(betaA);	
 	}
 	
       }
     }
   }
-  
-  
-  cout<<"Lab Asymmetry"<<endl;
-  cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
-  cout<<plotTheta[0]<<" - "<<AsymMatrix[0][0]<<" - "<<AsymMatrix[0][1]<<" - "<<AsymMatrix[0][2]<<" - "<<AsymMatrix[0][3]<<endl;
-  cout<<plotTheta[1]<<" - "<<AsymMatrix[1][0]<<" - "<<AsymMatrix[1][1]<<" - "<<AsymMatrix[1][2]<<" - "<<AsymMatrix[1][3]<<endl;
-  cout<<plotTheta[2]<<" - "<<AsymMatrix[2][0]<<" - "<<AsymMatrix[2][1]<<" - "<<AsymMatrix[2][2]<<" - "<<AsymMatrix[2][3]<<endl;
-  cout<<plotTheta[3]<<" - "<<AsymMatrix[3][0]<<" - "<<AsymMatrix[3][1]<<" - "<<AsymMatrix[3][2]<<" - "<<AsymMatrix[3][3]<<endl;
-  cout<<plotTheta[4]<<" - "<<AsymMatrix[4][0]<<" - "<<AsymMatrix[4][1]<<" - "<<AsymMatrix[4][2]<<" - "<<AsymMatrix[4][3]<<endl;
-  cout<<plotTheta[5]<<" - "<<AsymMatrix[5][0]<<" - "<<AsymMatrix[5][1]<<" - "<<AsymMatrix[5][2]<<" - "<<AsymMatrix[5][3]<<endl;
-  cout<<plotTheta[6]<<" - "<<AsymMatrix[6][0]<<" - "<<AsymMatrix[6][1]<<" - "<<AsymMatrix[6][2]<<" - "<<AsymMatrix[6][3]<<endl;
-  cout<<plotTheta[7]<<" - "<<AsymMatrix[7][0]<<" - "<<AsymMatrix[7][1]<<" - "<<AsymMatrix[7][2]<<" - "<<AsymMatrix[7][3]<<endl;
 
-  cout <<"True Asymmetry"<<endl;
-  cout<< "theta -" << " dPhi=0 -" << " dPhi=90 -" << " dPhi=180 -" << " dPhi=270" << endl;
-  cout<<plotTheta[0]<<" - "<<AsymTrue[0][0]<<" - "<<AsymTrue[0][1]<<" - "<<AsymTrue[0][2]<<" - "<<AsymTrue[0][3]<<endl;
-  cout<<plotTheta[1]<<" - "<<AsymTrue[1][0]<<" - "<<AsymTrue[1][1]<<" - "<<AsymTrue[1][2]<<" - "<<AsymTrue[1][3]<<endl;
-  cout<<plotTheta[2]<<" - "<<AsymTrue[2][0]<<" - "<<AsymTrue[2][1]<<" - "<<AsymTrue[2][2]<<" - "<<AsymTrue[2][3]<<endl;
-  cout<<plotTheta[3]<<" - "<<AsymTrue[3][0]<<" - "<<AsymTrue[3][1]<<" - "<<AsymTrue[3][2]<<" - "<<AsymTrue[3][3]<<endl;
-  cout<<plotTheta[4]<<" - "<<AsymTrue[4][0]<<" - "<<AsymTrue[4][1]<<" - "<<AsymTrue[4][2]<<" - "<<AsymTrue[4][3]<<endl;
-  cout<<plotTheta[5]<<" - "<<AsymTrue[5][0]<<" - "<<AsymTrue[5][1]<<" - "<<AsymTrue[5][2]<<" - "<<AsymTrue[5][3]<<endl;
-  cout<<plotTheta[6]<<" - "<<AsymTrue[6][0]<<" - "<<AsymTrue[6][1]<<" - "<<AsymTrue[6][2]<<" - "<<AsymTrue[6][3]<<endl;
-  cout<<plotTheta[7]<<" - "<<AsymTrue[7][0]<<" - "<<AsymTrue[7][1]<<" - "<<AsymTrue[7][2]<<" - "<<AsymTrue[7][3]<<endl;
-    
+  cout << endl;
+  cout << " Lab Asymmetry"<<endl;
+  cout << " theta \t" << "dPhi=0 \t" << "90 \t" << "180 \t" << "270" << endl;
+  for (Int_t i = 0 ; i < 8 ; i++)
+    cout << " " << plotTheta[i]     << "\t"
+	 << " " << AsymMatrix[i][0] << "\t" 
+	 << " " << AsymMatrix[i][1] << "\t"
+	 << " " << AsymMatrix[i][2] << "\t" 
+	 << " " << AsymMatrix[i][3] << endl;
+  
+  cout << endl;
+  cout <<" True Asymmetry"<<endl;
+  cout<< " theta \t" << "dPhi=0 \t" << "90 \t" << "180 \t" << "270" << endl;
+  for (Int_t i = 0 ; i < 8 ; i++)
+    cout << " " << plotTheta[i]   << "\t "
+	 << " " << AsymTrue[i][0] << "\t "
+	 << " " << AsymTrue[i][1] << "\t " 
+	 << " " << AsymTrue[i][2] << "\t " 
+	 << " " << AsymTrue[i][3] << endl;
+  cout << endl;
+  
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				1500,1000);
 
@@ -1169,6 +1196,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hBeta180[th]->SetLineColor(kGreen);
     
     hBeta090[th]->Scale(1./2);
+    hBeta090_TL[thBin]->Scale(1./2);
     
     hBeta_TL[th]->SetLineColor(kGreen);
     
@@ -1220,11 +1248,28 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
   for( Int_t th = 0 ; th < nThbins ; th++){
     canvas->cd(th+1);
+    hXY_TL[th]->Draw("colz");
+  }
+  plotName = "../Plots/hXY_TL_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
+
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
     hYZ[th]->Draw("colz");
   }
   plotName = "../Plots/hYZ_" + inputFileNumber;
   plotName += ".pdf";
   canvas->SaveAs(plotName);
+
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
+    hYZ_TL[th]->Draw("colz");
+  }
+  plotName = "../Plots/hYZ_TL_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
+
   
   for( Int_t th = 0 ; th < nThbins ; th++){
     canvas->cd(th+1);
@@ -1250,6 +1295,17 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hBeta000[th]->Draw("same");
   }
   plotName = "../Plots/hBetaX_" + inputFileNumber;
+  plotName += ".pdf";
+  canvas->SaveAs(plotName);
+
+  for( Int_t th = 0 ; th < nThbins ; th++){
+    canvas->cd(th+1);
+    
+    hBeta180_TL[th]->Draw();
+    hBeta090_TL[th]->Draw("same");
+    hBeta000_TL[th]->Draw("same");
+  }
+  plotName = "../Plots/hBetaX_TL" + inputFileNumber;
   plotName += ".pdf";
   canvas->SaveAs(plotName);
 
@@ -1281,10 +1337,10 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   cout << "  GraphAsymmetryLab   " << endl;
   
   this->SetStyle();
-
+  
   // GetThetaBinValues() is implemented in
   // CalculateAsymmetryLab
-
+  
   // entangled/polarised first
   // To do: change to have this second
   // with the unpolarised calculated 
@@ -1304,7 +1360,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   
   cout << endl;
   cout << " There are " << nFiles << " Files " << endl;
-  cout << " Dividing by unpolarised data " << endl;
+  
+  if(nFiles==2)
+    cout << " Dividing by unpolarised data " << endl;
 
   TString plotName;
   plotName = "../Plots/Asym_" + inputFileNumber1;
@@ -1352,12 +1410,13 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   // Float_t AsTrue[nThbins] = {0.};
   // Float_t AeTrue[nThbins] = {0.};
 
-  AsPhiDiff[nThbins] = {0.};
-  AePhiDiff[nThbins] = {0.};
-
-  AsTrue[nThbins] = {0.};
-  AeTrue[nThbins] = {0.};
-
+  for (Int_t th = 0 ; th < nThbins ; th++){
+    AsPhiDiff[th] = 0.;
+    AePhiDiff[th] = 0.;
+    AsTrue[th] = 0.;
+    AeTrue[th] = 0.;
+  }
+  
   // temporary variables
   Float_t AsPhiDiff1[nThbins] = {0.};
   Float_t AePhiDiff1[nThbins] = {0.};
@@ -1469,6 +1528,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   cout << endl;
   cout << " semiSpan = " << semiSpan*RadToDeg() << endl;
   cout << " alpha1   = " << alpha1*RadToDeg()   << endl;
+  cout << endl;
   
   for (Int_t i = 0; i<nThbins; i++){
     if( dPhiDiff == 180 ){
@@ -1707,11 +1767,12 @@ void TSim::CalculateABC_True(){
     fABC_True[i][1] -=  AsymTrue[i][2];
     fABC_True[i][2] -=  AsymTrue[i][3];
     
-    cout << endl;
+
     for(Int_t j = 0 ; j < 3 ; j++){
       fABC_True[i][j] = fABC_True[i][j]/4.;
       pABC_True[i][j] = fABC_True[i][j]/fABC_True[i][bin000];
-            
+
+      //      cout << endl;
 //       cout << " pABC_True["<< i << "][" << j << "] = " 
 // 	   <<  pABC_True[i][j] << endl;
     }
