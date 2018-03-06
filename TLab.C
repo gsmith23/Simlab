@@ -989,9 +989,9 @@ void TLab::CalculateAsymmetry(){
     cout << " nDuplicates = " << nDuplicates << endl;
   
   cout << endl;
-  cout << "Asymmetry"<<endl;
-  cout<< " theta \t" << "dPhi=0 \t" 
-      << "90 \t" << "180 \t" << "270" << endl;
+  cout << " Asymmetry"<<endl;
+  cout << " theta \t" << "dPhi=0 \t" 
+       << "90 \t" << "180 \t" << "270" << endl;
   for (Int_t i = 0 ; i < 8 ; i++)
     cout << " " << plotTheta[i]     << "\t" 
 	 << " " << AsymMatrix[i][0] << "\t" 
