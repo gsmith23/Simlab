@@ -509,10 +509,10 @@ Float_t TSim::CrystalToPhi(Int_t crystal){
   			      270. ,  -1. , 90.,
   			      -1.  , 180. , -1.};
   
-//   // !! Use corner crystals
-//   Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
-// 			       -1. ,  -1. , -1. ,
-// 			       270.,  -1. , 180. };
+  // !!Temp - Use corner crystals
+  // Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
+  // 			       -1. ,  -1. , -1. ,
+  // 			       270.,  -1. , 180. };
 
   Float_t phi = crystalToPhi[crystal];
 
@@ -661,7 +661,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH1F * hBeta180[nThbins];
 
   TH2F * hYZ[nThbins];
-
   TH2F * hXY[nThbins];
 
   TString hTitle = "hThRes00";
@@ -732,12 +731,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hTitle.Form("hXYA_%d",th);
     hXY[th] = new TH2F(hTitle,hTitle,
 			 10, 25.0, 55.0,
-			 10,-2.5, 2.5);
+			 10,-6.5, 6.5);
     
     hTitle.Form("hYZ_%d",th);
     hYZ[th] = new TH2F(hTitle,hTitle,
-		       10,-2.5, 2.5,
-		       10,-2.5, 2.5);
+		       10,-6.5, 6.5,
+		       10,-6.5, 6.5);
   }
   
   cout << endl;
@@ -893,7 +892,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     // 	     phiB < 360.){
     //   phiB = 270.;
     // }
-    
+   
     // make phiB value from previous event
     // phiB_this = phiB;
     // phiB = phiB_prev;
@@ -934,27 +933,32 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       betaB = ATan(betaB);
       betaB = betaB*RadToDeg();
       
+      // lablike phi is in lab reference frame
       phiDiff   = phiB - phiA;
       
+      // simulation phi is in photon reference frame
       dPhiXact  = simPhiA[0] + simPhiB[0];
-      
       if(dPhiXact < 0)
 	dPhiXact = dPhiXact + 360.;
       
+      // copy so it can be shifted by dphi
+      // for comparing resolution plots
       dPhiXact2 = dPhiXact;
 
+      // exact dphi for final event sample
       hDPhi[thBin]->Fill(dPhiXact);
       
+      // only using array A for now
       hBeta[thBin]->Fill(betaA);
-
+      hXY[thBin]->Fill(Abs(XposA[0]),YposA[0]);
+      hYZ[thBin]->Fill(YposA[0],ZposA[0]);
+      
       if (phiDiff == 0.) {
-	
-	hXY[thBin]->Fill(Abs(XposA[0]),YposA[0]);
-	hYZ[thBin]->Fill(YposA[0],ZposA[0]);
-	
+
+	// iterate dphi = 0 counts
 	AsymMatrix[thBin][0] += 1;
 	n000++;
-	
+			
 	hThRes00[thBin]->Fill(simtHA[0]);
 	
 	dPhiXact2 = dPhiXact2 + 90.;
@@ -967,6 +971,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       }
       if ((phiDiff == 90)||(phiDiff == -270)){
 	
+	// iterate dphi = 90 counts
 	AsymMatrix[thBin][1] += 1;
 	n090++;
 	
@@ -977,22 +982,26 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	
       }
       if ((phiDiff == 180)||(phiDiff == -180)){
+	
+	// iterate dphi = 180 counts
 	AsymMatrix[thBin][2] += 1;
+	n180++;
 	
 	hBeta180[thBin]->Fill(betaA);
-	
-	n180++;
+
       }
       if ((phiDiff == -90)||(phiDiff == 270)){
 	
+	// iterate dphi = 270 counts
+	AsymMatrix[thBin][3] += 1;
+	n270++;
+
 	dPhiXact2 = dPhiXact2 - 180.;
 	
 	hDPhiRes90[thBin]->Fill(dPhiXact2);	
 	hBeta090[thBin]->Fill(betaA);
-	
-	AsymMatrix[thBin][3] += 1;
-	n270++;
-      }
+		
+	      }
       
       // 'true lab' analysis
       if (
@@ -1102,7 +1111,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   
   canvas->Clear();
   
-  canvas->Divide(5,2);
+  Int_t nRows = 2; 
+  Int_t nColumns = nThbins/nRows;
+  
+  canvas->Divide(nColumns,nRows);
   
   for( Int_t th = 0 ; th < nThbins ; th++){
 
@@ -1290,8 +1302,10 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   else 
     inputFileInt2 = inputFileNumber2.Atoi();
   
-  cout << "  " << nFiles << " Files " << endl;
-  
+  cout << endl;
+  cout << " There are " << nFiles << " Files " << endl;
+  cout << " Dividing by unpolarised data " << endl;
+
   TString plotName;
   plotName = "../Plots/Asym_" + inputFileNumber1;
   plotName = plotName + ".pdf";
@@ -1330,13 +1344,21 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   grB_True    = new TGraphErrors(nThbins,plotTheta,pB_True,0,0);
   grC_True    = new TGraphErrors(nThbins,plotTheta,pC_True,0,0);
   
-  //Calculating ratios for desired dPhiDiff
-  Float_t AsPhiDiff[nThbins] = {0.};
-  Float_t AePhiDiff[nThbins] = {0.};
+  //  Calculating ratios for desired dPhiDiff
+  // !! warning, similar data members in TLab.h
+  // Float_t AsPhiDiff[nThbins] = {0.};
+  // Float_t AePhiDiff[nThbins] = {0.};
 
-  Float_t AsTrue[nThbins] = {0.};
-  Float_t AeTrue[nThbins] = {0.};
+  // Float_t AsTrue[nThbins] = {0.};
+  // Float_t AeTrue[nThbins] = {0.};
 
+  AsPhiDiff[nThbins] = {0.};
+  AePhiDiff[nThbins] = {0.};
+
+  AsTrue[nThbins] = {0.};
+  AeTrue[nThbins] = {0.};
+
+  // temporary variables
   Float_t AsPhiDiff1[nThbins] = {0.};
   Float_t AePhiDiff1[nThbins] = {0.};
   Float_t AsPhiDiffR[nThbins] = {0.};
@@ -1426,8 +1448,11 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   
   } //end of: for (Int_t file = 0 ; 
   
-  //theory curve
+  // theory curve with hlaf angles
   Float_t aTheory[nThbins];
+  
+  // use rho1 (detectors only finite in theta)
+  Float_t aTheory1[nThbins];
 
   //half resolution in dPhi
   // 35.0 is result from Chloe Schoolings fits
@@ -1438,23 +1463,32 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     
   TTheory *theory = new TTheory();
 
-  //calculating theory curve
+  // calculating theory curves
   cout << endl;
-  cout << " Calculating theory curve ... " << endl;
+  cout << " Calculating theory curve/s ... " << endl;
   cout << endl;
   cout << " semiSpan = " << semiSpan*RadToDeg() << endl;
   cout << " alpha1   = " << alpha1*RadToDeg()   << endl;
   
   for (Int_t i = 0; i<nThbins; i++){
     if( dPhiDiff == 180 ){
-	aTheory[i] = 1.0;
-	continue;
-      }
+      aTheory[i] = 1.0;
+      continue;
+    }
     plotTheta[i] = plotTheta[i]*DegToRad();
-    aTheory[i] = theory->rho2(plotTheta[i],semiSpan,alpha1);
+    
+    aTheory[i]  = theory->rho2(plotTheta[i],semiSpan,alpha1);
+    aTheory1[i] = theory->rho1(plotTheta[i],semiSpan);
+
+    // acceptance
+    f_AsPhiDiff[i] = AsPhiDiff[i]/aTheory1[i];
+    // error on acceptance
+    f_AePhiDiff[i] = AePhiDiff[i]/aTheory1[i];
+
     plotTheta[i] = plotTheta[i]*RadToDeg();
   }
-    
+  
+  
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
   
@@ -1520,8 +1554,10 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   leg->AddEntry(grAsym[0],"simulated lab", "E P");
   leg->AddEntry(grAsym[2],"true simulated lab","E P");
   grAsym[0]->Draw("P E");
+
+  // plot theory curve
   grAsym[1]->Draw("P L SAME");
-  grAsym[2]->Draw("P E");
+  grAsym[2]->Draw("P E SAME");
   leg->Draw();
 
   if     (nFiles==1){
@@ -2263,7 +2299,7 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   hr->GetYaxis()->SetTitle(yAxis);
   hr->GetYaxis()->SetTitleOffset(0.7);
   
-  TLegend *leg = new TLegend(0.50,0.75,0.8,0.89);
+  TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
   
   TTheory *theory = new TTheory();
   cout << endl;
@@ -2476,9 +2512,9 @@ void TSim::SetStyle(){
   garyStyle->SetPadColor(kWhite);
   
   //Make more room for X and Y titles
-  garyStyle->SetPadRightMargin(0.1);  //percentage
-  garyStyle->SetPadLeftMargin(0.15);    //percentage
-  garyStyle->SetPadBottomMargin(0.14); //percentage
+  garyStyle->SetPadRightMargin(0.05);  //percentage
+  garyStyle->SetPadLeftMargin(0.1);    //percentage
+  garyStyle->SetPadBottomMargin(0.12); //percentage
   
   //----------- Histogram
   

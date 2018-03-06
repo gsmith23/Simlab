@@ -1,5 +1,4 @@
 #include "TLab.h"
-//#include "./includes.h"
 
 #if !defined(__CINT__)
 ClassImp(TLab)
@@ -1128,8 +1127,8 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
   // Asymmetry plot range
-  Float_t maxY = 2.75;
-  Float_t minY = 0.75;
+  Float_t maxY = 2.8;
+  Float_t minY = 0.8;
 
   if(dPhiDiff==180)
     maxY = 6.0;
@@ -1287,8 +1286,8 @@ void TLab::GraphAsymmetry(Char_t option){
       
       // divide lab data by unpolarised sim
       AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i]);
-      AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
-    
+      AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt(AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]) );
+      
       if(divideByUnPol){
 	// same values as aSim[i] etc
 	// as they will be overwritten 
