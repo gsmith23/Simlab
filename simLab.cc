@@ -416,16 +416,21 @@ Int_t main(int argc, char **argv){
     cout << "     --------------------" << endl;
     cout << "    | lab and simulation |" << endl;
     cout << "     --------------------" << endl;
-
-    cout << "Analysing: " << argv[2] << " and " << argv[3] << endl;
-    cout << " Calculating & Plotting Asymmetry " << endl;
     
-    TLab *data = nullptr;
+    TLab * data = nullptr;
     
-    if     (argc == 4)
+    cout << endl;
+    if     (argc == 4){
+      cout << " Analysing: " << argv[2] << " and " << argv[3] << endl;
       data = new TLab(argv[2],argv[3]);
-    else if(argc == 5)
+    }
+    else if(argc == 5){
+      
+      cout << " Analysing: " 
+	   << argv[2] << ", " << argv[3] 
+	   << " and " << argv[4] << endl;
       data = new TLab(argv[2],argv[3],argv[4]);
+    }
     
     Char_t overwrite = 'n';
     Char_t option    = 'b';
@@ -496,7 +501,9 @@ Int_t main(int argc, char **argv){
     }
     else if(option == 'f' ||
 	    option == 'F')
+    
       option = 'f';
+    
     else{
       cout << endl;
       cout << " invalid choice, setting to default (a) " << endl;

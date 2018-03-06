@@ -989,7 +989,7 @@ void TLab::CalculateAsymmetry(){
     cout << " nDuplicates = " << nDuplicates << endl;
   
   cout << endl;
-  cout << " True Asymmetry"<<endl;
+  cout << "Asymmetry"<<endl;
   cout<< " theta \t" << "dPhi=0 \t" 
       << "90 \t" << "180 \t" << "270" << endl;
   for (Int_t i = 0 ; i < 8 ; i++)
@@ -1330,11 +1330,21 @@ void TLab::GraphAsymmetry(Char_t option){
 	//	f_aSimTrue[i] = aSimTrue[i]/aTheory1[i];
 	
 	AsPhiDiffF[i] = AsPhiDiff[i]/f_aSim[i];
+	
 	AePhiDiffF[i] = AsPhiDiffF[i] * 
 	  Sqrt(AePhiDiff[i]*AePhiDiff[i]/
 	       (AsPhiDiff[i]*AsPhiDiff[i]) + 
 	       f_aSimE[i]*f_aSimE[i]/
 	       (f_aSim[i]*f_aSim[i]) );
+
+	cout << endl;
+	cout << " AsPhiDiffF[" << i << "] = " 
+	     << AsPhiDiffF[i] << endl;
+	cout << " AePhiDiffF[" << i << "] = " 
+	     << AePhiDiffF[i] << endl;
+	  
+
+
       }
       else if(divByUnPol){
 	// same values as aSim[i] etc
@@ -1444,21 +1454,25 @@ void TLab::GraphAsymmetry(Char_t option){
   
   TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,0,muE);
 
-  // !!! temporary  
   if( correctA ){
-    
     if     (divByF){
-      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,0,AePhiDiffF);
-      grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory1,0,0);
+      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,
+				   0,AePhiDiffF);
+      grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory1,
+				   0,0);
     }
     else if(divByUnPol){
-      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffD,0,AePhiDiffD);
-      grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
+      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffD,
+				   0,AePhiDiffD);
+      grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,
+				   0,0);
     }
   }
   else{
-    grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
-    grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
+    grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,
+				 0,AePhiDiff);
+    grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,
+				 0,0);
   }
   
   
@@ -1517,7 +1531,8 @@ void TLab::GraphAsymmetry(Char_t option){
     grAsym[1]->Draw("L P");
   }
   else if(option=='a' ||
-	  option=='d'){
+	  option=='d' ||
+	  option=='f'){
     leg->AddEntry(grAsym[0],
 		  "laboratory","E P");
     leg->AddEntry(grAsym[1],
