@@ -1100,15 +1100,18 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t  AsPhiDiff[nThBins];
   Float_t  AePhiDiff[nThBins];
   
-  Bool_t divideByUnPol = kFALSE;
-  //  Bool_t divideByF     = kFALSE;
-
+  Bool_t divByUnPol = kFALSE;
+  Bool_t divByF     = kFALSE;
+  Bool_t correctA   = kFALSE;
+  
   if     (option=='d'){
-    divideByUnPol = kTRUE;
+    correctA   = kTRUE;
+    divByUnPol = kTRUE;
   }
-//   else if(option=='f'){
-//     divideByF = kTRUE;
-//   }
+  else if(option=='f'){
+    correctA = kTRUE;
+    divByF   = kTRUE;
+  }
   
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
@@ -1171,8 +1174,8 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimUTrue[nThBins]={0};
   Float_t aSimUTrueE[nThBins]={0};
   
-  Float_t AsPhiDiffR[nThBins]={0};
-  Float_t AePhiDiffR[nThBins]={0};
+  Float_t AsPhiDiffD[nThBins]={0};
+  Float_t AePhiDiffD[nThBins]={0};
 
   Float_t AsPhiDiffF[nThBins]={0};
   Float_t AePhiDiffF[nThBins]={0};
@@ -1267,7 +1270,8 @@ void TLab::GraphAsymmetry(Char_t option){
   // sim
   if( option=='a' || 
       option=='d' || 
-      option=='s' ||
+      option=='f' || 
+      option=='s' || // s,c: relics?
       option=='c'  ){
     
     cout << endl;
@@ -1275,11 +1279,14 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " and simulation results ... " << endl;
     TSim *simData ;
       
-    if(divideByUnPol){
-
+    if(divByUnPol){
+      
+      // two argument option requires some work
+      // but is functional 
+      // (no sort file creations yet)
       simData = new TSim(simRun,simRunU);
       
-      // unpolarised first
+      // unpolarised (second file) first
       simData->CalculateAsymmetryLab(simRunU);
     }
     else{
@@ -1300,25 +1307,47 @@ void TLab::GraphAsymmetry(Char_t option){
       aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
       
       // divide lab data by unpolarised sim
-      AsPhiDiffR[i] = (AsPhiDiff[i]/aSim[i]);
-      AePhiDiffR[i] = AsPhiDiffR[i] * Sqrt(AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]) );
+      AsPhiDiffD[i] = (AsPhiDiff[i]/aSim[i]);
+      AePhiDiffD[i] = AsPhiDiffD[i] * 
+	Sqrt(AePhiDiff[i]*AePhiDiff[i]/
+	     (AsPhiDiff[i]*AsPhiDiff[i]) + 
+	     aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]) );
       
-      if(divideByUnPol){
+      if(divByF){
+	
+	// error for acceptance from theory
+	f_aSimE[i]     = aSimE[i]/aTheory1[i];
+	f_aSimTrueE[i] = aSimTrueE[i]/aTheory1[i];
+	
+	// acceptance from theory & simulation
+	// divide lab data by this
+	// as alternative to the unpolarised
+	// simulated data
+	f_aSim[i]     = aSim[i]/aTheory1[i];
+	f_aSimTrue[i] = aSimTrue[i]/aTheory1[i];
+	
+	AsPhiDiffF[i] = AsPhiDiff[i]/f_aSim[i];
+	AePhiDiffF[i] = AsPhiDiffF[i] * 
+	  Sqrt(AePhiDiff[i]*AePhiDiff[i]/
+	       (AsPhiDiff[i]*AsPhiDiff[i]) + 
+	       f_aSimE[i]*f_aSimE[i]/
+	       (f_aSim[i]*f_aSim[i]) );
+      }
+      else if(divByUnPol){
 	// same values as aSim[i] etc
-	// as they will be overwritten 
-	// below
+	// - they will be overwritten below
 	aSimU[i]      = aSim[i];
 	aSimUE[i]     = aSimE[i];
 	aSimUTrue[i]  = aSimTrue[i];
 	aSimUTrueE[i] = aSimTrueE[i];
       }
-    
     }
     
-    // divide simulated entangled/polarised by simulated unpolarised
-    if(divideByUnPol){
+    // divide simulated entangled/polarised 
+    // by simulated unpolarised
+    if(divByUnPol){
       
-      // the entangled/polarised data
+      // now the entangled/polarised data (first file)
       simData->CalculateAsymmetryLab(simRun);
       
       for(Int_t i = 0 ; i < nThBins ; i++){
@@ -1333,22 +1362,16 @@ void TLab::GraphAsymmetry(Char_t option){
 	// calculate the errors first
 	
 	// errors for dividing by unpolarised
-	aSimE[i] = (aSim[i]/aSimU[i])*Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
-	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i])*Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/(aSimUTrue[i]*aSimUTrue[i]) + aSimTrueE[i]*aSimTrueE[i]/(aSimTrue[i]*aSimTrue[i]));
+	aSimE[i] = (aSim[i]/aSimU[i])*
+	  Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + 
+		aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
 	
-	// error for acceptance from theory
-	f_aSimE[i]     = aSimE[i]/aTheory1[i];
-	f_aSimTrueE[i] = aSimTrueE[i]/aTheory1[i];
+	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i]) *
+	  Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/
+		( aSimUTrue[i]*aSimUTrue[i]) + 
+		aSimTrueE[i]*aSimTrueE[i]/
+		(aSimTrue[i]*aSimTrue[i]));
 	
-	// acceptance from theory & simulation
-	// divide lab data by this
-	// as alternative to the unpolarised
-	// simulated data
-	f_aSim[i]     = aSim[i]/aTheory1[i];
-	f_aSimTrue[i] = aSimTrue[i]/aTheory1[i];
-	
-	AsPhiDiffF[i] = AsPhiDiff[i]/f_aSim[i];
-	AePhiDiffF[i] = AsPhiDiffF[i] * Sqrt(AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) + f_aSimE[i]*f_aSimE[i]/(f_aSim[i]*f_aSim[i]) );
 	
 	// acceptance from unpolarised simulation
 	// divide by unpolarised 
@@ -1419,19 +1442,18 @@ void TLab::GraphAsymmetry(Char_t option){
   TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,0,muE);
 
   // !!! temporary  
-  if( divideByUnPol)
-    grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,0,AePhiDiffF);
+  if( correctA ){
+    
+    if     (divByF)
+      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,0,AePhiDiffF);
+    else if(divByUnPol)
+      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffD,0,AePhiDiffD);
+  }
   else
     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
 
-  //   if( divideByUnPol)
-//     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
-//   else
-//     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,0,AePhiDiff);
-
   grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,0,0);
   
-   
   for (Int_t k = 0; k<nThBins; k++)
     plotTheta[k] -= 2.;
   grAsym[2] = new TGraphErrors(nThBins,plotTheta,aSim,0,aSimE);
