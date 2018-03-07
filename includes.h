@@ -1,9 +1,7 @@
 #include "TROOT.h"
-//#include <TChain.h>
 #include "TFile.h"
 
 #include "TTheory.h"
-//#include "TTheory.h"
 #include "TSim.h"
 
 
@@ -12,7 +10,6 @@
 #include "TVector3.h"
 #include "TVector2.h"
 #include "TString.h"
-//#include "TChain.h"
 #include "TGraphErrors.h"
 #include "TLorentzVector.h"
 
@@ -28,15 +25,13 @@
 #include "TCanvas.h"
 #include "TMath.h"
 
-#include "TRandom.h"
+#include "TRandom3.h"
 #include "TSpectrum.h"
 #include "TVirtualFitter.h"
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TClass.h"
-
-#include "TRandom1.h"
 
 #include <stdio.h>
 #include <iostream>

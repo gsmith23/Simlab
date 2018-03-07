@@ -1003,8 +1003,8 @@ void TLab::CalculateAsymmetry(){
 
 Float_t TLab::RandomLabPhi(){
   
-  TRandom1 * rand1 = new TRandom1(); 
-  Float_t phi = rand1->Uniform()*360;
+  TRandom3 * rand3 = new TRandom3(); 
+  Float_t phi = rand3->Uniform()*360;
   
   if     ( phi < 90 ){
     phi = 0.;

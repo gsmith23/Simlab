@@ -315,14 +315,14 @@ Int_t  TSim::SortEvents(TString fileNumber){
     simPhiB[i] = 999;
   }
   
-  TRandom *rand = new TRandom();
-
   //============
   // EVENT LOOP
   Float_t sigmaPar = 2.5;
 
   Long64_t nEvents = simDataTree->GetEntries();
   
+  TRandom3 * rand3 = new TRandom3(); 
+
   for(Int_t i = 0 ; i < nEvents ; i++){ 
     simDataTree->GetEvent(i);
     
@@ -346,8 +346,8 @@ Int_t  TSim::SortEvents(TString fileNumber){
       
       // sigmaE = sigma511 * sqrt( E / 511) 
       
-      EA[j] = rand->Gaus(CrystEnergyDep[j],sigmaA[j]*Sqrt(CrystEnergyDep[j]));
-      EB[j] = rand->Gaus(CrystEnergyDep[j+nCrystals], sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals]));
+      EA[j] = rand3->Gaus(CrystEnergyDep[j],sigmaA[j]*Sqrt(CrystEnergyDep[j]));
+      EB[j] = rand3->Gaus(CrystEnergyDep[j+nCrystals], sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals]));
       
       etHA[j] = PhotonEnergyToTheta(CrystEnergyDep[j]);
       etHB[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals]);
@@ -644,7 +644,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   
   TH1F * hDPhiRes00_TL[nThbins];
   TH1F * hDPhiRes90_TL[nThbins];
-    
+  
   TH1F * hThRes00[nThbins];
   TH1F * hThRes90[nThbins];
 
@@ -827,7 +827,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   
   Long64_t nEntries = sortDataTree->GetEntries();
 
-  for(Int_t j = 0 ; j <nThbins; j++){
+  for(Int_t j = 0 ; j < nThbins; j++){
     P_lab[j]  = 0.;
     Pq_lab[j] = 0.;
     P_true_lab[j]  = 0.;
@@ -842,15 +842,14 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   Float_t totEA  = 0;
   Float_t totEB  = 0;
   
-  // Float_t phiB_prev = -1;
-  // Float_t phiB_this = -1;
-
   Float_t phiDiff = -10.;
   Float_t dPhiXact = -999.;
   Float_t dPhiXact2 = -999.;
   Float_t betaA = -99;
   Float_t betaB = -99;
 
+  Float_t wF = 1.0;
+  
   // Event loop
   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
     sortDataTree->GetEvent(ientry);
@@ -864,6 +863,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    totEB  = 0;
    betaA = -99;
    betaB = -99;
+   wF    = 1.0;
    
    for (Int_t k = 0; k < nCrystals; k++){
       totEA += EA[k];
@@ -895,33 +895,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      }
    } // end of : if (GetThetaBin(ltHA
    
-   // randomise phiB
-   // TRandom1 * rand1 = new TRandom1(); 
-    // phiB = rand1->Uniform()*360;
-    // if     ( phiB < 90 ){
-    //   phiB = 0.;
-    // }
-    // else if( phiB >= 90  &&
-    // 	     phiB < 180){
-    //   phiB = 90.;
-    // }
-    // else if( phiB >= 180 &&
-    // 	     phiB < 270){
-    //   phiB = 180.;
-    // }
-    // else if( phiB >= 270 &&
-    // 	     phiB < 360.){
-    //   phiB = 270.;
-    // }
-   
-    // make phiB value from previous event
-    // phiB_this = phiB;
-    // phiB = phiB_prev;
-    // phiB_prev = phiB_this;
-        
-    // cout << endl;
-    // cout << " phiB = " << phiB << endl;
-
     if ( (phiA > -1) && 
 	 (phiB > -1) ){
       
@@ -962,6 +935,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if(dPhiXact < 0)
 	dPhiXact = dPhiXact + 360.;
       
+      //wF = Cos(2*dPhiXact*DegToRad());
+
       // copy so it can be shifted by dphi
       // for comparing resolution plots
       dPhiXact2 = dPhiXact;
@@ -977,7 +952,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if (phiDiff == 0.) {
 
 	// iterate dphi = 0 counts
-	AsymMatrix[thBin][0] += 1;
+	AsymMatrix[thBin][0] += wF;
 	n000++;
 			
 	hThRes00[thBin]->Fill(simtHA[0]);
@@ -993,7 +968,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if ((phiDiff == 90)||(phiDiff == -270)){
 	
 	// iterate dphi = 90 counts
-	AsymMatrix[thBin][1] += 1;
+	AsymMatrix[thBin][1] += wF;
 	n090++;
 	
 	hThRes90[thBin]->Fill(simtHA[0]);
@@ -1005,7 +980,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if ((phiDiff == 180)||(phiDiff == -180)){
 	
 	// iterate dphi = 180 counts
-	AsymMatrix[thBin][2] += 1;
+	AsymMatrix[thBin][2] += wF;
 	n180++;
 	
 	hBeta180[thBin]->Fill(betaA);
@@ -1014,7 +989,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if ((phiDiff == -90)||(phiDiff == 270)){
 	
 	// iterate dphi = 270 counts
-	AsymMatrix[thBin][3] += 1;
+	AsymMatrix[thBin][3] += wF;
 	n270++;
 
 	dPhiXact2 = dPhiXact2 - 180.;
@@ -1197,6 +1172,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hBeta090[th]->SetLineColor(kRed);
     hBeta180[th]->SetLineColor(kGreen);
     
+    hBeta000_TL[th]->SetLineColor(kBlue);
+    hBeta090_TL[th]->SetLineColor(kRed);
+    hBeta180_TL[th]->SetLineColor(kGreen);
+    
     hBeta090[th]->Scale(1./2);
     hBeta090_TL[thBin]->Scale(1./2);
     
@@ -1303,11 +1282,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   for( Int_t th = 0 ; th < nThbins ; th++){
     canvas->cd(th+1);
     
-    hBeta180_TL[th]->Draw();
-    hBeta090_TL[th]->Draw("same");
+    hBeta090_TL[th]->Draw();
+    hBeta180_TL[th]->Draw("same");
     hBeta000_TL[th]->Draw("same");
   }
-  plotName = "../Plots/hBetaX_TL" + inputFileNumber;
+  plotName = "../Plots/hBetaX_TL_" + inputFileNumber;
   plotName += ".pdf";
   canvas->SaveAs(plotName);
 
