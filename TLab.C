@@ -1544,7 +1544,6 @@ void TLab::GraphAsymmetry(Char_t option){
   sprintf(yAxis,"P(%d^{o})/P(0^{o})",dPhiDiff);
   hr->GetYaxis()->SetTitle(yAxis);
     
-  
   if     (option=='b'){
     leg->AddEntry(grAsym[0],"laboratory","E P");
     leg->AddEntry(grAsym[1],
