@@ -378,7 +378,7 @@ Int_t main(int argc, char **argv){
     
     cout << endl;
     cout << " Analysing : " << argv[2] << endl;
-
+    
     // To do extend to two files/argument case
     TSim * simData = new TSim(argv[2]);
 
@@ -390,7 +390,7 @@ Int_t main(int argc, char **argv){
     cout << " Sort/Re-sort ROOT file ? " << endl;
     cout << " n (default)/ y " << endl;
     cout << " ";
-    cin  >> sort;
+    //cin  >> sort;
 
     if (sort == 'y' || sort == 'Y' ){
       cout << endl;

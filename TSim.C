@@ -465,7 +465,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
-  Float_t crystalHalfSizeYZ = 1.0;
+  Float_t crystalHalfSizeYZ = 2.0;
   
   posYZ = Abs(posYZ);
 
@@ -624,18 +624,32 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   GetThetaBinValues();
 
   //difference 'sim theta' - 'energy theta'
-  TH2F* histThD = new TH2F("histThD",
-			   "sim - energy #theta difference",
-			   160,10,170,250,-120,130);
+  TH2F* hThExaSubThEI = new TH2F("hThExaSubThEI",
+				 "hThExaSubThEI",
+				 160,10,170,250,-120,130);
+  
+  TH2F* hThExaSubThEO = new TH2F("hThExaSubThEO",
+				 "hThExaSubThEO",
+				 160,10,170,250,-120,130);
 
   //difference 'lab theta' - 'energy theta'
-  TH2F* hLEdiff = new TH2F("hLEdiff","lab - energy theta",
-			   160,10,170,120,-50,70);
-
+  TH2F* hThLabSubThE_Vs_ThE = new TH2F("hThLabSubThE_Vs_ThE",
+				       "hThLabSubThE_Vs_ThE",
+				       160,10,170,120,-50,70);
+  
+  
   //difference 'max/min lab theta' - 'energy theta'
   TH2F* hMEdiff = new TH2F("hMEdiff","max/min - energy theta",
 			   160,10,170,120,-50,70);
+  
+  TH2F* hBetaVsDPhi = new TH2F("hBetaVsDPhi",
+			       "hBetaVsDPhi",
+			       32,-10.0,370,32,0.,10.);
 
+  TH2F* hRVsDPhi = new TH2F("hRVsDPhi",
+			    "hRVsDPhi",
+			    32,-10.0,370,32,-0.5,6.5);
+  
   TH1F * hDPhi[nThbins];
   TH1F * hDPhi_TL[nThbins];
   
@@ -847,6 +861,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   Float_t dPhiXact2 = -999.;
   Float_t betaA = -99;
   Float_t betaB = -99;
+  Float_t rA    = -99;
+
 
   Float_t wF = 1.0;
   
@@ -863,6 +879,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    totEB  = 0;
    betaA = -99;
    betaB = -99;
+   rA    = -99;
+   
    wF    = 1.0;
    
    for (Int_t k = 0; k < nCrystals; k++){
@@ -898,14 +916,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     if ( (phiA > -1) && 
 	 (phiB > -1) ){
       
-      histThD->Fill(etHA[4],simtHA[0]-etHA[4]);
-      histThD->Fill(etHB[4],simtHB[0]-etHB[4]);
-      
-      hLEdiff->Fill(etHA[4],ltHA[4] - etHA[4]);
-      hLEdiff->Fill(etHA[indexA],ltHA[indexA] - etHA[indexA]);
-      hLEdiff->Fill(etHB[4],ltHB[4] - etHB[4]);
-      hLEdiff->Fill(etHB[indexB],ltHB[indexB] - etHB[indexB]);
-      
       hMEdiff->Fill(etHA[4],mintHAErr[4] - etHA[4]);
       hMEdiff->Fill(etHA[indexA],mintHAErr[indexA] - etHA[indexA]);
       hMEdiff->Fill(etHB[4],mintHBErr[4] - etHB[4]);
@@ -915,8 +925,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       hMEdiff->Fill(etHB[4],maxtHBErr[4] - etHB[4]);
       hMEdiff->Fill(etHB[indexB],maxtHBErr[indexB] - etHB[indexB]);
       
-      betaA = (YposA[0]*YposA[0] + ZposA[0]*ZposA[0]);
-      betaA = Sqrt(betaA);
+      rA = (YposA[0]*YposA[0] + ZposA[0]*ZposA[0]);
+      rA = Sqrt(rA);
+      
+      betaA = rA;
       betaA = betaA/XposA[0];
       betaA = ATan(betaA);
       betaA = betaA*RadToDeg();
@@ -934,8 +946,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       dPhiXact  = simPhiA[0] + simPhiB[0];
       if(dPhiXact < 0)
 	dPhiXact = dPhiXact + 360.;
+
+      hBetaVsDPhi->Fill(dPhiXact,betaA);
+      hRVsDPhi->Fill(dPhiXact,rA);
       
-      //wF = Cos(2*dPhiXact*DegToRad());
+      wF = Cos(2*dPhiXact*DegToRad());
 
       // copy so it can be shifted by dphi
       // for comparing resolution plots
@@ -952,7 +967,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if (phiDiff == 0.) {
 
 	// iterate dphi = 0 counts
-	AsymMatrix[thBin][0] += wF;
+	AsymMatrix[thBin][0] += 1;
 	n000++;
 			
 	hThRes00[thBin]->Fill(simtHA[0]);
@@ -968,7 +983,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if ((phiDiff == 90)||(phiDiff == -270)){
 	
 	// iterate dphi = 90 counts
-	AsymMatrix[thBin][1] += wF;
+	AsymMatrix[thBin][1] += 1;
 	n090++;
 	
 	hThRes90[thBin]->Fill(simtHA[0]);
@@ -980,7 +995,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if ((phiDiff == 180)||(phiDiff == -180)){
 	
 	// iterate dphi = 180 counts
-	AsymMatrix[thBin][2] += wF;
+	AsymMatrix[thBin][2] += 1;
 	n180++;
 	
 	hBeta180[thBin]->Fill(betaA);
@@ -989,7 +1004,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       if ((phiDiff == -90)||(phiDiff == 270)){
 	
 	// iterate dphi = 270 counts
-	AsymMatrix[thBin][3] += wF;
+	AsymMatrix[thBin][3] += 1;
 	n270++;
 
 	dPhiXact2 = dPhiXact2 - 180.;
@@ -1001,7 +1016,9 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       
       // 'true lab' analysis
       if (
-	  // simtHA[0]<ThMax[thBin] && 
+// 	  Abs(simtHA[0]- etHA[4]) < 5.0 &&
+// 	  Abs(simtHB[0]- etHB[4]) < 5.0 &&
+//        simtHA[0]<ThMax[thBin] && 
 // 	  simtHA[0]>ThMin[thBin] &&
 // 	  simtHB[0]<ThMax[thBin] && 
 // 	  simtHB[0]>ThMin[thBin] &&
@@ -1011,10 +1028,23 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	  CentralYZ(ZposB[0])   
 	  //betaA < 1.0 &&
 	  //betaB < 1.0
-	  // nb_ComptA[4] == 1.     && 
+//        nb_ComptA[4] == 1.     && 
 // 	  nb_ComptB[4] == 1.    
 	  
 	  ){
+
+	
+	hThExaSubThEI->Fill(etHA[4],simtHA[0]-etHA[4]);
+	hThExaSubThEI->Fill(etHB[4],simtHB[0]-etHB[4]);
+	
+	hThExaSubThEO->Fill(etHA[4],simtHA[0]-etHA[indexA]);
+	hThExaSubThEO->Fill(etHB[4],simtHB[0]-etHB[indexB]);
+
+	hThLabSubThE_Vs_ThE->Fill(etHA[4],ltHA[4] - etHA[4]);
+//      hThLabSubThE_Vs_ThE->Fill(etHA[indexA],ltHA[indexA] - etHA[indexA]);
+// 	hThLabSubThE_Vs_ThE->Fill(etHB[4],ltHB[4] - etHB[4]);
+// 	hThLabSubThE_Vs_ThE->Fill(etHB[indexB],ltHB[indexB] - etHB[indexB]);
+      
 
 	hDPhi_TL[thBin]->Fill(dPhiXact);
 		
@@ -1080,27 +1110,52 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
   Char_t plotN[128];
 
-  hLEdiff->Draw("colz");
-  hLEdiff->GetXaxis()->SetTitle("energy #theta (deg)");
-  hLEdiff->GetYaxis()->SetTitle("lab #theta - energy #theta (deg)");
+  hThLabSubThE_Vs_ThE->Draw("colz");
+  hThLabSubThE_Vs_ThE->GetXaxis()->SetTitle("energy #theta (deg)");
+  hThLabSubThE_Vs_ThE->GetYaxis()->SetTitle("lab #theta - energy #theta (deg)");
 
-  sprintf(plotN,"../Plots/histLEdiff_%d.pdf",inputFileInt);
-  
-  plotName = "../Plots/histLEdiff_" + inputFileNumber;
+  plotName = "../Plots/hThLabSubThE_Vs_ThE_" + inputFileNumber;
   plotName += ".pdf";
 
   canvas->SaveAs(plotName);
    
-  histThD->Draw("colz");
-  histThD->GetXaxis()->SetTitle("#theta (deg)");
-  histThD->GetYaxis()->SetTitle("sim #theta - energy #theta (deg)");
+  hThExaSubThEI->Draw("colz");
+  hThExaSubThEI->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+  hThExaSubThEI->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
   
-  sprintf(plotN,"../Plots/histThDiff_%d.pdf",inputFileInt);
-
-  plotName = "../Plots/histThDiff_" + inputFileNumber;
+  plotName = "../Plots/hThExaSubThEI_" + inputFileNumber;
   plotName += ".pdf";
 
   canvas->SaveAs(plotName);
+
+  hThExaSubThEO->Draw("colz");
+  hThExaSubThEO->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+  hThExaSubThEO->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+    
+  plotName = "../Plots/hThExaSubThE0_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
+  
+  hBetaVsDPhi->Draw("colz");
+  hBetaVsDPhi->GetXaxis()->SetTitle("#Delta #phi (deg)");
+  hBetaVsDPhi->GetYaxis()->SetTitle("#beta (deg)");
+  
+  plotName = "../Plots/hBetaVsDPhi_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
+
+  hRVsDPhi->Draw("colz");
+  hRVsDPhi->GetXaxis()->SetTitle("#Delta #phi (deg)");
+  hRVsDPhi->GetYaxis()->SetTitle("(y^{2} + z^{2})^{1/2}");
+  
+  plotName = "../Plots/hRVsDPhi_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
+
+
 
   hMEdiff->Draw("colz");
   hMEdiff->GetXaxis()->SetTitle("energy #theta (deg)");
@@ -1383,14 +1438,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   grB_True    = new TGraphErrors(nThbins,plotTheta,pB_True,0,0);
   grC_True    = new TGraphErrors(nThbins,plotTheta,pC_True,0,0);
   
-  //  Calculating ratios for desired dPhiDiff
-  // !! warning, similar data members in TLab.h
-  // Float_t AsPhiDiff[nThbins] = {0.};
-  // Float_t AePhiDiff[nThbins] = {0.};
-
-  // Float_t AsTrue[nThbins] = {0.};
-  // Float_t AeTrue[nThbins] = {0.};
-
   for (Int_t th = 0 ; th < nThbins ; th++){
     AsPhiDiff[th] = 0.;
     AePhiDiff[th] = 0.;
@@ -1480,7 +1527,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
       }
       else if(file==1){
 	AsTrueR[i] = AsTrue1[i]/AsTrue[i] ;
-	
 	AeTrueR[i] = AsTrueR[i] * Sqrt( AeTrue[i]*AeTrue[i]/(AsTrue[i]*AsTrue[i]) + AeTrue1[i]*AeTrue1[i]/(AsTrue1[i]*AsTrue1[i]));
       }
       
@@ -2555,13 +2601,12 @@ void TSim::SetStyle(){
   
   //Make more room for X and Y titles
   garyStyle->SetPadRightMargin(0.05);  //percentage
-  garyStyle->SetPadLeftMargin(0.1);    //percentage
+  garyStyle->SetPadLeftMargin(0.12);    //percentage
   garyStyle->SetPadBottomMargin(0.12); //percentage
   
   //----------- Histogram
   
   //Histos
-  garyStyle->SetHistLineWidth(2);
   garyStyle->SetHistLineWidth(2);
   garyStyle->SetMarkerStyle(20);
   
@@ -2586,7 +2631,7 @@ void TSim::SetStyle(){
   garyStyle->SetTitleFont(132,"XYZ"); 
   garyStyle->SetTitleSize(0.05,"XYZ");
   garyStyle->SetTitleOffset(1.0,"XYZ");
-  garyStyle->SetTitleOffset(1.6,"Y");
+  //garyStyle->SetTitleOffset(1.6,"Y");
   
   //----------  Stats
   garyStyle->SetOptStat(0);

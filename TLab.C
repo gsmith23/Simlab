@@ -1161,6 +1161,15 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimTrue[nThBins]={0};
   Float_t aSimTrueE[nThBins]={0};
   
+  Float_t nSim[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimInt[nThBins]={0};
+
+  Float_t nSimU[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimUInt[nThBins]={0};
+  
+  Float_t nSimC[nThBins][nPhiBins]={{0},{0}};
+  
+
   Float_t f_aSim[nThBins]={0};
   Float_t f_aSimE[nThBins]={0};
   // Float_t f_aSimTrue[nThBins]={0};
@@ -1191,7 +1200,8 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " Calculating asymmetry values and " << endl;
     cout << " associated errors for lab data ... " << endl;
     
-    CalculateAsymmetry();
+    //!!! very temporary
+    //CalculateAsymmetry();
     
     for (Int_t i = 0 ; i < nThBins ; i++){
       
@@ -1232,6 +1242,9 @@ void TLab::GraphAsymmetry(Char_t option){
     // Only plot points in axis range
       if(AsPhiDiff[i] < 0.5 || AsPhiDiff[i] > maxY)
       	AsPhiDiff[i] = 0.0; 
+      
+      cout << " AsPhiDiff[" << i << "] = " 
+	   <<  AsPhiDiff[i] << endl;
       
     }
  
@@ -1302,7 +1315,7 @@ void TLab::GraphAsymmetry(Char_t option){
       aSimE[i]       = simData->GetAsymLabErr(dPhiDiff,i);
       aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
       aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
-      
+            
       // divide lab data by unpolarised sim
       AsPhiDiffD[i] = (AsPhiDiff[i]/aSim[i]);
       AePhiDiffD[i] = AsPhiDiffD[i] * 
@@ -1338,7 +1351,7 @@ void TLab::GraphAsymmetry(Char_t option){
 	     << AePhiDiffF[i] << endl;
 	  
 
-
+	
       }
       else if(divByUnPol){
 	// same values as aSim[i] etc
@@ -1347,6 +1360,27 @@ void TLab::GraphAsymmetry(Char_t option){
 	aSimUE[i]     = aSimE[i];
 	aSimUTrue[i]  = aSimTrue[i];
 	aSimUTrueE[i] = aSimTrueE[i];
+	
+	
+	//!!!!
+	
+	// record the counts per theta,phi bin
+	// and total per theta bin
+	for (Int_t p = 0 ; p < 4 ; p++){
+	  nSimU[i][p] =  simData->AsymMatrix[i][p];
+	  nSimUInt[i] += nSimU[i][p];
+	}
+	
+	// normalise to the total 
+	// so the integral is one
+	for (Int_t p = 0 ; p < 4 ; p++){
+	  nSimU[i][p] =  nSimU[i][p]/nSimUInt[i];
+	  cout << " nSimU[" << i << "][" << p << "] = "
+	       << nSimU[i][p] << endl;
+	
+	}
+	//!!!!	
+
       }
     }
     
@@ -1363,28 +1397,69 @@ void TLab::GraphAsymmetry(Char_t option){
 	aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
 	aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
 	
-	// ----------------------
-	// Acceptance correction
+	//!!
 
-	// calculate the errors first
+	//---------
+	// acceptance correction by counts subtraction
 	
-	// errors for dividing by unpolarised
-	aSimE[i] = (aSim[i]/aSimU[i])*
-	  Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + 
-		aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
+	// record the counts per theta,phi bin
+	// and total per theta bin
+	for (Int_t p = 0 ; p < 4 ; p++){
+	  nSim[i][p] =  simData->AsymMatrix[i][p];
+	  nSimInt[i] += nSim[i][p];
+	}
 	
-	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i]) *
-	  Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/
-		( aSimUTrue[i]*aSimUTrue[i]) + 
-		aSimTrueE[i]*aSimTrueE[i]/
-		(aSimTrue[i]*aSimTrue[i]));
+	// normalise to the total 
+	// so the integral is one
+	for (Int_t p = 0 ; p < 4 ; p++){
+	  nSim[i][p] =  nSim[i][p]/nSimInt[i];
+	  cout << " nSim[" << i << "][" << p << "] = "
+	       << nSim[i][p] << endl;
+	}
+
+	// correct the counts using the unpolarised
+	// distribution
+	for (Int_t p = 0 ; p < 4 ; p++){
+	  nSimC[i][p] = nSim[i][p] - nSimU[i][p] + 1./4;
+	  cout << " nSimC[" << i << "][" << p << "] = "
+	       << nSimC[i][p] << endl;
+	}
+	// do the divisions
+	if (nSimC[i][0] != 0){
+	  if (dPhiDiff  == 90){
+	    aSim[i] = nSimC[i][1]/nSimC[i][0];
+	    //using average 90 and 270
+	    aSim[i] = (nSimC[i][1]+nSimC[i][3])/(2*nSimC[i][0]);
+	  }
+	  if (dPhiDiff  == 180)
+	    aSim[i] = nSimC[i][2]/nSimC[i][0];
+	  if (dPhiDiff  == 270)
+	    aSim[i] = nSimC[i][3]/nSimC[i][0];
+	}
+//!!	
 	
 	
-	// acceptance from unpolarised simulation
-	// divide by unpolarised 
-	aSim[i]      = aSim[i]/aSimU[i];
-	aSimTrue[i]  = aSimTrue[i]/aSimUTrue[i];
+// 	// ---------------------------------
+// 	// Acceptance correction by division
+
+// 	// calculate the errors first
 	
+// 	// errors for dividing by unpolarised
+// 	aSimE[i] = (aSim[i]/aSimU[i])*
+// 	  Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + 
+// 		aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
+	
+// 	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i]) *
+// 	  Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/
+// 		( aSimUTrue[i]*aSimUTrue[i]) + 
+// 		aSimTrueE[i]*aSimTrueE[i]/
+// 		(aSimTrue[i]*aSimTrue[i]));
+	
+	
+// 	// acceptance from unpolarised simulation
+// 	// divide by unpolarised 
+// 	aSim[i]      = aSim[i]/aSimU[i];
+// 	aSimTrue[i]  = aSimTrue[i]/aSimUTrue[i];
 	
       }
     }
@@ -1451,7 +1526,6 @@ void TLab::GraphAsymmetry(Char_t option){
   
   TGraphErrors * grMu = new TGraphErrors(nThBins,plotTheta,mu,
 					 0,muE);
-
 
   if( correctA ){
     if     (divByF){
