@@ -1106,6 +1106,7 @@ void TLab::GraphAsymmetry(Char_t option){
   Bool_t divByF     = kFALSE;
   Bool_t correctA   = kFALSE;
   
+  cout << endl;
   if     (option=='d'){
     correctA   = kTRUE;
     divByUnPol = kTRUE;
