@@ -1102,16 +1102,27 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t  AePhiDiff[nThBins];
   
   Bool_t divByUnPol = kFALSE;
+  Bool_t subUnPol   = kFALSE;
   Bool_t divByF     = kFALSE;
   Bool_t correctA   = kFALSE;
   
   if     (option=='d'){
     correctA   = kTRUE;
     divByUnPol = kTRUE;
+    
+    cout << " Dividing by Unpolarised Simulation " << endl;
+  }
+  else if(option=='s'){
+    correctA = kTRUE;
+    subUnPol = kTRUE;
+    
+    cout << " Subtracting Unpolarised Simulation " << endl;
   }
   else if(option=='f'){
     correctA = kTRUE;
     divByF   = kTRUE;
+    
+    cout << " Dividing by Polarised Simulation scaled to theory " << endl;
   }
   
   // The ratio to be calculated for the
@@ -1163,24 +1174,27 @@ void TLab::GraphAsymmetry(Char_t option){
   
   Float_t nSim[nThBins][nPhiBins]={{0},{0}};
   Float_t nSimInt[nThBins]={0};
-
+  Float_t nSimTrue[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueInt[nThBins]={0};
+  
   Float_t nSimU[nThBins][nPhiBins]={{0},{0}};
   Float_t nSimUInt[nThBins]={0};
+  Float_t nSimTrueU[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueUInt[nThBins]={0};
   
   Float_t nSimC[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueC[nThBins][nPhiBins]={{0},{0}};
   
   Float_t nAsymMatrix[nThBins][nPhiBins]={{0},{0}};
   Float_t nAsymMatrixInt[nThBins] = {0};
     
   Float_t f_aSim[nThBins]={0};
   Float_t f_aSimE[nThBins]={0};
-  // Float_t f_aSimTrue[nThBins]={0};
-  // Float_t f_aSimTrueE[nThBins]={0};
   
   Float_t aSimU[nThBins]={0};
   Float_t aSimUE[nThBins]={0};
-  Float_t aSimUTrue[nThBins]={0};
-  Float_t aSimUTrueE[nThBins]={0};
+  Float_t aSimTrueU[nThBins]={0};
+  Float_t aSimTrueUE[nThBins]={0};
   
   Float_t AsPhiDiffD[nThBins]={0};
   Float_t AePhiDiffD[nThBins]={0};
@@ -1285,7 +1299,7 @@ void TLab::GraphAsymmetry(Char_t option){
   if( option=='a' || 
       option=='d' || 
       option=='f' || 
-      option=='s' || // s,c: relics?
+      option=='s' || 
       option=='c'  ){
     
     cout << endl;
@@ -1293,7 +1307,8 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << " and simulation results ... " << endl;
     TSim *simData ;
       
-    if(divByUnPol){
+    if(divByUnPol || 
+       subUnPol){
       
       // two argument option requires some work
       // but is functional 
@@ -1315,35 +1330,29 @@ void TLab::GraphAsymmetry(Char_t option){
       aTheory1[i]  = theory->rho1(plotTheta[i],semiSpan);
       plotTheta[i] = plotTheta[i]*RadToDeg();
 
-      aSim[i]        = simData->GetAsymLab(dPhiDiff,i);
-      aSimE[i]       = simData->GetAsymLabErr(dPhiDiff,i);
-      aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
-      aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
+      aSim[i]      = simData->GetAsymLab(dPhiDiff,i);
+      aSimE[i]     = simData->GetAsymLabErr(dPhiDiff,i);
+      aSimTrue[i]  = simData->GetAsymLabTrue(dPhiDiff,i);
+      aSimTrueE[i] = simData->GetAsymLabTrueErr(dPhiDiff,i);
       
       
-      
-      // !!
       // divide lab data by unpolarised sim
       AsPhiDiffD[i] = (AsPhiDiff[i]/aSim[i]);
       AePhiDiffD[i] = AsPhiDiffD[i] * 
 	Sqrt(AePhiDiff[i]*AePhiDiff[i]/
 	     (AsPhiDiff[i]*AsPhiDiff[i]) + 
 	     aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]) );
-      //!!
-
       
       if(divByF){
 	
 	// error for acceptance from theory
 	f_aSimE[i]     = aSimE[i]/aTheory1[i];
-	//	f_aSimTrueE[i] = aSimTrueE[i]/aTheory1[i];
 	
 	// acceptance from theory & simulation
 	// divide lab data by this
 	// as alternative to the unpolarised
 	// simulated data
 	f_aSim[i]     = aSim[i]/aTheory1[i];
-	//	f_aSimTrue[i] = aSimTrue[i]/aTheory1[i];
 	
 	AsPhiDiffF[i] = AsPhiDiff[i]/f_aSim[i];
 	
@@ -1359,43 +1368,50 @@ void TLab::GraphAsymmetry(Char_t option){
 	cout << " AePhiDiffF[" << i << "] = " 
 	     << AePhiDiffF[i] << endl;
 	  
-
-	
       }
       else if(divByUnPol){
 	// same values as aSim[i] etc
 	// - they will be overwritten below
 	aSimU[i]      = aSim[i];
 	aSimUE[i]     = aSimE[i];
-	aSimUTrue[i]  = aSimTrue[i];
-	aSimUTrueE[i] = aSimTrueE[i];
+	aSimTrueU[i]  = aSimTrue[i];
+	aSimTrueUE[i] = aSimTrueE[i];
 	
-	
-	//!!!!
-	
+      }
+      else if(subUnPol){
 	// record the counts per theta,phi bin
 	// and total per theta bin
 	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSimU[i][p] =  simData->AsymMatrix[i][p];
-	  nSimUInt[i] += nSimU[i][p];
+	  nSimU[i][p]     = simData->AsymMatrix[i][p];
+	  nSimTrueU[i][p] = simData->AsymTrue[i][p];
+	  
+	  nSimUInt[i]     += nSimU[i][p];
+	  nSimTrueUInt[i] += nSimTrueU[i][p];
 	}
 	
 	// normalise to the total 
 	// so the integral is one
+	cout << endl;
 	for (Int_t p = 0 ; p < 4 ; p++){
 	  nSimU[i][p] =  nSimU[i][p]/nSimUInt[i];
 	  cout << " nSimU[" << i << "][" << p << "] = "
 	       << nSimU[i][p] << endl;
-	
 	}
-	//!!!!	
-
+	cout << endl;
+	for (Int_t p = 0 ; p < 4 ; p++){
+	  nSimTrueU[i][p] =  nSimTrueU[i][p]/nSimTrueUInt[i];
+	  cout << " nSimTrueU[" << i << "][" << p << "] = "
+	       << nSimTrueU[i][p] << endl;
+	}
+	
       }
+      
     }
     
     // divide simulated entangled/polarised 
     // by simulated unpolarised
-    if(divByUnPol){
+    if( divByUnPol ||
+	subUnPol ){
       
       // now the entangled/polarised data (first file)
       simData->CalculateAsymmetryLab(simRun);
@@ -1406,119 +1422,154 @@ void TLab::GraphAsymmetry(Char_t option){
 	aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
 	aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
 	
-	//!!
-
-	//---------
-	// acceptance correction by counts subtraction
 	
-	// record the counts per theta,phi bin
-	// and total per theta bin
-	
-	//------
-	// Simulated Data
-	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSim[i][p] =  simData->AsymMatrix[i][p];
-	  nSimInt[i] += nSim[i][p];
-	}
-	
-	// normalise to the total 
-	// so the integral is one
-	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSim[i][p] =  nSim[i][p]/nSimInt[i];
-	  cout << " nSim[" << i << "][" << p << "] = "
-	       << nSim[i][p] << endl;
-	}
-	//------
-
-	//------
-	// Lab Data
-	// and total per theta bin
-	for (Int_t p = 0 ; p < 4 ; p++){
-	  nAsymMatrix[i][p] =  AsymMatrix[i][p];
-	  nAsymMatrixInt[i] += nAsymMatrix[i][p];
-	}
-	
-	// normalise to the total 
-	// so the integral is one
-	for (Int_t p = 0 ; p < 4 ; p++){
-	  nAsymMatrix[i][p] =  nAsymMatrix[i][p]/nAsymMatrixInt[i];
-	  cout << " nAsymMatrix[" << i << "][" << p << "] = "
-	       << nAsymMatrix[i][p] << endl;
-	}
-	//------
-	
-	// correct the counts using the unpolarised
-	// distribution
-	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSimC[i][p] = nSim[i][p] - nSimU[i][p] + 1./4;
+	if(subUnPol){
+	  //---------
+	  // acceptance correction by counts subtraction
 	  
-	  cout << " nSimC[" << i << "][" << p << "] = "
-	       << nSimC[i][p] << endl;
-	}
-	
-	for (Int_t p = 0 ; p < 4 ; p++){
-	  nAsymMatrix[i][p] = nAsymMatrix[i][p] - nSimU[i][p] + 1./4;
-	  cout << " nAsymMatrix[" << i << "][" << p << "] = "
-	       << nAsymMatrix[i][p] << endl;
-	}
-	
-	// do the divisions
-	if (nSimC[i][0] != 0){
-	  if (dPhiDiff  == 90){
-	    aSim[i] = nSimC[i][1]/nSimC[i][0];
-	    //using average 90 and 270
-	    aSim[i] = (nSimC[i][1]+nSimC[i][3])/(2*nSimC[i][0]);
+	  // record the counts per theta,phi bin
+	  // and total per theta bin
+	  
+	  //------
+	  // Simulated Data
+	  for (Int_t p = 0 ; p < 4 ; p++){
+	    nSim[i][p]     =  simData->AsymMatrix[i][p];
+	    nSimTrue[i][p] =  simData->AsymTrue[i][p];
+	    
+	    nSimInt[i]     += nSim[i][p];
+	    nSimTrueInt[i] += nSimTrue[i][p];
 	  }
-	  if (dPhiDiff  == 180)
-	    aSim[i] = nSimC[i][2]/nSimC[i][0];
-	  if (dPhiDiff  == 270)
-	    aSim[i] = nSimC[i][3]/nSimC[i][0];
-	}
-	
-	// do the divisions
-	if (nAsymMatrix[i][0] != 0){
-	  if (dPhiDiff  == 90){
-	    AsPhiDiffS[i] = nAsymMatrix[i][1]/nAsymMatrix[i][0];
-	    //using average 90 and 270
-	    AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(2*nAsymMatrix[i][0]);
+	  
+	  // normalise to the total 
+	  // so the integral is one
+	  cout << endl;
+	  for (Int_t p = 0 ; p < 4 ; p++){
+	    nSim[i][p] =  nSim[i][p]/nSimInt[i];
+	    cout << " nSim[" << i << "][" << p << "] = "
+		 << nSim[i][p] << endl;
 	  }
-	  if (dPhiDiff  == 180)
-	    AsPhiDiffS[i] = nAsymMatrix[i][2]/nAsymMatrix[i][0];
-	  if (dPhiDiff  == 270)
-	    AsPhiDiffS[i] = nAsymMatrix[i][3]/nAsymMatrix[i][0];
+	  
+	  cout << endl;
+	  for (Int_t p = 0 ; p < 4 ; p++){
+	    nSimTrue[i][p] =  nSimTrue[i][p]/nSimTrueInt[i];
+	    cout << " nSimTrue[" << i << "][" << p << "] = "
+		 << nSimTrue[i][p] << endl;
+	  }
+	  //------
+	  
+	  //------
+	  // Lab Data
+	  // and total per theta bin
+	  for (Int_t p = 0 ; p < 4 ; p++){
+	    nAsymMatrix[i][p] =  AsymMatrix[i][p];
+	    nAsymMatrixInt[i] += nAsymMatrix[i][p];
+	  }
+	  
+	  // normalise to the total 
+	  // so the integral is one
+	  cout << endl;
+	  for (Int_t p = 0 ; p < 4 ; p++){
+	    nAsymMatrix[i][p] =  nAsymMatrix[i][p]/nAsymMatrixInt[i];
+	    cout << " nAsymMatrix[" << i << "][" << p << "] = "
+		 << nAsymMatrix[i][p] << endl;
+	  }
+	  //------
+	  
+	  // correct the counts using the unpolarised
+	  // distribution
+	  cout << endl;
+	  for (Int_t p = 0 ; p < 4 ; p++){
+	    nSimC[i][p] = nSim[i][p] - nSimU[i][p] + 1./4;
+	    cout << " nSimC[" << i << "][" << p << "] = "
+		 << nSimC[i][p] << endl;
+	  }
+	  
+	  cout << endl;
+	  for (Int_t p = 0 ; p < 4 ; p++){
+	    nSimTrueC[i][p] = nSimTrue[i][p] - nSimTrueU[i][p] + 1./4;
+	    cout << " nSimTrueC[" << i << "][" << p << "] = "
+		 << nSimTrueC[i][p] << endl;
+	  }
+	  
+	  cout << endl;
+	  for (Int_t p = 0 ; p < 4 ; p++){
+	    nAsymMatrix[i][p] = nAsymMatrix[i][p] - nSimU[i][p] + 1./4;
+	    cout << " nAsymMatrix[" << i << "][" << p << "] = "
+		 << nAsymMatrix[i][p] << endl;
+	  }
+	  
+	  //--------
+	  // do the divisions
+	  
+	  // Sim
+	  if (nSimC[i][0] != 0){
+	    if (dPhiDiff  == 90){
+	      aSim[i] = nSimC[i][1]/nSimC[i][0];
+	      //using average 90 and 270
+	      aSim[i] = (nSimC[i][1]+nSimC[i][3])/(2*nSimC[i][0]);
+	    }
+	    if (dPhiDiff  == 180)
+	      aSim[i] = nSimC[i][2]/nSimC[i][0];
+	    if (dPhiDiff  == 270)
+	      aSim[i] = nSimC[i][3]/nSimC[i][0];
+	  }
+
+	  // True Sim
+	  if (nSimTrueC[i][0] != 0){
+	    if (dPhiDiff  == 90){
+	      aSimTrue[i] = nSimTrueC[i][1]/nSimTrueC[i][0];
+	      //using average 90 and 270
+	      aSimTrue[i] = (nSimTrueC[i][1]+nSimTrueC[i][3])/(2*nSimTrueC[i][0]);
+	    }
+	    if (dPhiDiff  == 180)
+	      aSimTrue[i] = nSimTrueC[i][2]/nSimTrueC[i][0];
+	    if (dPhiDiff  == 270)
+	      aSimTrue[i] = nSimTrueC[i][3]/nSimTrueC[i][0];
+	  }
+	  
+	  // Lab
+	  if (nAsymMatrix[i][0] != 0){
+	    if (dPhiDiff  == 90){
+	      AsPhiDiffS[i] = nAsymMatrix[i][1]/nAsymMatrix[i][0];
+	      //using average 90 and 270
+	      AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(2*nAsymMatrix[i][0]);
+	    }
+	    if (dPhiDiff  == 180)
+	      AsPhiDiffS[i] = nAsymMatrix[i][2]/nAsymMatrix[i][0];
+	    if (dPhiDiff  == 270)
+	      AsPhiDiffS[i] = nAsymMatrix[i][3]/nAsymMatrix[i][0];
+	  }
+	  
+	  //!!!!!! AePhiDiffS
+	  
 	}
 	
-	
-	
-
-//!!	
-	
-	
-// 	// ---------------------------------
-// 	// Acceptance correction by division
-
-// 	// calculate the errors first
-	
-// 	// errors for dividing by unpolarised
-// 	aSimE[i] = (aSim[i]/aSimU[i])*
-// 	  Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + 
-// 		aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
-	
-// 	aSimTrueE[i] = (aSimTrue[i]/aSimUTrue[i]) *
-// 	  Sqrt( aSimUTrueE[i]*aSimUTrueE[i]/
-// 		( aSimUTrue[i]*aSimUTrue[i]) + 
-// 		aSimTrueE[i]*aSimTrueE[i]/
-// 		(aSimTrue[i]*aSimTrue[i]));
-	
-	
-// 	// acceptance from unpolarised simulation
-// 	// divide by unpolarised 
-// 	aSim[i]      = aSim[i]/aSimU[i];
-// 	aSimTrue[i]  = aSimTrue[i]/aSimUTrue[i];
-	
+	if(divByUnPol){	
+	  // ---------------------------------
+	  // Acceptance correction by division
+	  
+	  // calculate the errors first
+	  
+	  // errors for dividing by unpolarised
+	  aSimE[i] = (aSim[i]/aSimU[i])*
+	    Sqrt( aSimUE[i]*aSimUE[i]/(aSimU[i]*aSimU[i]) + 
+		  aSimE[i]*aSimE[i]/(aSim[i]*aSim[i]));
+	  
+	  aSimTrueE[i] = (aSimTrue[i]/aSimTrueU[i]) *
+	    Sqrt( aSimTrueUE[i]*aSimTrueUE[i]/
+		  ( aSimTrueU[i]*aSimTrueU[i]) + 
+		  aSimTrueE[i]*aSimTrueE[i]/
+		  (aSimTrue[i]*aSimTrue[i]));
+	  
+	  
+	  // acceptance from unpolarised simulation
+	  // divide by unpolarised 
+	  aSim[i]      = aSim[i]/aSimU[i];
+	  aSimTrue[i]  = aSimTrue[i]/aSimTrueU[i];
+	}
       }
     }
-
+    
   }// end of:  if( option=='t' || option=='T'
   
   cout << endl;
@@ -1590,8 +1641,13 @@ void TLab::GraphAsymmetry(Char_t option){
 				   0,0);
     }
     else if(divByUnPol){
-      // grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffD,
-// 				   0,AePhiDiffD);
+      grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffD,
+				   0,AePhiDiffD);
+      
+      grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,
+				   0,0);
+    }
+    else if(subUnPol){
       
       grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffS,
 				   0,AePhiDiffD);
@@ -1599,7 +1655,7 @@ void TLab::GraphAsymmetry(Char_t option){
       grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,
 				   0,0);
     }
-  }
+  } // end of: if( correctA ){ ....
   else{
     grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiff,
 				 0,AePhiDiff);
@@ -1614,9 +1670,10 @@ void TLab::GraphAsymmetry(Char_t option){
   for (Int_t k = 0; k<nThBins; k++)
     plotTheta[k] += 2.;
   
-  if(option!='f')
+  if(option!='f'){
     grAsym[3] = new TGraphErrors(nThBins,plotTheta,aSimTrue,
 				 0,aSimTrueE);
+  }
   else{
     grAsym[3] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffF,
 				 0,AePhiDiffF);
@@ -1695,6 +1752,7 @@ void TLab::GraphAsymmetry(Char_t option){
   }
   else if(option=='a' ||
 	  option=='d' ||
+	  option=='s' ||
 	  option=='f'){
     leg->AddEntry(grAsym[0],
 		  "lab","E P");
@@ -1733,23 +1791,7 @@ void TLab::GraphAsymmetry(Char_t option){
     grAsym[3]->Draw("same EP ");
     
   }
-  else if(option=='c' || option=='C'){
-    leg->AddEntry(grAsym[0],
-		  "laboratory","E P");
-    leg->AddEntry(grAsym[2],
-		  "simulation (no entanglement)","P E");
-    grAsym[0]->Draw("P E");
-    grAsym[2]->Draw("same P");
-  }
-  else if(option=='s' || option=='S'){
-    leg->AddEntry(grAsym[1],
-		  theoryLegendTitle,"L P");
-    leg->AddEntry(grAsym[2],
-		  "simulation (no entanglement)","P E");
-    grAsym[1]->Draw("P L");
-    grAsym[2]->Draw("same P L");
-  }
-  
+
   leg->Draw();
   
   sprintf(plotName,"../Plots/%d_A_%d_%c.pdf",

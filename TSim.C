@@ -644,11 +644,13 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   
   TH2F* hBetaVsDPhi = new TH2F("hBetaVsDPhi",
 			       "hBetaVsDPhi",
-			       32,-10.0,370,32,0.,10.);
+			       32,-10.0,370,
+			       32,0.,10.);
 
   TH2F* hRVsDPhi = new TH2F("hRVsDPhi",
 			    "hRVsDPhi",
-			    32,-10.0,370,32,-0.5,6.5);
+			    32,-10.0,370,
+			    32,-0.5,6.5);
   
   TH1F * hDPhi[nThbins];
   TH1F * hDPhi_TL[nThbins];
@@ -950,8 +952,8 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       hBetaVsDPhi->Fill(dPhiXact,betaA);
       hRVsDPhi->Fill(dPhiXact,rA);
       
-      wF = Cos(2*dPhiXact*DegToRad());
-
+      wF = -1.*Cos(2*dPhiXact*DegToRad());
+      
       // copy so it can be shifted by dphi
       // for comparing resolution plots
       dPhiXact2 = dPhiXact;
@@ -1154,8 +1156,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   plotName += ".pdf";
 
   canvas->SaveAs(plotName);
-
-
 
   hMEdiff->Draw("colz");
   hMEdiff->GetXaxis()->SetTitle("energy #theta (deg)");

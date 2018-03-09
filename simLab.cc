@@ -481,6 +481,8 @@ Int_t main(int argc, char **argv){
     cout << " a - Lab, Theory and Simulation (default)" << endl;
     cout << " d - Lab, Theory and Simulation: \n " 
 	 <<  "    Divide Lab Asym by Unpol Sim Asym " << endl;
+    cout << " s - Lab, Theory and Simulation: \n " 
+	 <<  "    Subtract Unpol Sim Asym from Asym " << endl;
     cout << " f - Lab, Theory and Simulation: \n " 
 	 <<  "    Divide Lab Asym by f = (sim/theory) " << endl;
     cin  >> option;
@@ -491,6 +493,17 @@ Int_t main(int argc, char **argv){
     else if(option == 'd' ||
 	    option == 'D'){
       option = 'd';
+      
+      if(argc != 5){
+	cout << endl;
+	cout << " you must use two simulated data files for this option " << endl;
+	cout << endl;
+	return 1;
+      }
+    }
+    else if(option == 's' ||
+	    option == 'S'){
+      option = 's';
       
       if(argc != 5){
 	cout << endl;
