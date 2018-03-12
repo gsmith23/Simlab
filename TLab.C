@@ -1143,8 +1143,8 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
   // Asymmetry plot range
-  Float_t maxY = 1.5;
-  Float_t minY = 0.5;
+  Float_t maxY = 1.9;
+  Float_t minY = 0.9;
 
   if( dPhiDiff==180 )
     maxY = 6.0;
@@ -1259,7 +1259,7 @@ void TLab::GraphAsymmetry(Char_t option){
       }
       
     // Only plot points in axis range
-      if(AsPhiDiff[i] < 0.5 || AsPhiDiff[i] > maxY)
+      if(AsPhiDiff[i] < 0.5 )//|| AsPhiDiff[i] > maxY)
       	AsPhiDiff[i] = 0.0; 
       
       cout << " AsPhiDiff[" << i << "] = " 
@@ -1394,13 +1394,15 @@ void TLab::GraphAsymmetry(Char_t option){
 	// so the integral is one
 	cout << endl;
 	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSimU[i][p] =  nSimU[i][p]/nSimUInt[i];
+	  if( nSimUInt[i] > 0)
+	    nSimU[i][p] =  nSimU[i][p]/nSimUInt[i];
 	  cout << " nSimU[" << i << "][" << p << "] = "
 	       << nSimU[i][p] << endl;
 	}
 	cout << endl;
 	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSimTrueU[i][p] =  nSimTrueU[i][p]/nSimTrueUInt[i];
+	  if(nSimTrueUInt[i]> 0.)
+	    nSimTrueU[i][p] =  nSimTrueU[i][p]/nSimTrueUInt[i];
 	  cout << " nSimTrueU[" << i << "][" << p << "] = "
 	       << nSimTrueU[i][p] << endl;
 	}
@@ -1445,14 +1447,16 @@ void TLab::GraphAsymmetry(Char_t option){
 	  // so the integral is one
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nSim[i][p] =  nSim[i][p]/nSimInt[i];
+	    if( nSimInt[i] > 0. )
+	      nSim[i][p] =  nSim[i][p]/nSimInt[i];
 	    cout << " nSim[" << i << "][" << p << "] = "
 		 << nSim[i][p] << endl;
 	  }
 	  
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nSimTrue[i][p] =  nSimTrue[i][p]/nSimTrueInt[i];
+	    if( nSimTrueInt[i] > 0.0 )
+	      nSimTrue[i][p] =  nSimTrue[i][p]/nSimTrueInt[i];
 	    cout << " nSimTrue[" << i << "][" << p << "] = "
 		 << nSimTrue[i][p] << endl;
 	  }
@@ -1470,7 +1474,8 @@ void TLab::GraphAsymmetry(Char_t option){
 	  // so the integral is one
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nAsymMatrix[i][p] =  nAsymMatrix[i][p]/nAsymMatrixInt[i];
+	    if(nAsymMatrixInt[i] > 0)
+	      nAsymMatrix[i][p] =  nAsymMatrix[i][p]/nAsymMatrixInt[i];
 	    cout << " nAsymMatrix[" << i << "][" << p << "] = "
 		 << nAsymMatrix[i][p] << endl;
 	  }
@@ -1541,11 +1546,12 @@ void TLab::GraphAsymmetry(Char_t option){
 	      AsPhiDiffS[i] = nAsymMatrix[i][1]/nAsymMatrix[i][0];
 	      
 	      //using average 90 and 270
-	      //AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(2*nAsymMatrix[i][0]);
+	      AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(2*nAsymMatrix[i][0]);
 	      
 	      // !!
 	      // using 0,90,180,270
-	      AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(nAsymMatrix[i][0]+nAsymMatrix[i][2]);
+	      //AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/
+	      // /(nAsymMatrix[i][0]+nAsymMatrix[i][2]);
 	    }
 	    if (dPhiDiff  == 180)
 	      AsPhiDiffS[i] = nAsymMatrix[i][2]/nAsymMatrix[i][0];
@@ -1599,10 +1605,14 @@ void TLab::GraphAsymmetry(Char_t option){
       
     for ( Int_t i = 0 ; i < nThBins ; i++ ){
       
-      AsInt[j] += AsymMatrix[i][j];
-      AeInt[j] += AsymMatrix[i][j];  
+      AeInt[j] += AsymMatrix[i][j];
       
-      }
+      if(!subUnPol)
+	AsInt[j] += AsymMatrix[i][j];
+      else
+	AsInt[j] += nAsymMatrix[i][j];
+      
+    }
     
     AeInt[j] = Sqrt(AeInt[j]);
     

@@ -465,7 +465,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
-  Float_t crystalHalfSizeYZ = 2.0;
+  Float_t crystalHalfSizeYZ = 1.0;
   
   posYZ = Abs(posYZ);
 
@@ -1222,7 +1222,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hThRes90_TL[th]->GetYaxis()->SetTitle("Counts");
     hDPhiRes90_TL[th]->GetYaxis()->SetTitle("Counts");
     
-
     hBeta000[th]->SetLineColor(kBlue);
     hBeta090[th]->SetLineColor(kRed);
     hBeta180[th]->SetLineColor(kGreen);
@@ -1258,7 +1257,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
   for( Int_t th = 0 ; th < nThbins ; th++){
     canvas->cd(th+1);
-    hDPhiRes90[th]->Draw("");
+    hDPhiRes90[th]->Draw("HIST");
     hDPhiRes00[th]->Draw("same");  
   }
   plotName = "../Plots/hDPhiRes_" + inputFileNumber;
@@ -1267,7 +1266,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
   for( Int_t th = 0 ; th < nThbins ; th++){
     canvas->cd(th+1);
-    hDPhiRes90_TL[th]->Draw("");
+    hDPhiRes90_TL[th]->Draw("HIST");
     hDPhiRes00_TL[th]->Draw("same");  
   }
   plotName = "../Plots/hDPhiRes_TL_" + inputFileNumber;
@@ -1327,7 +1326,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     canvas->cd(th+1);
     
     hBeta180[th]->Draw();
-    hBeta090[th]->Draw("same");
+    hBeta090[th]->Draw("same HIST");
     hBeta000[th]->Draw("same");
   }
   plotName = "../Plots/hBetaX_" + inputFileNumber;
@@ -1337,7 +1336,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   for( Int_t th = 0 ; th < nThbins ; th++){
     canvas->cd(th+1);
     
-    hBeta090_TL[th]->Draw();
+    hBeta090_TL[th]->Draw("HIST");
     hBeta180_TL[th]->Draw("same");
     hBeta000_TL[th]->Draw("same");
   }
@@ -2188,9 +2187,10 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   if(!entangled[0])
     polarised[0] = kTRUE;
   
-  if(!entangled[1])
-    polarised[1] = kTRUE;
-  
+  // if(!entangled[1])
+  //   polarised[1] = kTRUE;
+   
+
   //Calculating ratios for desired dPhiDiff
   Float_t AsPhiDiff[nThbins] = {0.};
   Float_t AePhiDiff[nThbins] = {0.};
