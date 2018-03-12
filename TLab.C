@@ -1507,10 +1507,10 @@ void TLab::GraphAsymmetry(Char_t option){
 	    if (dPhiDiff  == 90){
 	      aSim[i] = nSimC[i][1]/nSimC[i][0];
 	      //using average 90 and 270
-	      //aSim[i] = (nSimC[i][1]+nSimC[i][3])/(2*nSimC[i][0]);
+	      aSim[i] = (nSimC[i][1]+nSimC[i][3])/(2*nSimC[i][0]);
 	      //!!!
-	      // using also average of 0 and 180
-	      aSim[i] = (nSimC[i][1]+nSimC[i][3])/(nSimC[i][0]+nSimC[i][2]);
+	      // using 0,90,180,270
+	      //aSim[i] = (nSimC[i][1]+nSimC[i][3])/(nSimC[i][0]+nSimC[i][2]);
 	    }
 	    if (dPhiDiff  == 180)
 	      aSim[i] = nSimC[i][2]/nSimC[i][0];
@@ -1523,11 +1523,11 @@ void TLab::GraphAsymmetry(Char_t option){
 	    if (dPhiDiff  == 90){
 	      aSimTrue[i] = nSimTrueC[i][1]/nSimTrueC[i][0];
 	      //using average 90 and 270
-	      //aSimTrue[i] = (nSimTrueC[i][1]+nSimTrueC[i][3])/(2*nSimTrueC[i][0]);
+	      aSimTrue[i] = (nSimTrueC[i][1]+nSimTrueC[i][3])/(2*nSimTrueC[i][0]);
 	      
 	      // !!!
 	      // using 0,90,180,270
-	      aSimTrue[i] = (nSimTrueC[i][1]+nSimTrueC[i][3])/(nSimTrueC[i][0]+nSimTrueC[i][2]);
+	      //aSimTrue[i] = (nSimTrueC[i][1]+nSimTrueC[i][3])/(nSimTrueC[i][0]+nSimTrueC[i][2]);
 	    }
 	    if (dPhiDiff  == 180)
 	      aSimTrue[i] = nSimTrueC[i][2]/nSimTrueC[i][0];
@@ -1541,11 +1541,11 @@ void TLab::GraphAsymmetry(Char_t option){
 	      AsPhiDiffS[i] = nAsymMatrix[i][1]/nAsymMatrix[i][0];
 	      
 	      //using average 90 and 270
-	      //AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(2*nAsymMatrix[i][0]);
+	      AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(2*nAsymMatrix[i][0]);
 	      
 	      // !!
 	      // using 0,90,180,270
-	      AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(nAsymMatrix[i][0]+nAsymMatrix[i][2]);
+	      //AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(nAsymMatrix[i][0]+nAsymMatrix[i][2]);
 	    }
 	    if (dPhiDiff  == 180)
 	      AsPhiDiffS[i] = nAsymMatrix[i][2]/nAsymMatrix[i][0];

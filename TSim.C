@@ -1027,11 +1027,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	  CentralYZ(YposA[0])    && 
 	  CentralYZ(ZposA[0])    &&
 	  CentralYZ(YposB[0])    && 
-	  CentralYZ(ZposB[0])    &&
+	  CentralYZ(ZposB[0])    
 	  //betaA < 1.0 &&
 	  //betaB < 1.0
-	  nb_ComptA[4] == 1.     && 
-	  nb_ComptB[4] == 1.    
+	  // nb_ComptA[4] == 1.     && 
+// 	  nb_ComptB[4] == 1.    
 	  
 	  ){
 
