@@ -1143,7 +1143,7 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
   // Asymmetry plot range
-  Float_t maxY = 3.5;
+  Float_t maxY = 1.5;
   Float_t minY = 0.5;
 
   if( dPhiDiff==180 )

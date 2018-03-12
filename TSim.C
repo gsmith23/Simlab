@@ -465,7 +465,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
-  Float_t crystalHalfSizeYZ = 1.0;
+  Float_t crystalHalfSizeYZ = 2.0;
   
   posYZ = Abs(posYZ);
 
@@ -509,7 +509,7 @@ Float_t TSim::CrystalToPhi(Int_t crystal){
   			      270. ,  -1. , 90.,
   			      -1.  , 180. , -1.};
   
-  // !!Temp - Use corner crystals
+  // //  !!Temp - Use corner crystals
   // Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
   // 			       -1. ,  -1. , -1. ,
   // 			       270.,  -1. , 180. };
