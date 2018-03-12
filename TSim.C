@@ -465,7 +465,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
-  Float_t crystalHalfSizeYZ = 1.0;
+  Float_t crystalHalfSizeYZ = 2.0;
   
   posYZ = Abs(posYZ);
 
@@ -1027,11 +1027,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	  CentralYZ(YposA[0])    && 
 	  CentralYZ(ZposA[0])    &&
 	  CentralYZ(YposB[0])    && 
-	  CentralYZ(ZposB[0])   
+	  CentralYZ(ZposB[0])    &&
 	  //betaA < 1.0 &&
 	  //betaB < 1.0
-//        nb_ComptA[4] == 1.     && 
-// 	  nb_ComptB[4] == 1.    
+	  nb_ComptA[4] == 1.     && 
+	  nb_ComptB[4] == 1.    
 	  
 	  ){
 
