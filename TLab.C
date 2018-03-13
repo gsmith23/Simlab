@@ -1143,8 +1143,8 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
   
   // Asymmetry plot range
-  Float_t maxY = 3.5;
-  Float_t minY = 0.5;
+  Float_t maxY = 1.9;
+  Float_t minY = 0.9;
 
   if( dPhiDiff==180 )
     maxY = 6.0;
@@ -1178,17 +1178,33 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t nSimTrue[nThBins][nPhiBins]={{0},{0}};
   Float_t nSimTrueInt[nThBins]={0};
   
+  Float_t nSimE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimIntE[nThBins]={0};
+  Float_t nSimTrueE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueIntE[nThBins]={0};
+  
   Float_t nSimU[nThBins][nPhiBins]={{0},{0}};
   Float_t nSimUInt[nThBins]={0};
   Float_t nSimTrueU[nThBins][nPhiBins]={{0},{0}};
   Float_t nSimTrueUInt[nThBins]={0};
   
+  Float_t nSimUE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimUIntE[nThBins]={0};
+  Float_t nSimTrueUE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueUIntE[nThBins]={0};
+  
   Float_t nSimC[nThBins][nPhiBins]={{0},{0}};
   Float_t nSimTrueC[nThBins][nPhiBins]={{0},{0}};
   
+  Float_t nSimCE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueCE[nThBins][nPhiBins]={{0},{0}};
+  
   Float_t nAsymMatrix[nThBins][nPhiBins]={{0},{0}};
   Float_t nAsymMatrixInt[nThBins] = {0};
-    
+  
+  Float_t nAsymMatrixE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nAsymMatrixIntE[nThBins] = {0};
+  
   Float_t f_aSim[nThBins]={0};
   Float_t f_aSimE[nThBins]={0};
   
@@ -1196,7 +1212,7 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimUE[nThBins]={0};
   Float_t aSimTrueU[nThBins]={0};
   Float_t aSimTrueUE[nThBins]={0};
-  
+
   Float_t AsPhiDiffD[nThBins]={0};
   Float_t AePhiDiffD[nThBins]={0};
 
@@ -1228,14 +1244,16 @@ void TLab::GraphAsymmetry(Char_t option){
 	
 	mu[i] = (AsymMatrix[i][1] - AsymMatrix[i][0]);
 	mu[i] = mu[i]/(AsymMatrix[i][1] + AsymMatrix[i][0]);
-
+	
 	if (dPhiDiff  == 90){
 	  
 	  if(!use270){
 	    AsPhiDiff[i] =
 	      AsymMatrix[i][1]/AsymMatrix[i][0];
-	    AePhiDiff[i] =
-	      AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
+	    
+	    if(AsymMatrix[i][1]!=0)
+	      AePhiDiff[i] =
+		AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
 	  }
 	  else{
 	    AsPhiDiff[i] =
@@ -1259,7 +1277,7 @@ void TLab::GraphAsymmetry(Char_t option){
       }
       
     // Only plot points in axis range
-      if(AsPhiDiff[i] < 0.5 || AsPhiDiff[i] > maxY)
+      if(AsPhiDiff[i] < 0.5 )//|| AsPhiDiff[i] > maxY)
       	AsPhiDiff[i] = 0.0; 
       
       cout << " AsPhiDiff[" << i << "] = " 
@@ -1383,26 +1401,65 @@ void TLab::GraphAsymmetry(Char_t option){
 	// record the counts per theta,phi bin
 	// and total per theta bin
 	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSimU[i][p]     = simData->AsymMatrix[i][p];
-	  nSimTrueU[i][p] = simData->AsymTrue[i][p];
+	  nSimU[i][p]  = simData->AsymMatrix[i][p];
+	  // computed only for completeness
+	  // this will be superceeded below
+	  nSimUE[i][p] = Sqrt(nSimU[i][p]);
 	  
+	  nSimTrueU[i][p]  = simData->AsymTrue[i][p];
+	  nSimTrueUE[i][p] = Sqrt(nSimTrueU[i][p]);
+	    
 	  nSimUInt[i]     += nSimU[i][p];
 	  nSimTrueUInt[i] += nSimTrueU[i][p];
+	  
 	}
+	
+	nSimUIntE[i] = Sqrt( nSimUIntE[i] );
+	nSimTrueUIntE[i] = Sqrt( nSimTrueUIntE[i] );
 	
 	// normalise to the total 
 	// so the integral is one
 	cout << endl;
 	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSimU[i][p] =  nSimU[i][p]/nSimUInt[i];
-	  cout << " nSimU[" << i << "][" << p << "] = "
+	  
+	  if( nSimUInt[i] > 0 &&
+	      nSimU[i][p] > 0.){
+	    
+	    // must do errors first
+	    // as nSimU[][] is overwritten
+	    nSimUE[i][p] = 1/nSimU[i][p] + 1/nSimUInt[i];
+	    nSimUE[i][p] = Sqrt(nSimUE[i][p]);
+	    
+	    nSimU[i][p]  = nSimU[i][p]/nSimUInt[i];
+	    
+	    nSimUE[i][p] = nSimU[i][p]*nSimUE[i][p];
+	  
+	  }
+	  cout << " nSimU[" << i << "][" << p << "]  = "
 	       << nSimU[i][p] << endl;
+	  
+	  cout << " nSimUE[" << i << "][" << p << "] = "
+	       << nSimUE[i][p] << endl;
+	  
 	}
 	cout << endl;
 	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSimTrueU[i][p] =  nSimTrueU[i][p]/nSimTrueUInt[i];
+	  if(nSimTrueUInt[i]> 0.){
+	    // must do errors first
+	    // as nSimTrueU[][] is overwritten
+	    nSimTrueUE[i][p] = 1/nSimTrueU[i][p] + 1/nSimTrueUInt[i];
+	    nSimTrueUE[i][p] = Sqrt(nSimTrueUE[i][p]);
+	    
+	    nSimTrueU[i][p] =  nSimTrueU[i][p]/nSimTrueUInt[i];
+	    
+	    nSimTrueUE[i][p] = nSimTrueU[i][p]*nSimTrueUE[i][p];
+	    }
+	  
 	  cout << " nSimTrueU[" << i << "][" << p << "] = "
 	       << nSimTrueU[i][p] << endl;
+	  cout << " nSimTrueUE[" << i << "][" << p << "] = "
+	       << nSimTrueUE[i][p] << endl;
+	  
 	}
 	
       }
@@ -1423,7 +1480,6 @@ void TLab::GraphAsymmetry(Char_t option){
 	aSimTrue[i]    = simData->GetAsymLabTrue(dPhiDiff,i);
 	aSimTrueE[i]   = simData->GetAsymLabTrueErr(dPhiDiff,i);
 	
-	
 	if(subUnPol){
 	  //---------
 	  // acceptance correction by counts subtraction
@@ -1433,28 +1489,63 @@ void TLab::GraphAsymmetry(Char_t option){
 	  
 	  //------
 	  // Simulated Data
+	  
 	  for (Int_t p = 0 ; p < 4 ; p++){
 	    nSim[i][p]     =  simData->AsymMatrix[i][p];
-	    nSimTrue[i][p] =  simData->AsymTrue[i][p];
+	    nSimE[i][p]    =  Sqrt(nSim[i][p]);
+	    
+	    nSimTrue[i][p]  =  simData->AsymTrue[i][p];
+	    nSimTrueE[i][p] =  Sqrt(nSimTrue[i][p]);
 	    
 	    nSimInt[i]     += nSim[i][p];
 	    nSimTrueInt[i] += nSimTrue[i][p];
 	  }
 	  
+	  nSimIntE[i] = Sqrt( nSimInt[i] );
+	  nSimTrueIntE[i] = Sqrt( nSimTrueInt[i] );
+	  
 	  // normalise to the total 
 	  // so the integral is one
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nSim[i][p] =  nSim[i][p]/nSimInt[i];
-	    cout << " nSim[" << i << "][" << p << "] = "
+	    if( nSimInt[i] > 0. &&
+		nSim[i][p] > 0.){
+	      
+	      // must start the error calc first
+	      // as nSim[i][p] will be overwritten
+	      nSimE[i][p] = 1/nSim[i][p] + 1/nSimInt[i];
+	      nSimE[i][p] = Sqrt(nSimE[i][p]);
+	      
+	      nSim[i][p]  =  nSim[i][p]/nSimInt[i];
+	      
+	      // scale error to the ratio
+	      nSimE[i][p] = nSim[i][p]*nSimE[i][p];
+	    }
+	    
+	    cout << " nSim[" << i << "][" << p << "]  = "
 		 << nSim[i][p] << endl;
+	    cout << " nSimE[" << i << "][" << p << "] = "
+	       << nSimE[i][p] << endl;
 	  }
 	  
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nSimTrue[i][p] =  nSimTrue[i][p]/nSimTrueInt[i];
-	    cout << " nSimTrue[" << i << "][" << p << "] = "
+	    if( nSimTrueInt[i] > 0.0 &&
+		nSimTrue[i][p] > 0.0){
+	      
+	      nSimTrueE[i][p] = 1/nSimTrue[i][p] + 1/nSimTrueInt[i];
+	      nSimTrueE[i][p] = Sqrt(nSimTrueE[i][p]);
+	      
+	      nSimTrue[i][p] =  nSimTrue[i][p]/nSimTrueInt[i];
+	      
+	      nSimTrueE[i][p] = nSimTrue[i][p]*nSimTrueE[i][p];
+	      
+	    }
+	    cout << " nSimTrue[" << i << "][" << p << "]  = "
 		 << nSimTrue[i][p] << endl;
+	    cout << " nSimTrueE[" << i << "][" << p << "] = "
+		 << nSimTrueE[i][p] << endl;
+	    
 	  }
 	  //------
 	  
@@ -1462,41 +1553,79 @@ void TLab::GraphAsymmetry(Char_t option){
 	  // Lab Data
 	  // and total per theta bin
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nAsymMatrix[i][p] =  AsymMatrix[i][p];
+	    nAsymMatrix[i][p]  =  AsymMatrix[i][p];
+	    nAsymMatrixE[i][p] =  Sqrt(nAsymMatrix[i][p]);
+	    
 	    nAsymMatrixInt[i] += nAsymMatrix[i][p];
 	  }
+	  
+	  nAsymMatrixIntE[i] = Sqrt(nAsymMatrixInt[i]);
 	  
 	  // normalise to the total 
 	  // so the integral is one
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nAsymMatrix[i][p] =  nAsymMatrix[i][p]/nAsymMatrixInt[i];
-	    cout << " nAsymMatrix[" << i << "][" << p << "] = "
+	    if(nAsymMatrixInt[i] > 0 && 
+	       nAsymMatrix[i][p] > 0.){
+	      
+	      // must start errors first
+	      nAsymMatrixE[i][p] = 1./nAsymMatrix[i][p]+1./nAsymMatrixInt[i];
+	      nAsymMatrixE[i][p] = Sqrt(nAsymMatrixE[i][p]);
+	      
+	      nAsymMatrix[i][p]  = nAsymMatrix[i][p]/nAsymMatrixInt[i];
+	      
+	      nAsymMatrixE[i][p] = nAsymMatrix[i][p]*nAsymMatrixE[i][p];
+	    }
+	    cout << " nAsymMatrix[" << i << "][" << p << "]  = "
 		 << nAsymMatrix[i][p] << endl;
+	    cout << " nAsymMatrixE[" << i << "][" << p << "] = "
+		 << nAsymMatrixE[i][p] << endl;
 	  }
 	  //------
 	  
 	  // correct the counts using the unpolarised
-	  // distribution
+	  // distribution - add 1/nThBins so integral is 1
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nSimC[i][p] = nSim[i][p] - nSimU[i][p] + 1./4;
-	    cout << " nSimC[" << i << "][" << p << "] = "
+	    
+	    nSimC[i][p]  = nSim[i][p] - nSimU[i][p] + 1./4;
+	    
+	    nSimCE[i][p]  = nSimE[i][p]*nSimE[i][p];
+	    nSimCE[i][p] += nSimUE[i][p]*nSimUE[i][p];
+	    nSimCE[i][p] = Sqrt(nSimCE[i][p]);
+	    
+	    cout << " nSimC[" << i << "][" << p << "]  = "
 		 << nSimC[i][p] << endl;
+	    cout << " nSimCE[" << i << "][" << p << "] = "
+		 << nSimCE[i][p] << endl;
 	  }
 	  
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nSimTrueC[i][p] = nSimTrue[i][p] - nSimTrueU[i][p] + 1./4;
+	    nSimTrueC[i][p]  = nSimTrue[i][p] - nSimTrueU[i][p] + 1./4;
+	    
+	    nSimTrueCE[i][p]  = nSimTrueE[i][p]*nSimTrueE[i][p];
+	    nSimTrueCE[i][p] += nSimTrueUE[i][p]*nSimTrueUE[i][p];
+	    nSimTrueCE[i][p] = Sqrt(nSimTrueCE[i][p]);
+	    
 	    cout << " nSimTrueC[" << i << "][" << p << "] = "
 		 << nSimTrueC[i][p] << endl;
+	    cout << " nSimTrueCE[" << i << "][" << p << "] = "
+		 << nSimTrueCE[i][p] << endl;
 	  }
 	  
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nAsymMatrix[i][p] = nAsymMatrix[i][p] - nSimU[i][p] + 1./4;
-	    cout << " nAsymMatrix[" << i << "][" << p << "] = "
+	    nAsymMatrix[i][p]   =  nAsymMatrix[i][p] - nSimU[i][p] + 1./4;
+	    
+	    nAsymMatrixE[i][p]  =  nAsymMatrixE[i][p]*nAsymMatrixE[i][p];
+	    nAsymMatrixE[i][p] +=  nSimUE[i][p]*nSimUE[i][p];
+	    nAsymMatrixE[i][p] = Sqrt(nAsymMatrixE[i][p]);
+
+	    cout << " nAsymMatrix[" << i << "][" << p << "]  = "
 		 << nAsymMatrix[i][p] << endl;
+	    cout << " nAsymMatrixE[" << i << "][" << p << "] = "
+		 << nAsymMatrixE[i][p] << endl;
 	  }
 	  
 	  //--------
@@ -1505,34 +1634,97 @@ void TLab::GraphAsymmetry(Char_t option){
 	  // Sim
 	  if (nSimC[i][0] != 0){
 	    if (dPhiDiff  == 90){
+	      
+	      cout << endl;
+	      cout << " nSimC[ " << i << "][1] = " << nSimC[i][1]  << endl;
+	      cout << " nSimC[ " << i << "][0] = " << nSimC[i][0]  << endl;
+	      
+	      cout << endl;
+	      cout << " nSimCE[ " << i << "][1] = " << nSimCE[i][1]  << endl;
+	      cout << " nSimCE[ " << i << "][0] = " << nSimCE[i][0]  << endl;
+	      
 	      aSim[i] = nSimC[i][1]/nSimC[i][0];
+	      
+	      // error on ratio
+	      aSimE[i] =  nSimCE[i][1]*nSimCE[i][1]/(nSimC[i][1]*nSimC[i][1]);
+	      aSimE[i] += nSimCE[i][0]*nSimCE[i][0]/(nSimC[i][0]*nSimC[i][0]);
+	  
+	      // scaled to function
+	      aSimE[i]  = aSim[i]*Sqrt(aSimE[i]);
+	      
+	      cout << endl;
+	      cout << " aSim[" << i << "]  = " << aSim[i]  << endl;
+	      cout << " aSimE[" << i << "] = " << aSimE[i] << endl;
+	      
 	      //using average 90 and 270
-	      aSim[i] = (nSimC[i][1]+nSimC[i][3])/(2*nSimC[i][0]);
-	      //!!!
+	      //aSim[i]  = (nSimC[i][1]+nSimC[i][3])/(2*nSimC[i][0]);
+	      
 	      // using 0,90,180,270
 	      //aSim[i] = (nSimC[i][1]+nSimC[i][3])/(nSimC[i][0]+nSimC[i][2]);
 	    }
-	    if (dPhiDiff  == 180)
+	    if (dPhiDiff  == 180){
 	      aSim[i] = nSimC[i][2]/nSimC[i][0];
-	    if (dPhiDiff  == 270)
+	      
+	      // error on ratio
+	      aSimE[i] =  nSimCE[i][2]*nSimCE[i][2]/(nSimC[i][2]*nSimC[i][2]);
+	      aSimE[i] += nSimCE[i][0]*nSimCE[i][0]/(nSimC[i][0]*nSimC[i][0]);
+	      
+	      // scaled to function
+	      aSimE[i]  = aSim[i]*Sqrt(aSimE[i]);
+	      
+	    }
+	    if (dPhiDiff  == 270){
 	      aSim[i] = nSimC[i][3]/nSimC[i][0];
+	      
+	      // error on ratio
+	      aSimE[i] =  nSimCE[i][3]*nSimCE[i][3]/(nSimC[i][3]*nSimC[i][3]);
+	      aSimE[i] += nSimCE[i][0]*nSimCE[i][0]/(nSimC[i][0]*nSimC[i][0]);
+	      
+	      // scaled to function
+	      aSimE[i]  = aSim[i]*Sqrt(aSimE[i]);
+	      
+	    }
 	  }
-
 	  // True Sim
 	  if (nSimTrueC[i][0] != 0){
 	    if (dPhiDiff  == 90){
 	      aSimTrue[i] = nSimTrueC[i][1]/nSimTrueC[i][0];
-	      //using average 90 and 270
-	      aSimTrue[i] = (nSimTrueC[i][1]+nSimTrueC[i][3])/(2*nSimTrueC[i][0]);
 	      
-	      // !!!
+	      // error on ratio
+	      aSimTrueE[i] =  nSimTrueCE[i][1]*nSimTrueCE[i][1]/(nSimTrueC[i][1]*nSimTrueC[i][1]);
+	      aSimTrueE[i] += nSimTrueCE[i][0]*nSimTrueCE[i][0]/(nSimTrueC[i][0]*nSimTrueC[i][0]);
+	      
+	      // scaled to function
+	      aSimTrueE[i]  = aSimTrue[i]*Sqrt(aSimTrueE[i]);
+	      
+	      //using average 90 and 270
+	      //aSimTrue[i] = (nSimTrueC[i][1]+nSimTrueC[i][3])/(2*nSimTrueC[i][0]);
+	      
 	      // using 0,90,180,270
 	      //aSimTrue[i] = (nSimTrueC[i][1]+nSimTrueC[i][3])/(nSimTrueC[i][0]+nSimTrueC[i][2]);
 	    }
-	    if (dPhiDiff  == 180)
+	    if (dPhiDiff  == 180){
 	      aSimTrue[i] = nSimTrueC[i][2]/nSimTrueC[i][0];
-	    if (dPhiDiff  == 270)
+	      
+	      // error on ratio
+	      aSimTrueE[i] =  nSimTrueCE[i][2]*nSimTrueCE[i][2]/(nSimTrueC[i][2]*nSimTrueC[i][2]);
+	      aSimTrueE[i] += nSimTrueCE[i][0]*nSimTrueCE[i][0]/(nSimTrueC[i][0]*nSimTrueC[i][0]);
+	      
+	      // scaled to function
+	      aSimTrueE[i]  = aSimTrue[i]*Sqrt(aSimTrueE[i]);
+	      
+	    }
+	    if (dPhiDiff  == 270){
 	      aSimTrue[i] = nSimTrueC[i][3]/nSimTrueC[i][0];
+	      
+	      // error on ratio
+	      aSimTrueE[i] =  nSimTrueCE[i][3]*nSimTrueCE[i][3]/(nSimTrueC[i][3]*nSimTrueC[i][3]);
+	      aSimTrueE[i] += nSimTrueCE[i][0]*nSimTrueCE[i][0]/(nSimTrueC[i][0]*nSimTrueC[i][0]);
+	      
+	      // scaled to function
+	      aSimTrueE[i]  = aSimTrue[i]*Sqrt(aSimTrueE[i]);
+	      
+	    }
 	  }
 	  
 	  // Lab
@@ -1540,20 +1732,41 @@ void TLab::GraphAsymmetry(Char_t option){
 	    if (dPhiDiff  == 90){
 	      AsPhiDiffS[i] = nAsymMatrix[i][1]/nAsymMatrix[i][0];
 	      
-	      //using average 90 and 270
-	      AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(2*nAsymMatrix[i][0]);
+	      // error on ratio
+	      AePhiDiffS[i]  = nAsymMatrixE[i][1]*nAsymMatrixE[i][1]/(nAsymMatrix[i][1]*nAsymMatrix[i][1]);
+	      AePhiDiffS[i] += nAsymMatrixE[i][0]*nAsymMatrixE[i][0]/(nAsymMatrix[i][0]*nAsymMatrix[i][0]);
 	      
-	      // !!
+	      // scaled to function
+	      AePhiDiffS[i]  = AsPhiDiffS[i]*Sqrt(AePhiDiffS[i]);
+	      
+	      //using average 90 and 270
+	      //AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(2*nAsymMatrix[i][0]);
+	      
 	      // using 0,90,180,270
-	      //AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/(nAsymMatrix[i][0]+nAsymMatrix[i][2]);
+	      //AsPhiDiffS[i] = (nAsymMatrix[i][1]+nAsymMatrix[i][3])/
+	      // /(nAsymMatrix[i][0]+nAsymMatrix[i][2]);
 	    }
-	    if (dPhiDiff  == 180)
+	    if (dPhiDiff  == 180){
 	      AsPhiDiffS[i] = nAsymMatrix[i][2]/nAsymMatrix[i][0];
-	    if (dPhiDiff  == 270)
+	      
+	      // error on ratio
+	      AePhiDiffS[i]  = nAsymMatrixE[i][2]*nAsymMatrixE[i][2]/(nAsymMatrix[i][2]*nAsymMatrix[i][2]);
+	      AePhiDiffS[i] += nAsymMatrixE[i][0]*nAsymMatrixE[i][0]/(nAsymMatrix[i][0]*nAsymMatrix[i][0]);
+	      
+	      // scaled to function
+	      AePhiDiffS[i]  = AsPhiDiffS[i]*Sqrt(AePhiDiffS[i]);
+	    }
+	    if (dPhiDiff  == 270){
 	      AsPhiDiffS[i] = nAsymMatrix[i][3]/nAsymMatrix[i][0];
+	      
+	      // error on ratio
+	      AePhiDiffS[i]  = nAsymMatrixE[i][3]*nAsymMatrixE[i][3]/(nAsymMatrix[i][3]*nAsymMatrix[i][3]);
+	      AePhiDiffS[i] += nAsymMatrixE[i][0]*nAsymMatrixE[i][0]/(nAsymMatrix[i][0]*nAsymMatrix[i][0]);
+	      
+	      // scaled to function
+	      AePhiDiffS[i]  = AsPhiDiffS[i]*Sqrt(AePhiDiffS[i]);
+	    }
 	  }
-	  
-	  //!!!!!! AePhiDiffS
 	  
 	}
 	
@@ -1599,10 +1812,14 @@ void TLab::GraphAsymmetry(Char_t option){
       
     for ( Int_t i = 0 ; i < nThBins ; i++ ){
       
-      AsInt[j] += AsymMatrix[i][j];
-      AeInt[j] += AsymMatrix[i][j];  
+      AeInt[j] += AsymMatrix[i][j];
       
-      }
+      if(!subUnPol)
+	AsInt[j] += AsymMatrix[i][j];
+      else
+	AsInt[j] += nAsymMatrix[i][j];
+      
+    }
     
     AeInt[j] = Sqrt(AeInt[j]);
     
@@ -1663,7 +1880,7 @@ void TLab::GraphAsymmetry(Char_t option){
     else if(subUnPol){
       
       grAsym[0] = new TGraphErrors(nThBins,plotTheta,AsPhiDiffS,
-				   0,AePhiDiffD);
+				   0,AePhiDiffS);
       
       grAsym[1] = new TGraphErrors(nThBins,plotTheta,aTheory,
 				   0,0);
