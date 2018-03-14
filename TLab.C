@@ -1588,9 +1588,9 @@ void TLab::GraphAsymmetry(Char_t option){
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
 	    
-	    nSimC[i][p]  = nSim[i][p] - nSimU[i][p] + 1./4;
+	    nSimC[i][p]  = 2.*nSim[i][p] - nSimU[i][p];
 	    
-	    nSimCE[i][p]  = nSimE[i][p]*nSimE[i][p];
+	    nSimCE[i][p]  = 2.*nSimE[i][p]*nSimE[i][p];
 	    nSimCE[i][p] += nSimUE[i][p]*nSimUE[i][p];
 	    nSimCE[i][p] = Sqrt(nSimCE[i][p]);
 	    
@@ -1602,9 +1602,9 @@ void TLab::GraphAsymmetry(Char_t option){
 	  
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nSimTrueC[i][p]  = nSimTrue[i][p] - nSimTrueU[i][p] + 1./4;
+	    nSimTrueC[i][p]  = 2.*nSimTrue[i][p] - nSimTrueU[i][p];
 	    
-	    nSimTrueCE[i][p]  = nSimTrueE[i][p]*nSimTrueE[i][p];
+	    nSimTrueCE[i][p]  = 2.*nSimTrueE[i][p]*nSimTrueE[i][p];
 	    nSimTrueCE[i][p] += nSimTrueUE[i][p]*nSimTrueUE[i][p];
 	    nSimTrueCE[i][p] = Sqrt(nSimTrueCE[i][p]);
 	    
@@ -1616,9 +1616,9 @@ void TLab::GraphAsymmetry(Char_t option){
 	  
 	  cout << endl;
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nAsymMatrix[i][p]   =  nAsymMatrix[i][p] - nSimU[i][p] + 1./4;
+	    nAsymMatrix[i][p]   =  2.*nAsymMatrix[i][p] - nSimU[i][p];
 	    
-	    nAsymMatrixE[i][p]  =  nAsymMatrixE[i][p]*nAsymMatrixE[i][p];
+	    nAsymMatrixE[i][p]  =  2.*nAsymMatrixE[i][p]*nAsymMatrixE[i][p];
 	    nAsymMatrixE[i][p] +=  nSimUE[i][p]*nSimUE[i][p];
 	    nAsymMatrixE[i][p] = Sqrt(nAsymMatrixE[i][p]);
 
