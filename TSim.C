@@ -465,7 +465,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
-  Float_t crystalHalfSizeYZ = 1.0;
+  Float_t crystalHalfSizeYZ = 2.0;
   
   posYZ = Abs(posYZ);
 
@@ -627,10 +627,19 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   TH2F* hThExaSubThEI = new TH2F("hThExaSubThEI",
 				 "hThExaSubThEI",
 				 160,10,170,250,-120,130);
+
+  TH2F* hThExaSubThEI_TL = new TH2F("hThExaSubThEI_TL",
+				    "hThExaSubThEI_TL",
+				    160,10,170,250,-120,130);
+
   
   TH2F* hThExaSubThEO = new TH2F("hThExaSubThEO",
 				 "hThExaSubThEO",
 				 160,10,170,250,-120,130);
+
+  TH2F* hThExaSubThEO_TL = new TH2F("hThExaSubThEO_TL",
+				    "hThExaSubThEO_TL",
+				    160,10,170,250,-120,130);
 
   //difference 'lab theta' - 'energy theta'
   TH2F* hThLabSubThE_Vs_ThE = new TH2F("hThLabSubThE_Vs_ThE",
@@ -966,6 +975,13 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       hXY[thBin]->Fill(Abs(XposA[0]),YposA[0]);
       hYZ[thBin]->Fill(YposA[0],ZposA[0]);
       
+      hThExaSubThEI->Fill(etHA[4],simtHA[0]-etHA[4]);
+      hThExaSubThEI->Fill(etHB[4],simtHB[0]-etHB[4]);
+      
+      hThExaSubThEO->Fill(etHA[4],simtHA[0]-etHA[indexA]);
+      hThExaSubThEO->Fill(etHB[4],simtHB[0]-etHB[indexB]);
+
+      
       if (phiDiff == 0.) {
 
 	// iterate dphi = 0 counts
@@ -1036,12 +1052,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	  ){
 
 	
-	hThExaSubThEI->Fill(etHA[4],simtHA[0]-etHA[4]);
-	hThExaSubThEI->Fill(etHB[4],simtHB[0]-etHB[4]);
+	hThExaSubThEI_TL->Fill(etHA[4],simtHA[0]-etHA[4]);
+	hThExaSubThEI_TL->Fill(etHB[4],simtHB[0]-etHB[4]);
 	
-	hThExaSubThEO->Fill(etHA[4],simtHA[0]-etHA[indexA]);
-	hThExaSubThEO->Fill(etHB[4],simtHB[0]-etHB[indexB]);
-
+	hThExaSubThEO_TL->Fill(etHA[4],simtHA[0]-etHA[indexA]);
+	hThExaSubThEO_TL->Fill(etHB[4],simtHB[0]-etHB[indexB]);
+	
 	hThLabSubThE_Vs_ThE->Fill(etHA[4],ltHA[4] - etHA[4]);
 //      hThLabSubThE_Vs_ThE->Fill(etHA[indexA],ltHA[indexA] - etHA[indexA]);
 // 	hThLabSubThE_Vs_ThE->Fill(etHB[4],ltHB[4] - etHB[4]);
@@ -1129,12 +1145,30 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
   plotName += ".pdf";
 
   canvas->SaveAs(plotName);
+  
+  hThExaSubThEI_TL->Draw("colz");
+  hThExaSubThEI_TL->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+  hThExaSubThEI_TL->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+  
+  plotName = "../Plots/hThExaSubThEI_TL_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
 
   hThExaSubThEO->Draw("colz");
   hThExaSubThEO->GetXaxis()->SetTitle("#theta_{exact} (deg)");
   hThExaSubThEO->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
     
   plotName = "../Plots/hThExaSubThE0_" + inputFileNumber;
+  plotName += ".pdf";
+
+  canvas->SaveAs(plotName);
+
+  hThExaSubThEO_TL->Draw("colz");
+  hThExaSubThEO_TL->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+  hThExaSubThEO_TL->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+    
+  plotName = "../Plots/hThExaSubThE0_TL_" + inputFileNumber;
   plotName += ".pdf";
 
   canvas->SaveAs(plotName);
