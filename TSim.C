@@ -628,6 +628,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 				 "hThExaSubThEI",
 				 160,10,170,250,-120,130);
   
+  TH2F* hThExaSubThLI = new TH2F("hThExaSubThLI",
+				 "hThExaSubThLI",
+				 160,10,170,250,-120,130);
+  
   TH2F* hThExaSubThEO = new TH2F("hThExaSubThEO",
 				 "hThExaSubThEO",
 				 160,10,170,250,-120,130);
