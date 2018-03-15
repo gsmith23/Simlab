@@ -1156,6 +1156,8 @@ void TLab::GraphAsymmetry(Char_t option){
   // 35.0 is result from Chloe Schoolings fits
   // perhaps an underestimate due to distribution
   // wings
+
+  // 
   Float_t alpha1   = DegToRad()*35.0*2.355/2.;
     
   // theta half width for theory
@@ -1334,6 +1336,8 @@ void TLab::GraphAsymmetry(Char_t option){
       // (no sort file creations yet)
       simData = new TSim(simRun,simRunU);
       
+      //!!  temporary
+      //simData->InitHs();
       // unpolarised (second file) first
       simData->CalculateAsymmetryLab(simRunU);
     }

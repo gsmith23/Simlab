@@ -95,7 +95,8 @@ class TSim : public TObject{
     return p[0] + 2*sintsq*sintsq/(gamma*gamma - 2*gamma*sintsq);
   }
 
-
+  void InitHs();
+  
   //======================
   //======================
   //==== Data Members ====
@@ -123,6 +124,14 @@ class TSim : public TObject{
 
   static const Int_t nThbins = 8;
   static const Int_t nPhibins = 4;
+
+  //!!! temporary
+  //  looking at division of
+  //  pol by unpol
+  Int_t fileNum = -1;
+
+  TH1F * hDPhi[nThbins][2];
+  TH1F * hDPhi_TL[nThbins][2];
   
   // must be multiple of 4
   static const Int_t nPhibinsSim = 8; 
@@ -205,8 +214,6 @@ class TSim : public TObject{
   TString rootFileSortName1;
   TString rootFileRawName2;
   TString rootFileSortName2;
-  
-  TH1F * hDPhi[nPhibinsSim]; 
   
   // corresponding file
   TFile  *theFile;
