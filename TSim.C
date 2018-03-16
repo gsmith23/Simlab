@@ -1061,7 +1061,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 // 	  simPhiB[0] += 360.;
 //       }
       
-      if ( phiDiff == 0 ){
+      if ( phiDiff == 90 ){
 	
 	if      (phiA==0){
 	  hPhiRes000[thBin]->Fill(simPhiA[0]);
@@ -1193,7 +1193,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	
 	
 	      
-      if ( phiDiff == 0 ){
+      if ( phiDiff == 90 ){
 	
 	if      (phiA==0){
 	  hPhiRes000_TL[thBin]->Fill(simPhiA[0]);
