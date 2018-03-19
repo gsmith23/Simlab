@@ -384,12 +384,12 @@ Int_t main(int argc, char **argv){
 
     // To do - add check for sorted file/s
     Char_t sort = 'n';
-    // cout << endl;
-//     cout << " Sorting ROOT file " << endl;
-//     cout << " Sort/Re-sort ROOT file ? " << endl;
-//     cout << " n (default)/ y " << endl;
-//     cout << " ";
-    //cin  >> sort;
+    cout << endl;
+    cout << " Sorting ROOT file " << endl;
+    cout << " Sort/Re-sort ROOT file ? " << endl;
+    cout << " n (default)/ y " << endl;
+    cout << " ";
+    cin  >> sort;
 
     if (sort == 'y' || sort == 'Y' ){
       cout << endl;
