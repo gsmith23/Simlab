@@ -518,8 +518,26 @@ Float_t TSim::CrystalToPhi(Int_t crystal){
 //   Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
 //   			       -1. ,  -1. , -1. ,
 //   			       270.,  -1. , 180. };
-
+  
   return crystalToPhi[crystal];
+}
+
+Float_t TSim::CrystalToPhiA(Int_t crystal){
+  
+  Float_t crystalToPhiA[9] = { -1.  ,  45. , -1.,
+			       -45. ,  -1. ,  135.,
+			       -1.  , -135. , -1.};
+  
+  return crystalToPhiA[crystal];
+}
+
+Float_t TSim::CrystalToPhiB(Int_t crystal){
+  
+  Float_t crystalToPhiB[9] = { -1.  ,  -45. , -1.,
+			       45. ,  -1. ,  -135.,
+			       -1.  , 135. , -1.};
+  
+  return crystalToPhiB[crystal];
 }
 
 Float_t TSim::GetAsymLab(Int_t dPhiDiff, Int_t i){
@@ -820,12 +838,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     
     hTitle.Form("hPhi000Res_TL_%d",th);
     hPhi000Res_TL[th] = new TH1F(hTitle,hTitle,
-				32, -180.,180.);
+				 32, -180.,180.);
     
     hTitle.Form("hPhi090Res_TL_%d",th);
     hPhi090Res_TL[th] = new TH1F(hTitle,hTitle,
-				32, -180.,180.);
-
+				 32, -180.,180.);
+    
     hTitle.Form("hPhi180Res_TL_%d",th);
     hPhi180Res_TL[th] = new TH1F(hTitle,hTitle,
 				 32, -180.,180.);
@@ -833,7 +851,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
     hTitle.Form("hPhi270Res_TL_%d",th);
     hPhi270Res_TL[th] = new TH1F(hTitle,hTitle,
 				 32, -180.,180.);
-        
+    
     hTitle.Form("hDPhiRes00_TL_%d",th);
     hDPhiRes00_TL[th] = new TH1F(hTitle,hTitle,
 				 32, 0.,360.);
@@ -1042,20 +1060,20 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	     (thBin>-1)              && 
 	     (ltHA[i]<ThMax[thBin])  &&
 	     (ltHA[i]>ThMin[thBin]) ){
-	  phiA = CrystalToPhi(i);
+	  phiA = CrystalToPhiA(i);
 	  indexA = i;
 	}
 	if ( (i!=4)                  &&
 	     (thBin>-1)              &&
 	     (ltHB[i]<ThMax[thBin])  &&
 	     (ltHB[i]>ThMin[thBin]) ){
-	  phiB = CrystalToPhi(i);
+	  phiB = CrystalToPhiB(i);
 	  indexB = i;
 	}	
       }
     } // end of : if (GetThetaBin(ltHA
     
-    if ( (phiA > -1) && (phiB > -1) ){
+    if ( (phiA != -1) && (phiB != -1) ){
       
       hMEdiff->Fill(etHA[4],mintHAErr[4] - etHA[4]);
       hMEdiff->Fill(etHA[indexA],mintHAErr[indexA] - etHA[indexA]);
@@ -1080,25 +1098,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       betaB = ATan(betaB);
       betaB = betaB*RadToDeg();
       
-      // lablike phis are in common/global reference frame
-      // e.g. phiA = 90 is opposite phiB = 90 
-      // s.t. crystals had same Y and Z 
-      // therefore subtract to get delta phi:
+      // lab phi now relative to photon reference frame
+      // hence subtract to get delta phi
       phiDiff   = phiB - phiA;
       
-      // phiDiff shift (implemented below)
-      // -270 has one possibility and is shifted to 90
-      //  (90  has three possibilites)
-      
-      // -90  has three possibilities and is shifted to 270 
-      //  (270 has one possibility)
-
-      // -180 has two possibilites
-      // as does 180
-      
-      // 0 has four
-      
-      // now all phiDiffs will have four combinations
+      // shift (-360,0) to (0,360.)
       if(phiDiff < 0.)
 	phiDiff += 360.;
       
@@ -1109,39 +1113,24 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       // phi = std::atan2(vScat_y,vScat_x) * 180/(pi);
       //... see Tangle2SteppingAction.cc
       
-      // simulation phi is in photon reference frame
+      // simulation phi relative to photon reference frame
+      // hence add phis to get delta phi
       dPhiXact  = simPhiA[0] + simPhiB[0];
       
-      // shift from (-360,0) to (0,360.)
+      // shift (-360,0) to (0,360.)
       if(dPhiXact < 0)
-	dPhiXact = dPhiXact + 360.;
+	dPhiXact += 360.;
       
-      // transfer range to (0,360).
-      // for phi resolution plots
-      // simPhiA[0] += 180.;
-      // simPhiB[0] += 180.;
-      
-      // Centre all phis on 180.
-      simPhiASft  = simPhiA[0] - phiA;
-      simPhiASft -= 45.0;  
-      simPhiASft += 180.;  
-      
-
-      if     (simPhiASft < 0.0 ) 
-	simPhiASft += 360.;
-      else if(simPhiASft > 360.0 ) 
-	simPhiASft -= 360.;
-      
-      // Centre all phis on 180.
-      simPhiBSft  = simPhiB[0] - phiB;
-      simPhiBSft -= 45.0;  
-      simPhiBSft += 180.;  
-      
-      if     (simPhiBSft < 0.0 ) 
-	simPhiBSft += 360.;
-      else if(simPhiBSft > 360.0 ) 
-	simPhiBSft -= 360.;
-	  
+      // When beam is not in fixed (x) direction 
+      // the lab phi distribution is in 
+      // a different plane to the true phi
+      // the true phi (or lab phi) should
+      // be projected before comparing.
+      // The true phi plane is not unbiased when
+      // delta phi is selected/biased, delta phi
+      // is biased in the raw data due to the
+      // central crystal thresholds
+     
       if     ( phiDiff == 0 )
 	hPhiRes000[thBin]->Fill(simPhiASft);
       else if( phiDiff == 90 )
@@ -1163,22 +1152,21 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
       else if(simPhiASft > 360.0 ) 
 	simPhiASft -= 360.;
 
+      //      if ( phiDiff == 0 ){
       
-      if ( phiDiff == 0 ){
-	
-	if      (phiA==0){
+	if      (phiA == 45){
 	  hPhi000Res[thBin]->Fill(simPhiA[0]);
 	}
-	else if(phiA==90){
+	else if(phiA == 135){
 	  hPhi090Res[thBin]->Fill(simPhiA[0]);
 	}
-	else if(phiA==180){
+	else if(phiA == -135){
 	  hPhi180Res[thBin]->Fill(simPhiA[0]);
 	}
-	else if(phiA==270){
+	else if(phiA == -45){
 	  hPhi270Res[thBin]->Fill(simPhiA[0]);
 	}
-	
+	//      }
 // 	if      (phiB==0){
 // 	  hPhi000Res[thBin]->Fill(simPhiB[0]);
 // 	}
@@ -1193,7 +1181,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 // 	}
 	
 	
-      }
+	//}
       
       
       hBetaVsDPhi->Fill(dPhiXact,betaA);
@@ -1302,35 +1290,21 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	if     ( phiDiff == 270 )
 	  hPhiRes270_TL[thBin]->Fill(simPhiASft);
 	
-	if ( phiDiff == 0 ){
-	  if      (phiA==0){
-	  hPhi000Res_TL[thBin]->Fill(simPhiA[0]);
-	}
-	else if(phiA==90){
-	  hPhi090Res_TL[thBin]->Fill(simPhiA[0]);
-	}
-	else if(phiA==180){
-	  hPhi180Res_TL[thBin]->Fill(simPhiA[0]);
-	}
-	else if(phiA==270){
-	  hPhi270Res_TL[thBin]->Fill(simPhiA[0]);
-	}
-	
-	// 	if      (phiB==0){
-// 	  hPhi000Res[thBin]->Fill(simPhiB[0]);
-// 	}
-// 	else if(phiB==90){
-// 	  hPhi090Res[thBin]->Fill(simPhiB[0]);
-// 	}
-// 	else if(phiB==180){
-// 	  hPhi180Res[thBin]->Fill(simPhiB[0]);
-// 	}
-// 	else if(phiB==270){
-// 	  hPhi270Res[thBin]->Fill(simPhiB[0]);
-// 	}
-	
-	
-      }
+	//if ( phiDiff == 0 ){
+// 	  if      (phiA==0){
+// 	    hPhi000Res_TL[thBin]->Fill(simPhiA[0]);
+// 	  }
+// 	  else if(phiA==90){
+// 	    hPhi090Res_TL[thBin]->Fill(simPhiA[0]);
+// 	  }
+// 	  else if(phiA==180){
+// 	    hPhi180Res_TL[thBin]->Fill(simPhiA[0]);
+// 	  }
+// 	  else if(phiA==270){
+// 	    hPhi270Res_TL[thBin]->Fill(simPhiA[0]);
+// 	  }
+	  
+	  //}
       
 
 	hThExaSubThEI_TL->Fill(etHA[4],simtHA[0]-etHA[4]);

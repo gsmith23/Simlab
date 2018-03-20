@@ -68,6 +68,8 @@ class TSim : public TObject{
   void    GetThetaBinValues();
   
   Float_t CrystalToPhi(Int_t);
+  Float_t CrystalToPhiA(Int_t);
+  Float_t CrystalToPhiB(Int_t);
 
   Float_t GetAsymLab(Int_t,Int_t);
   Float_t GetAsymLabErr(Int_t,Int_t);
