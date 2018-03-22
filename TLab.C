@@ -815,6 +815,11 @@ void TLab::CalculateAsymmetry(){
     nB[i] = 0;
   }
   
+  // !!! Recalibrate Energy
+  
+  //
+  
+
   Bool_t AB000 = kFALSE, AB090 = kFALSE,
     AB180 = kFALSE, AB270 = kFALSE;
   
@@ -1129,6 +1134,7 @@ void TLab::GraphAsymmetry(Char_t option){
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = N(90)/N(0) 
+  //!!
   Int_t   dPhiDiff = 90;
 
   Float_t  phi[nPhiBins];
@@ -1144,10 +1150,20 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // Asymmetry plot range
   Float_t maxY = 1.9;
+  //maxY = 1.4;
+  maxY = 2.0;
   Float_t minY = 0.9;
 
-  if( dPhiDiff==180 )
+  if( dPhiDiff==180 ){
     maxY = 6.0;
+    
+    if(option=='d'){
+      maxY = 2.0;
+      minY = 0.0;
+    }
+      
+    
+  }
   
   // Theory curve
   Float_t aTheory[nThBins];
@@ -1286,7 +1302,7 @@ void TLab::GraphAsymmetry(Char_t option){
 	   <<  AsPhiDiff[i] << endl;
       
     }
- 
+    
   }// end of: if( option!='t' &...
 
 
@@ -1990,8 +2006,9 @@ void TLab::GraphAsymmetry(Char_t option){
 	  option=='f'){
     leg->AddEntry(grAsym[0],
 		  "lab","E P");
-    leg->AddEntry(grAsym[1],
-		  theoryLegendTitle,"L P");
+    if(option!='d')
+      leg->AddEntry(grAsym[1],
+		    theoryLegendTitle,"L P");
     leg->AddEntry(grAsym[2],
 		  "sim ","E P");
     if(option!='f')
@@ -2018,7 +2035,8 @@ void TLab::GraphAsymmetry(Char_t option){
       grAsym[0]->Draw("P E");
     
     // theory
-    grAsym[1]->Draw("same LP");
+    if(option!='d' )
+      grAsym[1]->Draw("same LP");
     // sim
     grAsym[2]->Draw("same EP");
     // lab/f
