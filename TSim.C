@@ -470,7 +470,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
   
   Bool_t centralYZ = kFALSE;
   
-  Float_t crystalHalfSizeYZ =  2.0;
+  Float_t crystalHalfSizeYZ =  1.0;
   
   posYZ = Abs(posYZ);
 
