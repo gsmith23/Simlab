@@ -110,7 +110,10 @@ class TSim : public TObject{
 
   Double_t EA[nCrystals];
   Double_t EB[nCrystals];
-  
+
+  Double_t EAX[nCrystals];
+  Double_t EBX[nCrystals];
+
   Float_t etHA[nCrystals];
   Float_t etHB[nCrystals];
   Float_t ltHA[nCrystals];
@@ -124,7 +127,7 @@ class TSim : public TObject{
   Int_t nb_ComptA[nCrystals];
   Int_t nb_ComptB[nCrystals];
 
-  static const Int_t nThbins = 8;
+  static const Int_t  nThbins = 8;
   static const Int_t nPhibins = 4;
 
   //!!! temporary
@@ -222,6 +225,9 @@ class TSim : public TObject{
   
   // corresponding tree
   TTree *sortDataTree;
+  
+  TTree *sortDataTree2;
+  
   TTree  *simDataTree;
   
   // Declaration of leaf types

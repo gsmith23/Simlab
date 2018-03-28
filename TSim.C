@@ -1,1905 +1,2062 @@
-#include "TSim.h"
-
-#if !defined(__CINT__)
-ClassImp(TSim)
-#endif
-
-TSim::TSim(){
-}
-
-TSim::TSim(TString fileNumber){
-
-  //!!!!
-  InitHs();
-  
-  cout << endl;
-  cout << " Constructing TSim object " << endl;
-    
-  rootFileRawName = "../Data/sim" + fileNumber;
-  rootFileSortName = "../Data/sort" + fileNumber;
-  
-  rootFileRawName = rootFileRawName + ".root";
-  rootFileSortName = rootFileSortName + ".root";
-  
-}
-
-TSim::TSim(TString fileNumber1, TString fileNumber2){
-  
-  //!!
-  InitHs();
-  cout << endl;
-  cout << " Constructing TSim object " << endl;
-    
-  rootFileRawName1 = "../Data/sim" + fileNumber1;
-  rootFileSortName1 = "../Data/sort" + fileNumber1;
-  
-  rootFileRawName1 = rootFileRawName1 + ".root";
-  rootFileSortName1 = rootFileSortName1 + ".root";
-
-  rootFileRawName2 = "../Data/sim" + fileNumber2;
-  rootFileSortName2 = "../Data/sort" + fileNumber2;
-  
-  rootFileRawName2 = rootFileRawName2 + ".root";
-  rootFileSortName2 = rootFileSortName2 + ".root";
-
-}
-
-
-TSim::~TSim(){
-}
-
-//----------------------------------------------
-
-/** Public member functions *********/
-
-
-Bool_t TSim::SortedROOTFileExists(){
-  TFile *file = TFile::Open(rootFileSortName);
-
-  return file;
-}
-
-Float_t TSim::ElectronEnergyToTheta(Double_t nrg){
-  return RadToDeg()*ACos(2. - 511./(511. - nrg));
-}
-
-Float_t TSim::PhotonEnergyToTheta(Double_t nrg){
-  return RadToDeg()*ACos(2. - 511./nrg);;
-}
-
-Float_t TSim::ThetaToPhotonEnergy(Float_t theta){
-  return (511./(2 - Cos(TMath::DegToRad()*theta)));
-}
-
-Float_t TSim::ThetaToElectronEnergy(Float_t theta){
-  return (511. - (511./(2. - Cos(TMath::DegToRad()*theta))));
-}
-
-
-
-Int_t TSim::GetThetaBin(Float_t theta){
-  
-  Int_t bin = -1;
-
-  for (Int_t i = 0 ; i < nThbins ; i++){
-    if ( 
-	(theta > ThMin[i])  &&
-	(theta < ThMax[i])
-	 ){
-      bin = i;
-    }
-  }
-  
-  return bin;
-}
-
-Int_t  TSim::SortEvents(TString fileNumber){
-
-  //=========================
-  // Initialise variables &
-  // connect tree and leaves
-  
-  TString rootFileRawName;
-  TString rootFileSortName;
-  
-  rootFileRawName = "../Data/sim" + fileNumber;
-  rootFileSortName = "../Data/sort" + fileNumber;
-  
-  rootFileRawName = rootFileRawName + ".root";
-  rootFileSortName = rootFileSortName + ".root";
-  
-  TFile* inputFile = new TFile(rootFileRawName);
-  TFile* outputFile = new TFile(rootFileSortName,"recreate");
-
-  cout << endl;
-  cout << " SortEvents: " << endl;
-  cout << endl;
-  cout << " as you requested, I will now sort the  " << endl;
-  cout << " events in the root file for you and create" << endl;
-  cout << " a new root file containing additional variables " << endl;
-  cout << " to use in the PET analysis. " << endl;
-  cout << endl;
-  
-  cout << endl;
-  cout << " Input File : " << rootFileRawName  << endl;
-  cout << " Output File: " << rootFileSortName << endl;
-  
-  //==========================
-  // read in output from 
-  // Geant4 simulation
-
-  simDataTree =(TTree*)inputFile->Get("Tangle2");
-  simDataTree->SetBranchAddress("edep0", &edep0, &b_edep0);
-  simDataTree->SetBranchAddress("edep1", &edep1, &b_edep1);
-  simDataTree->SetBranchAddress("edep2", &edep2, &b_edep2);
-  simDataTree->SetBranchAddress("edep3", &edep3, &b_edep3);
-  simDataTree->SetBranchAddress("edep4", &edep4, &b_edep4);
-  simDataTree->SetBranchAddress("edep5", &edep5, &b_edep5);
-  simDataTree->SetBranchAddress("edep6", &edep6, &b_edep6);
-  simDataTree->SetBranchAddress("edep7", &edep7, &b_edep7);
-  simDataTree->SetBranchAddress("edep8", &edep8, &b_edep8);
-  simDataTree->SetBranchAddress("edep9", &edep9, &b_edep9);
-  simDataTree->SetBranchAddress("edep10", &edep10, &b_edep10);
-  simDataTree->SetBranchAddress("edep11", &edep11, &b_edep11);
-  simDataTree->SetBranchAddress("edep12", &edep12, &b_edep12);
-  simDataTree->SetBranchAddress("edep13", &edep13, &b_edep13);
-  simDataTree->SetBranchAddress("edep14", &edep14, &b_edep14);
-  simDataTree->SetBranchAddress("edep15", &edep15, &b_edep15);
-  simDataTree->SetBranchAddress("edep16", &edep16, &b_edep16);
-  simDataTree->SetBranchAddress("edep17", &edep17, &b_edep17);
-  simDataTree->SetBranchAddress("nb_Compt0", &nb_Compt0, &b_nb_Compt0);
-  simDataTree->SetBranchAddress("nb_Compt1", &nb_Compt1, &b_nb_Compt1);
-  simDataTree->SetBranchAddress("nb_Compt2", &nb_Compt2, &b_nb_Compt2);
-  simDataTree->SetBranchAddress("nb_Compt3", &nb_Compt3, &b_nb_Compt3);
-  simDataTree->SetBranchAddress("nb_Compt4", &nb_Compt4, &b_nb_Compt4);
-  simDataTree->SetBranchAddress("nb_Compt5", &nb_Compt5, &b_nb_Compt5);
-  simDataTree->SetBranchAddress("nb_Compt6", &nb_Compt6, &b_nb_Compt6);
-  simDataTree->SetBranchAddress("nb_Compt7", &nb_Compt7, &b_nb_Compt7);
-  simDataTree->SetBranchAddress("nb_Compt8", &nb_Compt8, &b_nb_Compt8);
-  simDataTree->SetBranchAddress("nb_Compt9", &nb_Compt9, &b_nb_Compt9);
-  simDataTree->SetBranchAddress("nb_Compt10", &nb_Compt10, &b_nb_Compt10);
-  simDataTree->SetBranchAddress("nb_Compt11", &nb_Compt11, &b_nb_Compt11);
-  simDataTree->SetBranchAddress("nb_Compt12", &nb_Compt12, &b_nb_Compt12);
-  simDataTree->SetBranchAddress("nb_Compt13", &nb_Compt13, &b_nb_Compt13);
-  simDataTree->SetBranchAddress("nb_Compt14", &nb_Compt14, &b_nb_Compt14);
-  simDataTree->SetBranchAddress("nb_Compt15", &nb_Compt15, &b_nb_Compt15);
-  simDataTree->SetBranchAddress("nb_Compt16", &nb_Compt16, &b_nb_Compt16);
-  simDataTree->SetBranchAddress("nb_Compt17", &nb_Compt17, &b_nb_Compt17);
-  simDataTree->SetBranchAddress("XposA_1st", &XposA_1st, &b_XposA_1st);
-  simDataTree->SetBranchAddress("YposA_1st", &YposA_1st, &b_YposA_1st);
-  simDataTree->SetBranchAddress("ZposA_1st", &ZposA_1st, &b_ZposA_1st);
-  simDataTree->SetBranchAddress("XposA_2nd", &XposA_2nd, &b_XposA_2nd);
-  simDataTree->SetBranchAddress("YposA_2nd", &YposA_2nd, &b_YposA_2nd);
-  simDataTree->SetBranchAddress("ZposA_2nd", &ZposA_2nd, &b_ZposA_2nd);
-  simDataTree->SetBranchAddress("XposB_1st", &XposB_1st, &b_XposB_1st);
-  simDataTree->SetBranchAddress("YposB_1st", &YposB_1st, &b_YposB_1st);
-  simDataTree->SetBranchAddress("ZposB_1st", &ZposB_1st, &b_ZposB_1st);
-  simDataTree->SetBranchAddress("XposB_2nd", &XposB_2nd, &b_XposB_2nd);
-  simDataTree->SetBranchAddress("YposB_2nd", &YposB_2nd, &b_YposB_2nd);
-  simDataTree->SetBranchAddress("ZposB_2nd", &ZposB_2nd, &b_ZposB_2nd);
-  simDataTree->SetBranchAddress("ThetaA_1st", &ThetaA_1st, &b_ThetaA_1st);
-  simDataTree->SetBranchAddress("PhiA_1st", &PhiA_1st, &b_PhiA_1st);
-  simDataTree->SetBranchAddress("ThetaB_1st", &ThetaB_1st, &b_ThetaB_1st);
-  simDataTree->SetBranchAddress("PhiB_1st", &PhiB_1st, &b_PhiB_1st);
-  simDataTree->SetBranchAddress("dPhi_1st", &dPhi_1st, &b_dPhi_1st);
-  simDataTree->SetBranchAddress("ThetaA_2nd", &ThetaA_2nd, &b_ThetaA_2nd);
-  simDataTree->SetBranchAddress("PhiA_2nd", &PhiA_2nd, &b_PhiA_2nd);
-  simDataTree->SetBranchAddress("ThetaB_2nd", &ThetaB_2nd, &b_ThetaB_2nd);
-  simDataTree->SetBranchAddress("PhiB_2nd", &PhiB_2nd, &b_PhiB_2nd);
-
-
-  //============================================
-  // write to
-  sortDataTree = new TTree("sortDataTree",
-			   "Sorted simulation events");
-
-  // New variables
-  TString tempString = "";
-
-  tempString.Form("EA[%d]/D", nCrystals);
-  sortDataTree->Branch("EA", EA, tempString);
-
-  tempString.Form("EB[%d]/D", nCrystals);
-  sortDataTree->Branch("EB", EB, tempString);
-  
-  tempString.Form("etHA[%d]/F",nCrystals);
-  sortDataTree->Branch("etHA",etHA,tempString);
-
-  tempString.Form("ltHA[%d]/F",nCrystals);
-  sortDataTree->Branch("ltHA",ltHA,tempString);
-
-  tempString.Form("maxtHAErr[%d]/F",nCrystals);
-  sortDataTree->Branch("maxtHAErr",maxtHAErr,tempString);
-
-  tempString.Form("mintHAErr[%d]/F",nCrystals);
-  sortDataTree->Branch("mintHAErr",mintHAErr,tempString);
-  
-  tempString.Form("etHB[%d]/F",nCrystals);
-  sortDataTree->Branch("etHB",etHB,tempString);
-
-  tempString.Form("ltHB[%d]/F",nCrystals);
-  sortDataTree->Branch("ltHB",ltHB,tempString);
-
-  tempString.Form("maxtHBErr[%d]/F",nCrystals);
-  sortDataTree->Branch("maxtHBErr",maxtHBErr,tempString);
-
-  tempString.Form("mintHBErr[%d]/F",nCrystals);
-  sortDataTree->Branch("mintHBErr",mintHBErr,tempString);
-
-  tempString.Form("nb_ComptA[%d]/I",nCrystals);
-  sortDataTree->Branch("nb_ComptA", nb_ComptA, tempString);
-
-  tempString.Form("nb_ComptB[%d]/I",nCrystals);
-  sortDataTree->Branch("nb_ComptB", nb_ComptB, tempString);
-
-  tempString.Form("simtHA[%d]/D",2);
-  sortDataTree->Branch("simtHA", simtHA, tempString);
-
-  tempString.Form("simtHB[%d]/D",2);
-  sortDataTree->Branch("simtHB", simtHB, tempString);
-
-  tempString.Form("simPhiA[%d]/D",2);
-  sortDataTree->Branch("simPhiA", simPhiA, tempString);
-
-  tempString.Form("simPhiB[%d]/D",2);
-  sortDataTree->Branch("simPhiB", simPhiB, tempString);
-
-  tempString.Form("XposA[%d]/D",2);
-  sortDataTree->Branch("XposA", XposA, tempString);
-
-  tempString.Form("YposA[%d]/D",2);
-  sortDataTree->Branch("YposA", YposA, tempString);
-
-  tempString.Form("ZposA[%d]/D",2);
-  sortDataTree->Branch("ZposA", ZposA, tempString);
-  
-  tempString.Form("XposB[%d]/D",2);
-  sortDataTree->Branch("XposB", XposB, tempString);
-
-  tempString.Form("YposB[%d]/D",2);
-  sortDataTree->Branch("YposB", YposB, tempString);
-
-  tempString.Form("ZposB[%d]/D",2);
-  sortDataTree->Branch("ZposB", ZposB, tempString);
-  
-  //============================================
-  //--------------------------------------------
-  // Variable declarations
-
-  //Energy drom the simulation will be smeared with a Gaussian
-  //Set the HWHM for each crystal
-  
-  Double_t HWHM = 25.; //average from lab data
-
-  // energy resolution coefficient k 
-  // such that sigma(Energy) = k*Sqrt(Energy)
-  // sigma = DeltaE_511 / sqrt(511) * 1 / (2sqrt(2ln2)
-  // IE: k = DeltaE_511 / sqrt(511) = 25/sqrt(511)
-  
-  for (Int_t i = 0; i < nCrystals; i++){
-    sigmaA[i] = HWHM/(Sqrt(2*Log(2.)*511));
-    sigmaB[i] = HWHM/(Sqrt(2*Log(2.)*511));
-  }
-  
-  //-------------------------------
-  // Initial array initialisations
-  for (Int_t i = 0; i < nCrystals; i++){
-
-    // smeared energy
-    EA[i] = 0; 
-    EB[i] = 0;
-
-    // angle calculated from exact energy deposit = 'energy theta'
-    etHA[i] = 0;
-    etHB[i] = 0.;
-    
-    // angle calculated from the smeared energy deposit = 'lab theta'
-    ltHA[i] = 0;
-    ltHB[i] = 0.;
-    
-    // angle calculated from exact energy - a*sigma
-    mintHAErr[i] = 0.;
-    mintHBErr[i] = 0.;
-    
-    // angle calculated from exact energy + a*sigma
-    maxtHAErr[i] = 0.;
-    maxtHBErr[i] = 0.;
-    
-    nb_ComptA[i] = 0;
-    nb_ComptB[i] = 0;
-    
-  }
-  
-  for(Int_t i = 0 ; i < 2 ; i++){
-    // angle after first Compton scattering 
-    // retrieved from the simulation = 'sim theta'
-    simtHA[i] = 180;
-    simtHB[i] = 180;
-    
-    simPhiA[i] = 999;
-    simPhiB[i] = 999;
-  }
-  
-  //============
-  // EVENT LOOP
-  Float_t sigmaPar = 2.5;
-
-  Long64_t nEvents = simDataTree->GetEntries();
-  
-  TRandom3 * rand3 = new TRandom3(); 
-
-  for(Int_t i = 0 ; i < nEvents ; i++){ 
-    simDataTree->GetEvent(i);
-    
-    Double_t CrystEnergyDep[18] = {edep0,edep1,edep2,
-				   edep3,edep4,edep5,
-				   edep6,edep7,edep8,
-				   edep9,edep10,edep11,
-				   edep12,edep13,edep14,
-				   edep15,edep16,edep17};
-    for (Int_t k=0; k<18; k++)
-      CrystEnergyDep[k] = 1000*CrystEnergyDep[k];
-
-    Int_t nb_Compt[18] = {nb_Compt0,nb_Compt1,nb_Compt2,
-			  nb_Compt3,nb_Compt4,nb_Compt5,
-			  nb_Compt6,nb_Compt7,nb_Compt8,
-			  nb_Compt9,nb_Compt10,nb_Compt11,
-			  nb_Compt12,nb_Compt13,nb_Compt14,
-			  nb_Compt15,nb_Compt16,nb_Compt17};
-
-    for (Int_t j = 0 ; j < nCrystals ; j++){
-      
-      // sigmaE = sigma511 * sqrt( E / 511) 
-      
-      EA[j] = rand3->Gaus(CrystEnergyDep[j],sigmaA[j]*Sqrt(CrystEnergyDep[j]));
-      EB[j] = rand3->Gaus(CrystEnergyDep[j+nCrystals], sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals]));
-      
-      etHA[j] = PhotonEnergyToTheta(CrystEnergyDep[j]);
-      etHB[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals]);
-      ltHA[j] = PhotonEnergyToTheta(EA[j]);
-      ltHB[j] = PhotonEnergyToTheta(EB[j]);
-
-      // max/min defined as sigmaPar* sigma away from the mean
-      maxtHAErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j] - (sigmaPar*sigmaA[j]*Sqrt(CrystEnergyDep[j])));
-      mintHAErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j] + (sigmaPar*sigmaA[j]*Sqrt(CrystEnergyDep[j])));
-      maxtHBErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals] - (sigmaPar*sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals])));
-      mintHBErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals] + (sigmaPar*sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals])));
-      
-      nb_ComptA[j] = nb_Compt[j];
-      nb_ComptB[j] = nb_Compt[j + nCrystals];
-      
-    }
-    
-    simtHA[0] = ThetaA_1st;
-    simtHB[0] = ThetaB_1st;
-    simtHA[1] = ThetaA_2nd;
-    simtHB[1] = ThetaB_2nd;
-    
-    simPhiA[0] = PhiA_1st;
-    simPhiB[0] = PhiB_1st;
-    simPhiA[1] = PhiA_2nd;
-    simPhiB[1] = PhiB_2nd;
-    
-    XposA[0] = XposA_1st;
-    YposA[0] = YposA_1st;
-    ZposA[0] = ZposA_1st;
-    XposB[0] = XposB_1st;
-    YposB[0] = YposB_1st;
-    ZposB[0] = ZposB_1st;
-
-    XposA[1] = XposA_2nd;
-    YposA[1] = YposA_2nd;
-    ZposA[1] = ZposA_2nd;
-    XposB[1] = XposB_2nd;
-    YposB[1] = YposB_2nd;
-    ZposB[1] = ZposB_2nd;
-    
-    etHA[4] = ElectronEnergyToTheta(CrystEnergyDep[4]);
-    etHB[4] = ElectronEnergyToTheta(CrystEnergyDep[13]);
-    ltHA[4] = ElectronEnergyToTheta(EA[4]);
-    ltHB[4] = ElectronEnergyToTheta(EB[4]);
-    
-    maxtHAErr[4] = ElectronEnergyToTheta(CrystEnergyDep[4] + (sigmaPar*sigmaA[4]*Sqrt(CrystEnergyDep[4])));
-    mintHAErr[4] = ElectronEnergyToTheta(CrystEnergyDep[4] - (sigmaPar*sigmaA[4]*Sqrt(CrystEnergyDep[4])));
-    maxtHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] + (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));
-    mintHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] - (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));				 
-    
-    sortDataTree->Fill();
-  
-  } // end of: for(Int_t i = 0 ; i < nEvents     
-  
-  //=========================
-  sortDataTree->Write();
-  
-  outputFile->Write();
-  
-  cout << endl;
-  cout << " the new root file has been written " << endl;
-  cout << endl;
-  
-  outputFile->Close();
-
-  return 0;
-  
-} 
-
-Bool_t TSim::GoodTheta(Float_t theta){
-  
-  Bool_t goodTheta = kFALSE;
-  
-  if( theta >= 10. &&
-      theta <  170.)
-    goodTheta = kTRUE;
-  
-  return goodTheta;
-}
-
-
-Bool_t TSim::CentralXA(Double_t posXA){
-  
-  Bool_t centralXA = kFALSE;
-  
-  if( posXA > 0. && 
-      posXA < 54.25 )
-    centralXA = kTRUE;
-
-//   if( posXA > 35. && 
-//       posXA < 45. )
-//     centralXA = kTRUE;
-
-  return centralXA;
-}
-
-Bool_t TSim::CentralXB(Double_t posXB){
-  
-  Bool_t centralXB = kFALSE;
-  
-  if( posXB < 0.  && 
-      posXB > -54.25 )
-    centralXB = kTRUE;
-  
-//   if( posXB < -35.  && 
-//       posXB > -45. )
-//     centralXB = kTRUE;
-  
-  return centralXB;
-}
-
-
-Bool_t TSim::CentralYZ(Double_t posYZ){
-  
-  Bool_t centralYZ = kFALSE;
-  
-  Float_t crystalHalfSizeYZ =  1.0;
-  
-  posYZ = Abs(posYZ);
-
-  if(posYZ < crystalHalfSizeYZ)
-    centralYZ = kTRUE;
-  
-  return centralYZ;
-}
-
-Bool_t TSim::OuterYZ(Double_t posYZ){
-  
-  Bool_t outerYZ = kFALSE;
-  
-  Float_t crystalHalfSizeYZ = 2.0;
-  
-  posYZ = Abs(posYZ);
-  
-  if(posYZ > crystalHalfSizeYZ )
-    outerYZ = kTRUE;
-
-  return outerYZ;
-}
-
-// original simulation had 3 x 4 x 22 mm crystals
-Bool_t TSim::CentralZ(Double_t posZ){
-  
-  Bool_t centralZ = kFALSE;
-  
-  //! works only for this particular detector geometry
-  posZ = Abs(posZ);
-
-  if( posZ < 1.5)
-    centralZ = kTRUE;
-
-  return centralZ;
-}
-
-Float_t TSim::CrystalToPhi(Int_t crystal){
-
-  Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
-  			      90. ,  -1. , 270.,
-  			      -1.  , 180. , -1.};
-  
-//    !!Temp - Use corner crystals
-//   Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
-//   			       -1. ,  -1. , -1. ,
-//   			       270.,  -1. , 180. };
-  
-  return crystalToPhi[crystal];
-}
-
-// Transformation below matches the
-// simulation with beam in X and
-// arbitrary reference in Z (lab 'up' direction)
-// If using full PET array then use
-// arbitrary reference as scanner axis
-// so it is never in beam direction
-Float_t TSim::CrystalToPhiA(Int_t crystal){
-  
-  // Float_t crystalToPhiA[9] = { -1.  ,  0.  ,  -1.,
-  // 			       90. ,  -1. ,  -90.,
-  // 			       -1.  , 180. , -1.};
-  
-  // corner crystals
-  Float_t crystalToPhiA[9] = { 45.  , -1.  , -45.,
-			       -1.  , -1. ,  -1.,
-			       135. , -1. , -135.};
-  
-  return crystalToPhiA[crystal];
-}
-
-Float_t TSim::CrystalToPhiB(Int_t crystal){
-  
-  // Float_t crystalToPhiB[9] = { -1. ,  0.  , -1.,
-  // 			       -90. ,  -1. , 90.,
-  // 			       -1. , 180. , -1.};
-
-
-  Float_t crystalToPhiB[9] = { -45. , -1. , 45.,
-			       -1.  , -1. , -1.,
-			       -135., -1. , 135.};
-  
-  return crystalToPhiB[crystal];
-}
-
-Float_t TSim::GetAsymLab(Int_t dPhiDiff, Int_t i){
-
-  Float_t AsPhiDiff = 0;
-  if (AsymMatrix[i][0] != 0){
-      if (dPhiDiff  == 90){
-	AsPhiDiff = AsymMatrix[i][1]/AsymMatrix[i][0];
-	//using average 90 and 270
-	//AsPhiDiff = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
-      }
-      if (dPhiDiff  == 180)
-	AsPhiDiff = AsymMatrix[i][2]/AsymMatrix[i][0];
-      if (dPhiDiff  == 270)
-	AsPhiDiff = AsymMatrix[i][3]/AsymMatrix[i][0];
-    }
-  return AsPhiDiff;
-}
-
-Float_t TSim::GetAsymLabErr(Int_t dPhiDiff, Int_t i){
-
-  Float_t AsPhiDiff = 0;
-  Float_t AePhiDiff = 0;
-  if (AsymMatrix[i][0] != 0){
-      if (dPhiDiff  == 90){
-	AsPhiDiff = AsymMatrix[i][1]/AsymMatrix[i][0];
-	AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
-	
-	// using average 90 and 270
-	//AsPhiDiff = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
-	//AePhiDiff = AsPhiDiff*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
-      }
-      if (dPhiDiff  == 180){
-	AsPhiDiff = AsymMatrix[i][2]/AsymMatrix[i][0];
-	AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][2])+(1/AsymMatrix[i][0]));
-      }
-      if (dPhiDiff  == 270){
-	AsPhiDiff = AsymMatrix[i][3]/AsymMatrix[i][0];
-	AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][3])+(1/AsymMatrix[i][0]));
-      }
-    }
-  
-  return AePhiDiff;
-}
-
-Float_t TSim::GetAsymLabTrue(Int_t dPhiDiff, Int_t i){
-
-  Float_t AsTrue = 0;
-  if (AsymTrue[i][0] != 0){
-      if (dPhiDiff  == 90){
-	AsTrue = AsymTrue[i][1]/AsymTrue[i][0];
-	//using average 90 and 270
-	//AsTrue = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
-      }
-      if (dPhiDiff  == 180)
-	AsTrue = AsymTrue[i][2]/AsymTrue[i][0];
-      if (dPhiDiff  == 270)
-	AsTrue = AsymTrue[i][3]/AsymTrue[i][0];
-    }
-  return AsTrue;
-}
-
-Float_t TSim::GetAsymLabTrueErr(Int_t dPhiDiff, Int_t i){
-
-  Float_t AsTrue = 0;
-  Float_t AeTrue = 0;
-  if (AsymTrue[i][0] != 0){
-      if (dPhiDiff  == 90){
-	AsTrue = AsymTrue[i][1]/AsymTrue[i][0];
-	AeTrue = AsTrue*Sqrt((1/AsymTrue[i][1])+(1/AsymTrue[i][0]));
-	//using average 90 and 270
-	// AsTrue = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
-// 	AeTrue = AsTrue*Sqrt((1/(AsymTrue[i][1]+AsymTrue[i][3]))+(1/AsymTrue[i][0]));
-      }
-      if (dPhiDiff  == 180){
-	AsTrue = AsymTrue[i][2]/AsymTrue[i][0];
-	AeTrue = AsTrue*Sqrt((1/AsymTrue[i][2])+(1/AsymTrue[i][0]));
-      }
-      if (dPhiDiff  == 270){
-	AsTrue = AsymTrue[i][3]/AsymTrue[i][0];
-	AeTrue = AsTrue*Sqrt((1/AsymTrue[i][3])+(1/AsymTrue[i][0]));
-      }
-    }
-  
-  return AeTrue;
-}
-
-void TSim::GetThetaBinValues(){
-  Float_t thetaLowEdge  = 10.;
-  Float_t thetaHighEdge = 170.;
-
-  Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThbins;
-
-  cout << endl;
-  for (Int_t i = 0 ; i < nThbins ; i++){
-    ThMin[i] = thetaLowEdge + i * thetaBinWidth;
-    ThMax[i] = thetaLowEdge + (i+1)* thetaBinWidth;
-    plotTheta[i] = thetaLowEdge + (i+0.5)* thetaBinWidth;
-    
-    //cout << " plotTheta[" << i << "] = " << plotTheta[i] << endl;
-  }
-}
-
-//!!! temporary
-void TSim::InitHs(){
-
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    
-    TString hTitle = "";
-    
-    hTitle.Form("hDPhi_%d_0",th);
-    hDPhi[th][0] = new TH1F(hTitle,hTitle,
-			    32, 0.,360.);
-    hTitle.Form("hDPhi_%d_1",th);
-    hDPhi[th][1] = new TH1F(hTitle,hTitle,
-			    32, 0.,360.);
-    
-    hTitle.Form("hDPhi_TL_%d_0",th);
-    hDPhi_TL[th][0] = new TH1F(hTitle,hTitle,
+ #include "TSim.h"
+
+ #if !defined(__CINT__)
+ ClassImp(TSim)
+ #endif
+
+ TSim::TSim(){
+ }
+
+ TSim::TSim(TString fileNumber){
+
+   //!!!!
+   InitHs();
+
+   cout << endl;
+   cout << " Constructing TSim object " << endl;
+
+   rootFileRawName = "../Data/sim" + fileNumber;
+   rootFileSortName = "../Data/sort" + fileNumber;
+
+   rootFileRawName = rootFileRawName + ".root";
+   rootFileSortName = rootFileSortName + ".root";
+
+ }
+
+ TSim::TSim(TString fileNumber1, TString fileNumber2){
+
+   //!!
+   InitHs();
+   cout << endl;
+   cout << " Constructing TSim object " << endl;
+
+   rootFileRawName1 = "../Data/sim" + fileNumber1;
+   rootFileSortName1 = "../Data/sort" + fileNumber1;
+
+   rootFileRawName1 = rootFileRawName1 + ".root";
+   rootFileSortName1 = rootFileSortName1 + ".root";
+
+   rootFileRawName2 = "../Data/sim" + fileNumber2;
+   rootFileSortName2 = "../Data/sort" + fileNumber2;
+
+   rootFileRawName2 = rootFileRawName2 + ".root";
+   rootFileSortName2 = rootFileSortName2 + ".root";
+
+ }
+
+
+ TSim::~TSim(){
+ }
+
+ //----------------------------------------------
+
+ /** Public member functions *********/
+
+
+ Bool_t TSim::SortedROOTFileExists(){
+   TFile *file = TFile::Open(rootFileSortName);
+
+   return file;
+ }
+
+ Float_t TSim::ElectronEnergyToTheta(Double_t nrg){
+   return RadToDeg()*ACos(2. - 511./(511. - nrg));
+ }
+
+ Float_t TSim::PhotonEnergyToTheta(Double_t nrg){
+   return RadToDeg()*ACos(2. - 511./nrg);;
+ }
+
+ Float_t TSim::ThetaToPhotonEnergy(Float_t theta){
+   return (511./(2 - Cos(TMath::DegToRad()*theta)));
+ }
+
+ Float_t TSim::ThetaToElectronEnergy(Float_t theta){
+   return (511. - (511./(2. - Cos(TMath::DegToRad()*theta))));
+ }
+
+
+
+ Int_t TSim::GetThetaBin(Float_t theta){
+
+   Int_t bin = -1;
+
+   for (Int_t i = 0 ; i < nThbins ; i++){
+     if ( 
+	 (theta > ThMin[i])  &&
+	 (theta < ThMax[i])
+	  ){
+       bin = i;
+     }
+   }
+
+   return bin;
+ }
+
+ Int_t  TSim::SortEvents(TString fileNumber){
+
+   //=========================
+   // Initialise variables &
+   // connect tree and leaves
+
+   TString rootFileRawName;
+   TString rootFileSortName;
+
+   rootFileRawName = "../Data/sim" + fileNumber;
+   rootFileSortName = "../Data/sort" + fileNumber;
+
+   rootFileRawName = rootFileRawName + ".root";
+   rootFileSortName = rootFileSortName + ".root";
+
+   TFile* inputFile = new TFile(rootFileRawName);
+   TFile* outputFile = new TFile(rootFileSortName,"recreate");
+
+   cout << endl;
+   cout << " SortEvents: " << endl;
+   cout << endl;
+   cout << " as you requested, I will now sort the  " << endl;
+   cout << " events in the root file for you and create" << endl;
+   cout << " a new root file containing additional variables " << endl;
+   cout << " to use in the PET analysis. " << endl;
+   cout << endl;
+
+   cout << endl;
+   cout << " Input File : " << rootFileRawName  << endl;
+   cout << " Output File: " << rootFileSortName << endl;
+
+   //==========================
+   // read in output from 
+   // Geant4 simulation
+
+   simDataTree =(TTree*)inputFile->Get("Tangle2");
+   simDataTree->SetBranchAddress("edep0", &edep0, &b_edep0);
+   simDataTree->SetBranchAddress("edep1", &edep1, &b_edep1);
+   simDataTree->SetBranchAddress("edep2", &edep2, &b_edep2);
+   simDataTree->SetBranchAddress("edep3", &edep3, &b_edep3);
+   simDataTree->SetBranchAddress("edep4", &edep4, &b_edep4);
+   simDataTree->SetBranchAddress("edep5", &edep5, &b_edep5);
+   simDataTree->SetBranchAddress("edep6", &edep6, &b_edep6);
+   simDataTree->SetBranchAddress("edep7", &edep7, &b_edep7);
+   simDataTree->SetBranchAddress("edep8", &edep8, &b_edep8);
+   simDataTree->SetBranchAddress("edep9", &edep9, &b_edep9);
+   simDataTree->SetBranchAddress("edep10", &edep10, &b_edep10);
+   simDataTree->SetBranchAddress("edep11", &edep11, &b_edep11);
+   simDataTree->SetBranchAddress("edep12", &edep12, &b_edep12);
+   simDataTree->SetBranchAddress("edep13", &edep13, &b_edep13);
+   simDataTree->SetBranchAddress("edep14", &edep14, &b_edep14);
+   simDataTree->SetBranchAddress("edep15", &edep15, &b_edep15);
+   simDataTree->SetBranchAddress("edep16", &edep16, &b_edep16);
+   simDataTree->SetBranchAddress("edep17", &edep17, &b_edep17);
+   simDataTree->SetBranchAddress("nb_Compt0", &nb_Compt0, &b_nb_Compt0);
+   simDataTree->SetBranchAddress("nb_Compt1", &nb_Compt1, &b_nb_Compt1);
+   simDataTree->SetBranchAddress("nb_Compt2", &nb_Compt2, &b_nb_Compt2);
+   simDataTree->SetBranchAddress("nb_Compt3", &nb_Compt3, &b_nb_Compt3);
+   simDataTree->SetBranchAddress("nb_Compt4", &nb_Compt4, &b_nb_Compt4);
+   simDataTree->SetBranchAddress("nb_Compt5", &nb_Compt5, &b_nb_Compt5);
+   simDataTree->SetBranchAddress("nb_Compt6", &nb_Compt6, &b_nb_Compt6);
+   simDataTree->SetBranchAddress("nb_Compt7", &nb_Compt7, &b_nb_Compt7);
+   simDataTree->SetBranchAddress("nb_Compt8", &nb_Compt8, &b_nb_Compt8);
+   simDataTree->SetBranchAddress("nb_Compt9", &nb_Compt9, &b_nb_Compt9);
+   simDataTree->SetBranchAddress("nb_Compt10", &nb_Compt10, &b_nb_Compt10);
+   simDataTree->SetBranchAddress("nb_Compt11", &nb_Compt11, &b_nb_Compt11);
+   simDataTree->SetBranchAddress("nb_Compt12", &nb_Compt12, &b_nb_Compt12);
+   simDataTree->SetBranchAddress("nb_Compt13", &nb_Compt13, &b_nb_Compt13);
+   simDataTree->SetBranchAddress("nb_Compt14", &nb_Compt14, &b_nb_Compt14);
+   simDataTree->SetBranchAddress("nb_Compt15", &nb_Compt15, &b_nb_Compt15);
+   simDataTree->SetBranchAddress("nb_Compt16", &nb_Compt16, &b_nb_Compt16);
+   simDataTree->SetBranchAddress("nb_Compt17", &nb_Compt17, &b_nb_Compt17);
+   simDataTree->SetBranchAddress("XposA_1st", &XposA_1st, &b_XposA_1st);
+   simDataTree->SetBranchAddress("YposA_1st", &YposA_1st, &b_YposA_1st);
+   simDataTree->SetBranchAddress("ZposA_1st", &ZposA_1st, &b_ZposA_1st);
+   simDataTree->SetBranchAddress("XposA_2nd", &XposA_2nd, &b_XposA_2nd);
+   simDataTree->SetBranchAddress("YposA_2nd", &YposA_2nd, &b_YposA_2nd);
+   simDataTree->SetBranchAddress("ZposA_2nd", &ZposA_2nd, &b_ZposA_2nd);
+   simDataTree->SetBranchAddress("XposB_1st", &XposB_1st, &b_XposB_1st);
+   simDataTree->SetBranchAddress("YposB_1st", &YposB_1st, &b_YposB_1st);
+   simDataTree->SetBranchAddress("ZposB_1st", &ZposB_1st, &b_ZposB_1st);
+   simDataTree->SetBranchAddress("XposB_2nd", &XposB_2nd, &b_XposB_2nd);
+   simDataTree->SetBranchAddress("YposB_2nd", &YposB_2nd, &b_YposB_2nd);
+   simDataTree->SetBranchAddress("ZposB_2nd", &ZposB_2nd, &b_ZposB_2nd);
+   simDataTree->SetBranchAddress("ThetaA_1st", &ThetaA_1st, &b_ThetaA_1st);
+   simDataTree->SetBranchAddress("PhiA_1st", &PhiA_1st, &b_PhiA_1st);
+   simDataTree->SetBranchAddress("ThetaB_1st", &ThetaB_1st, &b_ThetaB_1st);
+   simDataTree->SetBranchAddress("PhiB_1st", &PhiB_1st, &b_PhiB_1st);
+   simDataTree->SetBranchAddress("dPhi_1st", &dPhi_1st, &b_dPhi_1st);
+   simDataTree->SetBranchAddress("ThetaA_2nd", &ThetaA_2nd, &b_ThetaA_2nd);
+   simDataTree->SetBranchAddress("PhiA_2nd", &PhiA_2nd, &b_PhiA_2nd);
+   simDataTree->SetBranchAddress("ThetaB_2nd", &ThetaB_2nd, &b_ThetaB_2nd);
+   simDataTree->SetBranchAddress("PhiB_2nd", &PhiB_2nd, &b_PhiB_2nd);
+
+
+   //============================================
+   // write to
+   sortDataTree = new TTree("sortDataTree",
+			    "Sorted simulation events");
+
+   // New variables
+   TString tempString = "";
+
+   tempString.Form("EA[%d]/D", nCrystals);
+   sortDataTree->Branch("EA", EA, tempString);
+
+   tempString.Form("EB[%d]/D", nCrystals);
+   sortDataTree->Branch("EB", EB, tempString);
+
+   tempString.Form("EAX[%d]/D", nCrystals);
+   sortDataTree->Branch("EAX", EAX, tempString);
+
+   tempString.Form("EBX[%d]/D", nCrystals);
+   sortDataTree->Branch("EBX", EBX, tempString);
+
+
+   tempString.Form("etHA[%d]/F",nCrystals);
+   sortDataTree->Branch("etHA",etHA,tempString);
+
+   tempString.Form("ltHA[%d]/F",nCrystals);
+   sortDataTree->Branch("ltHA",ltHA,tempString);
+
+   tempString.Form("maxtHAErr[%d]/F",nCrystals);
+   sortDataTree->Branch("maxtHAErr",maxtHAErr,tempString);
+
+   tempString.Form("mintHAErr[%d]/F",nCrystals);
+   sortDataTree->Branch("mintHAErr",mintHAErr,tempString);
+
+   tempString.Form("etHB[%d]/F",nCrystals);
+   sortDataTree->Branch("etHB",etHB,tempString);
+
+   tempString.Form("ltHB[%d]/F",nCrystals);
+   sortDataTree->Branch("ltHB",ltHB,tempString);
+
+   tempString.Form("maxtHBErr[%d]/F",nCrystals);
+   sortDataTree->Branch("maxtHBErr",maxtHBErr,tempString);
+
+   tempString.Form("mintHBErr[%d]/F",nCrystals);
+   sortDataTree->Branch("mintHBErr",mintHBErr,tempString);
+
+   tempString.Form("nb_ComptA[%d]/I",nCrystals);
+   sortDataTree->Branch("nb_ComptA", nb_ComptA, tempString);
+
+   tempString.Form("nb_ComptB[%d]/I",nCrystals);
+   sortDataTree->Branch("nb_ComptB", nb_ComptB, tempString);
+
+   tempString.Form("simtHA[%d]/D",2);
+   sortDataTree->Branch("simtHA", simtHA, tempString);
+
+   tempString.Form("simtHB[%d]/D",2);
+   sortDataTree->Branch("simtHB", simtHB, tempString);
+
+   tempString.Form("simPhiA[%d]/D",2);
+   sortDataTree->Branch("simPhiA", simPhiA, tempString);
+
+   tempString.Form("simPhiB[%d]/D",2);
+   sortDataTree->Branch("simPhiB", simPhiB, tempString);
+
+   tempString.Form("XposA[%d]/D",2);
+   sortDataTree->Branch("XposA", XposA, tempString);
+
+   tempString.Form("YposA[%d]/D",2);
+   sortDataTree->Branch("YposA", YposA, tempString);
+
+   tempString.Form("ZposA[%d]/D",2);
+   sortDataTree->Branch("ZposA", ZposA, tempString);
+
+   tempString.Form("XposB[%d]/D",2);
+   sortDataTree->Branch("XposB", XposB, tempString);
+
+   tempString.Form("YposB[%d]/D",2);
+   sortDataTree->Branch("YposB", YposB, tempString);
+
+   tempString.Form("ZposB[%d]/D",2);
+   sortDataTree->Branch("ZposB", ZposB, tempString);
+
+   //============================================
+   //--------------------------------------------
+   // Variable declarations
+
+   //Energy drom the simulation will be smeared with a Gaussian
+   //Set the HWHM for each crystal
+
+   Double_t HWHM = 25.; //average from lab data
+
+   // energy resolution coefficient k 
+   // such that sigma(Energy) = k*Sqrt(Energy)
+   // sigma = DeltaE_511 / sqrt(511) * 1 / (2sqrt(2ln2)
+   // IE: k = DeltaE_511 / sqrt(511) = 25/sqrt(511)
+
+   for (Int_t i = 0; i < nCrystals; i++){
+     sigmaA[i] = HWHM/(Sqrt(2*Log(2.)*511));
+     sigmaB[i] = HWHM/(Sqrt(2*Log(2.)*511));
+   }
+
+   //-------------------------------
+   // Initial array initialisations
+   for (Int_t i = 0; i < nCrystals; i++){
+
+     // smeared energy
+     EA[i] = 0; 
+     EB[i] = 0;
+
+     // exact energy    
+     EAX[i] = 0; 
+     EBX[i] = 0;
+
+     // angle calculated from exact energy deposit = 'energy theta'
+     etHA[i] = 0;
+     etHB[i] = 0.;
+
+     // angle calculated from the smeared energy deposit = 'lab theta'
+     ltHA[i] = 0;
+     ltHB[i] = 0.;
+
+     // angle calculated from exact energy - a*sigma
+     mintHAErr[i] = 0.;
+     mintHBErr[i] = 0.;
+
+     // angle calculated from exact energy + a*sigma
+     maxtHAErr[i] = 0.;
+     maxtHBErr[i] = 0.;
+
+     nb_ComptA[i] = 0;
+     nb_ComptB[i] = 0;
+
+   }
+
+   for(Int_t i = 0 ; i < 2 ; i++){
+     // angle after first Compton scattering 
+     // retrieved from the simulation = 'sim theta'
+     simtHA[i] = 180;
+     simtHB[i] = 180;
+
+     simPhiA[i] = 999;
+     simPhiB[i] = 999;
+   }
+
+   //============
+   // EVENT LOOP
+   Float_t sigmaPar = 2.5;
+
+   Long64_t nEvents = simDataTree->GetEntries();
+
+   TRandom3 * rand3 = new TRandom3(); 
+
+   for(Int_t i = 0 ; i < nEvents ; i++){ 
+     simDataTree->GetEvent(i);
+
+     Double_t CrystEnergyDep[18] = {edep0,edep1,edep2,
+				    edep3,edep4,edep5,
+				    edep6,edep7,edep8,
+				    edep9,edep10,edep11,
+				    edep12,edep13,edep14,
+				    edep15,edep16,edep17};
+     for (Int_t k=0; k<18; k++)
+       CrystEnergyDep[k] = 1000*CrystEnergyDep[k];
+
+     Int_t nb_Compt[18] = {nb_Compt0,nb_Compt1,nb_Compt2,
+			   nb_Compt3,nb_Compt4,nb_Compt5,
+			   nb_Compt6,nb_Compt7,nb_Compt8,
+			   nb_Compt9,nb_Compt10,nb_Compt11,
+			   nb_Compt12,nb_Compt13,nb_Compt14,
+			   nb_Compt15,nb_Compt16,nb_Compt17};
+
+     for (Int_t j = 0 ; j < nCrystals ; j++){
+
+       // sigmaE = sigma511 * sqrt( E / 511) 
+
+       EAX[j] = CrystEnergyDep[j];
+       EBX[j] = CrystEnergyDep[j+nCrystals];
+
+       EA[j] = rand3->Gaus(CrystEnergyDep[j],sigmaA[j]*Sqrt(CrystEnergyDep[j]));
+       EB[j] = rand3->Gaus(CrystEnergyDep[j+nCrystals], sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals]));
+
+       etHA[j] = PhotonEnergyToTheta(CrystEnergyDep[j]);
+       etHB[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals]);
+       ltHA[j] = PhotonEnergyToTheta(EA[j]);
+       ltHB[j] = PhotonEnergyToTheta(EB[j]);
+
+       // max/min defined as sigmaPar* sigma away from the mean
+       maxtHAErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j] - (sigmaPar*sigmaA[j]*Sqrt(CrystEnergyDep[j])));
+       mintHAErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j] + (sigmaPar*sigmaA[j]*Sqrt(CrystEnergyDep[j])));
+       maxtHBErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals] - (sigmaPar*sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals])));
+       mintHBErr[j] = PhotonEnergyToTheta(CrystEnergyDep[j+nCrystals] + (sigmaPar*sigmaB[j]*Sqrt(CrystEnergyDep[j+nCrystals])));
+
+       nb_ComptA[j] = nb_Compt[j];
+       nb_ComptB[j] = nb_Compt[j + nCrystals];
+
+     }
+
+     simtHA[0] = ThetaA_1st;
+     simtHB[0] = ThetaB_1st;
+     simtHA[1] = ThetaA_2nd;
+     simtHB[1] = ThetaB_2nd;
+
+     simPhiA[0] = PhiA_1st;
+     simPhiB[0] = PhiB_1st;
+     simPhiA[1] = PhiA_2nd;
+     simPhiB[1] = PhiB_2nd;
+
+     XposA[0] = XposA_1st;
+     YposA[0] = YposA_1st;
+     ZposA[0] = ZposA_1st;
+     XposB[0] = XposB_1st;
+     YposB[0] = YposB_1st;
+     ZposB[0] = ZposB_1st;
+
+     XposA[1] = XposA_2nd;
+     YposA[1] = YposA_2nd;
+     ZposA[1] = ZposA_2nd;
+     XposB[1] = XposB_2nd;
+     YposB[1] = YposB_2nd;
+     ZposB[1] = ZposB_2nd;
+
+     etHA[4] = ElectronEnergyToTheta(CrystEnergyDep[4]);
+     etHB[4] = ElectronEnergyToTheta(CrystEnergyDep[13]);
+     ltHA[4] = ElectronEnergyToTheta(EA[4]);
+     ltHB[4] = ElectronEnergyToTheta(EB[4]);
+
+     maxtHAErr[4] = ElectronEnergyToTheta(CrystEnergyDep[4] + (sigmaPar*sigmaA[4]*Sqrt(CrystEnergyDep[4])));
+     mintHAErr[4] = ElectronEnergyToTheta(CrystEnergyDep[4] - (sigmaPar*sigmaA[4]*Sqrt(CrystEnergyDep[4])));
+     maxtHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] + (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));
+     mintHBErr[4] = ElectronEnergyToTheta(CrystEnergyDep[13] - (sigmaPar*sigmaB[4]*Sqrt(CrystEnergyDep[13])));				 
+
+     sortDataTree->Fill();
+
+   } // end of: for(Int_t i = 0 ; i < nEvents     
+
+   //=========================
+   sortDataTree->Write();
+
+   outputFile->Write();
+
+   cout << endl;
+   cout << " the new root file has been written " << endl;
+   cout << endl;
+
+   outputFile->Close();
+
+   return 0;
+
+ } 
+
+ Bool_t TSim::GoodTheta(Float_t theta){
+
+   Bool_t goodTheta = kFALSE;
+
+   if( theta >= 10. &&
+       theta <  170.)
+     goodTheta = kTRUE;
+
+   return goodTheta;
+ }
+
+
+ Bool_t TSim::CentralXA(Double_t posXA){
+
+   Bool_t centralXA = kFALSE;
+
+   if( posXA > 0. && 
+       posXA < 54.25 )
+     centralXA = kTRUE;
+
+ //   if( posXA > 35. && 
+ //       posXA < 45. )
+ //     centralXA = kTRUE;
+
+   return centralXA;
+ }
+
+ Bool_t TSim::CentralXB(Double_t posXB){
+
+   Bool_t centralXB = kFALSE;
+
+   if( posXB < 0.  && 
+       posXB > -54.25 )
+     centralXB = kTRUE;
+
+ //   if( posXB < -35.  && 
+ //       posXB > -45. )
+ //     centralXB = kTRUE;
+
+   return centralXB;
+ }
+
+
+ Bool_t TSim::CentralYZ(Double_t posYZ){
+
+   Bool_t centralYZ = kFALSE;
+
+   Float_t crystalHalfSizeYZ =  1.0;
+
+   posYZ = Abs(posYZ);
+
+   if(posYZ < crystalHalfSizeYZ)
+     centralYZ = kTRUE;
+
+   return centralYZ;
+ }
+
+ Bool_t TSim::OuterYZ(Double_t posYZ){
+
+   Bool_t outerYZ = kFALSE;
+
+   Float_t crystalHalfSizeYZ = 2.0;
+
+   posYZ = Abs(posYZ);
+
+   if(posYZ > crystalHalfSizeYZ )
+     outerYZ = kTRUE;
+
+   return outerYZ;
+ }
+
+ // original simulation had 3 x 4 x 22 mm crystals
+ Bool_t TSim::CentralZ(Double_t posZ){
+
+   Bool_t centralZ = kFALSE;
+
+   //! works only for this particular detector geometry
+   posZ = Abs(posZ);
+
+   if( posZ < 1.5)
+     centralZ = kTRUE;
+
+   return centralZ;
+ }
+
+ Float_t TSim::CrystalToPhi(Int_t crystal){
+
+   Float_t crystalToPhi[9] = { -1.  ,   0. , -1.,
+			       90. ,  -1. , 270.,
+			       -1.  , 180. , -1.};
+
+ //    !!Temp - Use corner crystals
+ //   Float_t crystalToPhi[9] = {  0.  ,  -1  , 90. ,
+ //   			       -1. ,  -1. , -1. ,
+ //   			       270.,  -1. , 180. };
+
+   return crystalToPhi[crystal];
+ }
+
+ // Transformation below matches the
+ // simulation with beam in X and
+ // arbitrary reference in Z (lab 'up' direction)
+ // If using full PET array then use
+ // arbitrary reference as scanner axis
+ // so it is never in beam direction
+ Float_t TSim::CrystalToPhiA(Int_t crystal){
+
+   Float_t crystalToPhiA[9] = { -1.  ,  0.  ,  -1.,
+				-90. ,  -1. ,  90.,
+				-1.  , 180. , -1.};
+
+ //   // corner crystals
+ //   Float_t crystalToPhiA[9] = { 45.  , -1.  , -45.,
+ // 			       -1.  , -1. ,  -1.,
+ // 			       135. , -1. , -135.};
+
+   return crystalToPhiA[crystal];
+ }
+
+ Float_t TSim::CrystalToPhiB(Int_t crystal){
+
+   Float_t crystalToPhiB[9] = { -1. ,  0.  , -1.,
+				90. ,  -1. , -90.,
+				-1. , 180. , -1.};
+
+
+ //   Float_t crystalToPhiB[9] = { -45. , -1. , 45.,
+ // 			       -1.  , -1. , -1.,
+ // 			       -135., -1. , 135.};
+
+   return crystalToPhiB[crystal];
+ }
+
+ Float_t TSim::GetAsymLab(Int_t dPhiDiff, Int_t i){
+
+   Float_t AsPhiDiff = 0;
+   if (AsymMatrix[i][0] != 0){
+       if (dPhiDiff  == 90){
+	 AsPhiDiff = AsymMatrix[i][1]/AsymMatrix[i][0];
+	 //using average 90 and 270
+	 //AsPhiDiff = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
+       }
+       if (dPhiDiff  == 180)
+	 AsPhiDiff = AsymMatrix[i][2]/AsymMatrix[i][0];
+       if (dPhiDiff  == 270)
+	 AsPhiDiff = AsymMatrix[i][3]/AsymMatrix[i][0];
+     }
+   return AsPhiDiff;
+ }
+
+ Float_t TSim::GetAsymLabErr(Int_t dPhiDiff, Int_t i){
+
+   Float_t AsPhiDiff = 0;
+   Float_t AePhiDiff = 0;
+   if (AsymMatrix[i][0] != 0){
+       if (dPhiDiff  == 90){
+	 AsPhiDiff = AsymMatrix[i][1]/AsymMatrix[i][0];
+	 AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
+
+	 // using average 90 and 270
+	 //AsPhiDiff = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
+	 //AePhiDiff = AsPhiDiff*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
+       }
+       if (dPhiDiff  == 180){
+	 AsPhiDiff = AsymMatrix[i][2]/AsymMatrix[i][0];
+	 AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][2])+(1/AsymMatrix[i][0]));
+       }
+       if (dPhiDiff  == 270){
+	 AsPhiDiff = AsymMatrix[i][3]/AsymMatrix[i][0];
+	 AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][3])+(1/AsymMatrix[i][0]));
+       }
+     }
+
+   return AePhiDiff;
+ }
+
+ Float_t TSim::GetAsymLabTrue(Int_t dPhiDiff, Int_t i){
+
+   Float_t AsTrue = 0;
+   if (AsymTrue[i][0] != 0){
+       if (dPhiDiff  == 90){
+	 AsTrue = AsymTrue[i][1]/AsymTrue[i][0];
+	 //using average 90 and 270
+	 //AsTrue = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
+       }
+       if (dPhiDiff  == 180)
+	 AsTrue = AsymTrue[i][2]/AsymTrue[i][0];
+       if (dPhiDiff  == 270)
+	 AsTrue = AsymTrue[i][3]/AsymTrue[i][0];
+     }
+   return AsTrue;
+ }
+
+ Float_t TSim::GetAsymLabTrueErr(Int_t dPhiDiff, Int_t i){
+
+   Float_t AsTrue = 0;
+   Float_t AeTrue = 0;
+   if (AsymTrue[i][0] != 0){
+       if (dPhiDiff  == 90){
+	 AsTrue = AsymTrue[i][1]/AsymTrue[i][0];
+	 AeTrue = AsTrue*Sqrt((1/AsymTrue[i][1])+(1/AsymTrue[i][0]));
+	 //using average 90 and 270
+	 // AsTrue = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
+ // 	AeTrue = AsTrue*Sqrt((1/(AsymTrue[i][1]+AsymTrue[i][3]))+(1/AsymTrue[i][0]));
+       }
+       if (dPhiDiff  == 180){
+	 AsTrue = AsymTrue[i][2]/AsymTrue[i][0];
+	 AeTrue = AsTrue*Sqrt((1/AsymTrue[i][2])+(1/AsymTrue[i][0]));
+       }
+       if (dPhiDiff  == 270){
+	 AsTrue = AsymTrue[i][3]/AsymTrue[i][0];
+	 AeTrue = AsTrue*Sqrt((1/AsymTrue[i][3])+(1/AsymTrue[i][0]));
+       }
+     }
+
+   return AeTrue;
+ }
+
+ void TSim::GetThetaBinValues(){
+   Float_t thetaLowEdge  = 10.;
+   Float_t thetaHighEdge = 170.;
+
+   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThbins;
+
+   cout << endl;
+   for (Int_t i = 0 ; i < nThbins ; i++){
+     ThMin[i] = thetaLowEdge + i * thetaBinWidth;
+     ThMax[i] = thetaLowEdge + (i+1)* thetaBinWidth;
+     plotTheta[i] = thetaLowEdge + (i+0.5)* thetaBinWidth;
+
+     //cout << " plotTheta[" << i << "] = " << plotTheta[i] << endl;
+   }
+ }
+
+ //!!! temporary
+ void TSim::InitHs(){
+
+
+   for( Int_t th = 0 ; th < nThbins ; th++){
+
+     TString hTitle = "";
+
+     hTitle.Form("hDPhi_%d_0",th);
+     hDPhi[th][0] = new TH1F(hTitle,hTitle,
+			     32, 0.,360.);
+     hTitle.Form("hDPhi_%d_1",th);
+     hDPhi[th][1] = new TH1F(hTitle,hTitle,
+			     32, 0.,360.);
+
+     hTitle.Form("hDPhi_TL_%d_0",th);
+     hDPhi_TL[th][0] = new TH1F(hTitle,hTitle,
+				32, 0.,360.);
+
+     hTitle.Form("hDPhi_TL_%d_1",th);
+     hDPhi_TL[th][1] = new TH1F(hTitle,hTitle,
+				32, 0.,360.);
+   }
+
+
+ }
+
+ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
+
+   GetThetaBinValues();
+
+   //difference 'sim theta' - 'energy theta'
+   TH2F* hThExaSubThEI = new TH2F("hThExaSubThEI",
+				  "hThExaSubThEI",
+				  160,10,170,250,-120,130);
+
+   TH2F* hThExaSubThEI_TL = new TH2F("hThExaSubThEI_TL",
+				     "hThExaSubThEI_TL",
+				     160,10,170,250,-120,130);
+
+   TH2F* hThExaSubThLI = new TH2F("hThExaSubThLI",
+				  "hThExaSubThLI",
+				  160,10,170,250,-120,130);
+
+   TH2F* hThExaSubThLI_TL = new TH2F("hThExaSubThLI_TL",
+				     "hThExaSubThLI_TL",
+				     160,10,170,250,-120,130);
+
+   TH2F* hThExaSubThEO = new TH2F("hThExaSubThEO",
+				  "hThExaSubThEO",
+				  160,10,170,250,-120,130);
+
+   TH2F* hThExaSubThEO_TL = new TH2F("hThExaSubThEO_TL",
+				     "hThExaSubThEO_TL",
+				     160,10,170,250,-120,130);
+
+   //difference 'lab theta' - 'energy theta'
+   TH2F* hThLabSubThE_Vs_ThE = new TH2F("hThLabSubThE_Vs_ThE",
+					"hThLabSubThE_Vs_ThE",
+					160,10,170,120,-50,70);
+
+
+   //difference 'max/min lab theta' - 'energy theta'
+   TH2F* hMEdiff = new TH2F("hMEdiff","max/min - energy theta",
+			    160,10,170,120,-50,70);
+
+   TH2F* hBetaVsDPhi = new TH2F("hBetaVsDPhi",
+				"hBetaVsDPhi",
+				32,-10.0,370,
+				32,0.,10.);
+
+   TH2F* hRVsDPhi = new TH2F("hRVsDPhi",
+			     "hRVsDPhi",
+			     32,-10.0,370,
+			     32,-0.5,6.5);
+
+   fileNum++;
+   cout << endl;
+   cout << " fileNum = " << fileNum << endl;
+
+   // delta phi resolution
+   // for delta phi = 0 
+   // and delta phi = 90
+   TH1F * hDPhiRes00[nThbins];
+   TH1F * hDPhiRes90[nThbins];
+
+   TH1F * hDPhiRes00_TL[nThbins];
+   TH1F * hDPhiRes90_TL[nThbins];
+
+   TH1F * hPhiRes[nThbins];
+   TH1F * hPhiRes_TL[nThbins];
+
+ //   TH1F * hPhiLabA[nThbins];
+ //   TH1F * hPhiLabB[nThbins];
+
+   TH1F * hPhi000Res[nThbins];
+   TH1F * hPhi090Res[nThbins];
+   TH1F * hPhi180Res[nThbins];
+   TH1F * hPhi270Res[nThbins];
+
+//    TH1F * hPhi000Res_TL[nThbins];
+//    TH1F * hPhi090Res_TL[nThbins];
+//    TH1F * hPhi180Res_TL[nThbins];
+//    TH1F * hPhi270Res_TL[nThbins];
+
+   TH1F * hPhiRes000[nThbins];
+   TH1F * hPhiRes090[nThbins];
+   TH1F * hPhiRes180[nThbins];
+   TH1F * hPhiRes270[nThbins];
+
+   TH1F * hPhiRes000_TL[nThbins];
+   TH1F * hPhiRes090_TL[nThbins];
+   TH1F * hPhiRes180_TL[nThbins];
+   TH1F * hPhiRes270_TL[nThbins];
+
+   TH1F * hThRes00[nThbins];
+   TH1F * hThRes90[nThbins];
+
+   TH1F * hThRes00_TL[nThbins];
+   TH1F * hThRes90_TL[nThbins];
+
+   // angle to normal of detector surface
+   TH1F * hBeta[nThbins];
+   TH1F * hBeta_TL[nThbins];
+
+   TH1F * hBeta000[nThbins], * hBeta000_TL[nThbins];
+   TH1F * hBeta090[nThbins], * hBeta090_TL[nThbins];
+   TH1F * hBeta180[nThbins], * hBeta180_TL[nThbins];
+
+   TH2F * hYZ[nThbins], * hYZ_TL[nThbins];
+   TH2F * hXY[nThbins], * hXY_TL[nThbins];
+
+   TH2F * hYZ_dPhi[4], * hYZ_dPhi_TL[4];
+
+   TString hTitle = "hThRes00";
+
+   for( Int_t th = 0 ; th < nThbins ; th++){
+
+     hTitle.Form("hDPhiRes00_%d",th);
+     hDPhiRes00[th] = new TH1F(hTitle,hTitle,
 			       32, 0.,360.);
-    
-    hTitle.Form("hDPhi_TL_%d_1",th);
-    hDPhi_TL[th][1] = new TH1F(hTitle,hTitle,
+
+     hTitle.Form("hDPhiRes90_%d",th);
+     hDPhiRes90[th] = new TH1F(hTitle,hTitle,
 			       32, 0.,360.);
-  }
 
-  
-}
+     hTitle.Form("hDPhiRes00_TL_%d",th);
+     hDPhiRes00_TL[th] = new TH1F(hTitle,hTitle,
+				  32, 0.,360.);
 
-Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
+     hTitle.Form("hDPhiRes90_TL_%d",th);
+     hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
+				  32, 0.,360.);
 
-  GetThetaBinValues();
+     hTitle.Form("hPhiRes_%d",th);
+     hPhiRes[th] = new TH1F(hTitle,hTitle,
+			    32, -180.,180.);
+     
+     hTitle.Form("hPhiRes_TL_%d",th);
+     hPhiRes_TL[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
 
-  //difference 'sim theta' - 'energy theta'
-  TH2F* hThExaSubThEI = new TH2F("hThExaSubThEI",
-				 "hThExaSubThEI",
-				 160,10,170,250,-120,130);
+     hTitle.Form("hPhiRes000_%d",th);
+     hPhiRes000[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
 
-  TH2F* hThExaSubThEI_TL = new TH2F("hThExaSubThEI_TL",
-				    "hThExaSubThEI_TL",
-				    160,10,170,250,-120,130);
+     hTitle.Form("hPhiRes090_%d",th);
+     hPhiRes090[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
 
-  TH2F* hThExaSubThLI = new TH2F("hThExaSubThLI",
-				 "hThExaSubThLI",
-				 160,10,170,250,-120,130);
-  
-  TH2F* hThExaSubThLI_TL = new TH2F("hThExaSubThLI_TL",
-				    "hThExaSubThLI_TL",
-				    160,10,170,250,-120,130);
-  
-  TH2F* hThExaSubThEO = new TH2F("hThExaSubThEO",
-				 "hThExaSubThEO",
-				 160,10,170,250,-120,130);
+     hTitle.Form("hPhiRes180_%d",th);
+     hPhiRes180[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
 
-  TH2F* hThExaSubThEO_TL = new TH2F("hThExaSubThEO_TL",
-				    "hThExaSubThEO_TL",
-				    160,10,170,250,-120,130);
+     hTitle.Form("hPhiRes270_%d",th);
+     hPhiRes270[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
 
-  //difference 'lab theta' - 'energy theta'
-  TH2F* hThLabSubThE_Vs_ThE = new TH2F("hThLabSubThE_Vs_ThE",
-				       "hThLabSubThE_Vs_ThE",
-				       160,10,170,120,-50,70);
-  
-  
-  //difference 'max/min lab theta' - 'energy theta'
-  TH2F* hMEdiff = new TH2F("hMEdiff","max/min - energy theta",
-			   160,10,170,120,-50,70);
-  
-  TH2F* hBetaVsDPhi = new TH2F("hBetaVsDPhi",
-			       "hBetaVsDPhi",
-			       32,-10.0,370,
-			       32,0.,10.);
+     hTitle.Form("hPhiRes000_TL_%d",th);
+     hPhiRes000_TL[th] = new TH1F(hTitle,hTitle,
+				  32, -180.,180.);
 
-  TH2F* hRVsDPhi = new TH2F("hRVsDPhi",
-			    "hRVsDPhi",
-			    32,-10.0,370,
-			    32,-0.5,6.5);
-  
-  fileNum++;
-  cout << endl;
-  cout << " fileNum = " << fileNum << endl;
-  
-  // delta phi resolution
-  // for delta phi = 0 
-  // and delta phi = 90
-  TH1F * hDPhiRes00[nThbins];
-  TH1F * hDPhiRes90[nThbins];
-  
-  TH1F * hDPhiRes00_TL[nThbins];
-  TH1F * hDPhiRes90_TL[nThbins];
-  
-  TH1F * hPhiRes[nThbins];
-  TH1F * hPhiRes_TL[nThbins];
+     hTitle.Form("hPhiRes090_TL_%d",th);
+     hPhiRes090_TL[th] = new TH1F(hTitle,hTitle,
+				  32, -180.,180.);
 
-  TH1F * hPhi000Res[nThbins];
-  TH1F * hPhi090Res[nThbins];
-  TH1F * hPhi180Res[nThbins];
-  TH1F * hPhi270Res[nThbins];
+     hTitle.Form("hPhiRes180_TL_%d",th);
+     hPhiRes180_TL[th] = new TH1F(hTitle,hTitle,
+				  32, -180.,180.);
 
-  TH1F * hPhi000Res_TL[nThbins];
-  TH1F * hPhi090Res_TL[nThbins];
-  TH1F * hPhi180Res_TL[nThbins];
-  TH1F * hPhi270Res_TL[nThbins];
+     hTitle.Form("hPhiRes270_TL_%d",th);
+     hPhiRes270_TL[th] = new TH1F(hTitle,hTitle,
+				  32, -180.,180.);
 
-  TH1F * hPhiRes000[nThbins];
-  TH1F * hPhiRes090[nThbins];
-  TH1F * hPhiRes180[nThbins];
-  TH1F * hPhiRes270[nThbins];
-  
-  TH1F * hPhiRes000_TL[nThbins];
-  TH1F * hPhiRes090_TL[nThbins];
-  TH1F * hPhiRes180_TL[nThbins];
-  TH1F * hPhiRes270_TL[nThbins];
-  
-  TH1F * hThRes00[nThbins];
-  TH1F * hThRes90[nThbins];
 
-  TH1F * hThRes00_TL[nThbins];
-  TH1F * hThRes90_TL[nThbins];
-  
-  // angle to normal of detector surface
-  TH1F * hBeta[nThbins];
-  TH1F * hBeta_TL[nThbins];
-  
-  TH1F * hBeta000[nThbins], * hBeta000_TL[nThbins];
-  TH1F * hBeta090[nThbins], * hBeta090_TL[nThbins];
-  TH1F * hBeta180[nThbins], * hBeta180_TL[nThbins];
- 
-  TH2F * hYZ[nThbins], * hYZ_TL[nThbins];
-  TH2F * hXY[nThbins], * hXY_TL[nThbins];
+     hTitle.Form("hPhi000Res_%d",th);
+     hPhi000Res[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
 
-  TH2F * hYZ_dPhi[4], * hYZ_dPhi_TL[4];
-  
-  TString hTitle = "hThRes00";
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){
-  
-    hTitle.Form("hDPhiRes00_%d",th);
-    hDPhiRes00[th] = new TH1F(hTitle,hTitle,
-			      32, 0.,360.);
-    
-    hTitle.Form("hDPhiRes90_%d",th);
-    hDPhiRes90[th] = new TH1F(hTitle,hTitle,
-			      32, 0.,360.);
+     hTitle.Form("hPhi090Res_%d",th);
+     hPhi090Res[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
+     
+     hTitle.Form("hPhi180Res_%d",th);
+     hPhi180Res[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
 
-    hTitle.Form("hDPhiRes00_TL_%d",th);
-    hDPhiRes00_TL[th] = new TH1F(hTitle,hTitle,
-				 32, 0.,360.);
-    
-    hTitle.Form("hDPhiRes90_TL_%d",th);
-    hDPhiRes90_TL[th] = new TH1F(hTitle,hTitle,
-				 32, 0.,360.);
-    
-    hTitle.Form("hPhiRes_%d",th);
-    hPhiRes[th] = new TH1F(hTitle,hTitle,
-			   32, 0.,360.);
+     hTitle.Form("hPhi270Res_%d",th);
+     hPhi270Res[th] = new TH1F(hTitle,hTitle,
+			       32, -180.,180.);
 
-    hTitle.Form("hPhiRes_TL_%d",th);
-    hPhiRes_TL[th] = new TH1F(hTitle,hTitle,
-			      32, 0.,360.);
+//      hTitle.Form("hPhi000Res_TL_%d",th);
+//      hPhi000Res_TL[th] = new TH1F(hTitle,hTitle,
+// 				  32, -180.,180.);
 
-    hTitle.Form("hPhiRes000_%d",th);
-    hPhiRes000[th] = new TH1F(hTitle,hTitle,
-			      32, 0.,360.);
-    
-    hTitle.Form("hPhiRes090_%d",th);
-    hPhiRes090[th] = new TH1F(hTitle,hTitle,
-			      32, 0.,360.);
-    
-    hTitle.Form("hPhiRes180_%d",th);
-    hPhiRes180[th] = new TH1F(hTitle,hTitle,
-			      32, 0.,360.);
-    
-    hTitle.Form("hPhiRes270_%d",th);
-    hPhiRes270[th] = new TH1F(hTitle,hTitle,
-			      32, 0.,360.);
-    
-    hTitle.Form("hPhiRes000_TL_%d",th);
-    hPhiRes000_TL[th] = new TH1F(hTitle,hTitle,
-				 32, 0.,360.);
-    
-    hTitle.Form("hPhiRes090_TL_%d",th);
-    hPhiRes090_TL[th] = new TH1F(hTitle,hTitle,
-				 32, 0.,360.);
-    
-    hTitle.Form("hPhiRes180_TL_%d",th);
-    hPhiRes180_TL[th] = new TH1F(hTitle,hTitle,
-				 32, 0.,360.);
-    
-    hTitle.Form("hPhiRes270_TL_%d",th);
-    hPhiRes270_TL[th] = new TH1F(hTitle,hTitle,
-				 32, 0.,360.);
+//      hTitle.Form("hPhi090Res_TL_%d",th);
+//      hPhi090Res_TL[th] = new TH1F(hTitle,hTitle,
+// 				  32, -180.,180.);
 
-    
-    hTitle.Form("hPhi000Res_%d",th);
-    hPhi000Res[th] = new TH1F(hTitle,hTitle,
-			      32, -180.,180.);
-    
-    hTitle.Form("hPhi090Res_%d",th);
-    hPhi090Res[th] = new TH1F(hTitle,hTitle,
-			      32, -180.,180.);
-    
-    hTitle.Form("hPhi180Res_%d",th);
-    hPhi180Res[th] = new TH1F(hTitle,hTitle,
-			      32, -180.,180.);
-    
-    hTitle.Form("hPhi270Res_%d",th);
-    hPhi270Res[th] = new TH1F(hTitle,hTitle,
-			      32, -180.,180.);
-    
-    hTitle.Form("hPhi000Res_TL_%d",th);
-    hPhi000Res_TL[th] = new TH1F(hTitle,hTitle,
-				 32, -180.,180.);
-    
-    hTitle.Form("hPhi090Res_TL_%d",th);
-    hPhi090Res_TL[th] = new TH1F(hTitle,hTitle,
-				 32, -180.,180.);
-    
-    hTitle.Form("hPhi180Res_TL_%d",th);
-    hPhi180Res_TL[th] = new TH1F(hTitle,hTitle,
-				 32, -180.,180.);
-    
-    hTitle.Form("hPhi270Res_TL_%d",th);
-    hPhi270Res_TL[th] = new TH1F(hTitle,hTitle,
-				 32, -180.,180.);
-    
+//      hTitle.Form("hPhi180Res_TL_%d",th);
+//      hPhi180Res_TL[th] = new TH1F(hTitle,hTitle,
+// 				  32, -180.,180.);
 
-    hTitle.Form("hThRes00_%d",th);
-    hThRes00[th] = new TH1F(hTitle,hTitle,
-			    128, -10., 180.);
-    
-    hTitle.Form("hThRes90_%d",th);
-    hThRes90[th] = new TH1F(hTitle,hTitle,
-			    128, -10., 180.);
-    
-    hTitle.Form("hThRes00_TL_%d",th);
-    hThRes00_TL[th] = new TH1F(hTitle,hTitle,
-			       128, -10., 180.);
-    
-    hTitle.Form("hThRes90_TL_%d",th);
-    hThRes90_TL[th] = new TH1F(hTitle,hTitle,
-			       128, -10., 180.);
-    
-    hTitle.Form("hBeta_%d",th);
-    hBeta[th] = new TH1F(hTitle,hTitle,
-			 32,-0.0, 10.0);
-    
-    hTitle.Form("hBeta_TL_%d",th);
-    hBeta_TL[th] = new TH1F(hTitle,hTitle,
-			    32,-0.0, 10.0);
+//      hTitle.Form("hPhi270Res_TL_%d",th);
+//      hPhi270Res_TL[th] = new TH1F(hTitle,hTitle,
+// 				  32, -180.,180.);
 
-    hTitle.Form("hBeta000_%d",th);
-    hBeta000[th] = new TH1F(hTitle,hTitle,
-			    32,-0.0, 10.0);
-    
-    hTitle.Form("hBeta090_%d",th);
-    hBeta090[th] = new TH1F(hTitle,hTitle,
-			    32,-0.0, 10.0);
 
-    hTitle.Form("hBeta180_%d",th);
-    hBeta180[th] = new TH1F(hTitle,hTitle,
-			    32,-0.0, 10.0);
+     hTitle.Form("hThRes00_%d",th);
+     hThRes00[th] = new TH1F(hTitle,hTitle,
+			     128, -10., 180.);
 
-    hTitle.Form("hBeta000_TL_%d",th);
-    hBeta000_TL[th] = new TH1F(hTitle,hTitle,
-			       32,-0.0, 10.0);
-    
-    hTitle.Form("hBeta090_TL_%d",th);
-    hBeta090_TL[th] = new TH1F(hTitle,hTitle,
-			       32,-0.0, 10.0);
-    
-    hTitle.Form("hBeta180_TL_%d",th);
-    hBeta180_TL[th] = new TH1F(hTitle,hTitle,
-			       32,-0.0, 10.0);
-    
-    hTitle.Form("hXY_%d",th);
-    hXY[th] = new TH2F(hTitle,hTitle,
-			 10, 25.0, 55.0,
-			 10,-6.5, 6.5);
-    
-    hTitle.Form("hYZ_%d",th);
-    hYZ[th] = new TH2F(hTitle,hTitle,
-		       10,-6.5, 6.5,
-		       10,-6.5, 6.5);
-  
-    hTitle.Form("hXY_TL_%d",th);
-    hXY_TL[th] = new TH2F(hTitle,hTitle,
+     hTitle.Form("hThRes90_%d",th);
+     hThRes90[th] = new TH1F(hTitle,hTitle,
+			     128, -10., 180.);
+
+     hTitle.Form("hThRes00_TL_%d",th);
+     hThRes00_TL[th] = new TH1F(hTitle,hTitle,
+				128, -10., 180.);
+
+     hTitle.Form("hThRes90_TL_%d",th);
+     hThRes90_TL[th] = new TH1F(hTitle,hTitle,
+				128, -10., 180.);
+
+     hTitle.Form("hBeta_%d",th);
+     hBeta[th] = new TH1F(hTitle,hTitle,
+			  32,-0.0, 10.0);
+
+     hTitle.Form("hBeta_TL_%d",th);
+     hBeta_TL[th] = new TH1F(hTitle,hTitle,
+			     32,-0.0, 10.0);
+
+     hTitle.Form("hBeta000_%d",th);
+     hBeta000[th] = new TH1F(hTitle,hTitle,
+			     32,-0.0, 10.0);
+
+     hTitle.Form("hBeta090_%d",th);
+     hBeta090[th] = new TH1F(hTitle,hTitle,
+			     32,-0.0, 10.0);
+
+     hTitle.Form("hBeta180_%d",th);
+     hBeta180[th] = new TH1F(hTitle,hTitle,
+			     32,-0.0, 10.0);
+
+     hTitle.Form("hBeta000_TL_%d",th);
+     hBeta000_TL[th] = new TH1F(hTitle,hTitle,
+				32,-0.0, 10.0);
+
+     hTitle.Form("hBeta090_TL_%d",th);
+     hBeta090_TL[th] = new TH1F(hTitle,hTitle,
+				32,-0.0, 10.0);
+
+     hTitle.Form("hBeta180_TL_%d",th);
+     hBeta180_TL[th] = new TH1F(hTitle,hTitle,
+				32,-0.0, 10.0);
+
+     hTitle.Form("hXY_%d",th);
+     hXY[th] = new TH2F(hTitle,hTitle,
 			  10, 25.0, 55.0,
 			  10,-6.5, 6.5);
-    
-    hTitle.Form("hYZ_TL_%d",th);
-    hYZ_TL[th] = new TH2F(hTitle,hTitle,
-			  10,-6.5, 6.5,
-			  10,-6.5, 6.5);
 
-    
-  }
-  
-  for (Int_t p = 0 ; p < 4 ; p ++){
-    
-    Int_t dp = p*90;
-    
-    hTitle.Form("hYZ_dPhi_%d",dp);
-    hYZ_dPhi[p] = new TH2F(hTitle,hTitle,
-			   32,-4.0, 4.0,
-			   32,-4.0, 4.0);
-    
-    hTitle.Form("hYZ_dPhi_TL_%d",dp);
-    hYZ_dPhi_TL[p] = new TH2F(hTitle,hTitle,
-			      32,-1.5, 1.5,
-			      32,-1.5, 1.5);
-  }
-  
-  cout << endl;
-  cout << " Getting asymmetry " << endl;
-  
-  Int_t inputFileInt = inputFileNumber.Atoi();
-  
-  TString plotName;
-  plotName = "../Plots/Asym_" + inputFileNumber;
+     hTitle.Form("hYZ_%d",th);
+     hYZ[th] = new TH2F(hTitle,hTitle,
+			10,-6.5, 6.5,
+			10,-6.5, 6.5);
 
-  plotName = plotName + ".pdf";
+     hTitle.Form("hXY_TL_%d",th);
+     hXY_TL[th] = new TH2F(hTitle,hTitle,
+			   10, 25.0, 55.0,
+			   10,-6.5, 6.5);
 
-  TString inputFileName = "../Data/sort" + inputFileNumber;
-  inputFileName  = inputFileName + ".root";
-    
-  cout << endl;
-  cout << " Input File : " << inputFileName  << endl;
-  cout << endl;
+     hTitle.Form("hYZ_TL_%d",th);
+     hYZ_TL[th] = new TH2F(hTitle,hTitle,
+			   10,-6.5, 6.5,
+			   10,-6.5, 6.5);
 
-  TFile* inputFile = new TFile(inputFileName);
-  
-  sortDataTree=(TTree*)inputFile->Get("sortDataTree");
 
-  sortDataTree->SetBranchAddress("EA",EA);
-  sortDataTree->SetBranchAddress("EB",EB);
-  
-  sortDataTree->SetBranchAddress("etHA",etHA);
-  sortDataTree->SetBranchAddress("etHB",etHB);
-  sortDataTree->SetBranchAddress("ltHA",ltHA);
-  sortDataTree->SetBranchAddress("ltHB",ltHB);
-  
-  sortDataTree->SetBranchAddress("mintHAErr",mintHAErr);
-  sortDataTree->SetBranchAddress("mintHBErr",mintHBErr);
-  sortDataTree->SetBranchAddress("maxtHAErr",maxtHAErr);
-  sortDataTree->SetBranchAddress("maxtHBErr",maxtHBErr);
-  
-  sortDataTree->SetBranchAddress("simtHA",&simtHA);
-  sortDataTree->SetBranchAddress("simtHB",&simtHB);
-  sortDataTree->SetBranchAddress("simPhiA",&simPhiA);
-  sortDataTree->SetBranchAddress("simPhiB",&simPhiB);
-
-  sortDataTree->SetBranchAddress("nb_ComptA",&nb_ComptA);
-  sortDataTree->SetBranchAddress("nb_ComptB",&nb_ComptB);
-  
-  sortDataTree->SetBranchAddress("XposA",&XposA);
-  sortDataTree->SetBranchAddress("YposA",&YposA);
-  sortDataTree->SetBranchAddress("ZposA",&ZposA);
-
-  sortDataTree->SetBranchAddress("XposB",&XposB);
-  sortDataTree->SetBranchAddress("YposB",&YposB);
-  sortDataTree->SetBranchAddress("ZposB",&ZposB);
-  
-  n000 = 0;
-  n090 = 0;
-  n180 = 0;
-  n270 = 0;
-
-  for(Int_t j = 0 ; j <nThbins; j++){
-    for(Int_t k = 0 ; k < 4; k++){
-      AsymMatrix[j][k] = 0;}
-  }
-
-  for(Int_t j = 0 ; j < nThbins; j++){
-    for(Int_t k = 0 ; k < 4; k++){
-      AsymTrue[j][k] = 0;}
-  }
-  
-  Long64_t nEntries = sortDataTree->GetEntries();
-
-  for(Int_t j = 0 ; j < nThbins; j++){
-    P_lab[j]  = 0.;
-    Pq_lab[j] = 0.;
-    P_true_lab[j]  = 0.;
-    Pq_true_lab[j] = 0.;
-  }
-
-  Int_t   thBin  = -1;
-  Float_t phiA   = -1;
-  Float_t phiB   = -1;
-  Int_t   indexA = -1;
-  Int_t   indexB = -1;
-  Float_t totEA  = 0;
-  Float_t totEB  = 0;
-  
-  Float_t phiDiff = -10.;
-  Float_t dPhiXact = -999.;
-  Float_t dPhiXact2 = -999.;
-  Float_t betaA = -99;
-  Float_t betaB = -99;
-  Float_t rA    = -99;
-  
-  Float_t simPhiASft = -999.;
-  Float_t simPhiBSft = -999.;
-
-  Float_t simPhiASft0 = -999.;
-  Float_t simPhiBSft0 = -999.;
-  
-  Float_t wF = 1.0;
-  
-  // Event loop
-  for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
-    sortDataTree->GetEvent(ientry);
-    
-    thBin  = -1;
-    phiA   = -1;
-    phiB   = -1;
-    indexA = -1;
-    indexB = -1;
-    totEA  = 0;
-    totEB  = 0;
-    betaA = -99;
-    betaB = -99;
-    rA    = -99;
-    wF    = 1.0;
-    
-    for (Int_t k = 0; k < nCrystals; k++){
-      totEA += EA[k];
-      totEB += EB[k];
    }
-    
-   // Select same theta bins and total energy
-    if (GetThetaBin(ltHA[4]) == GetThetaBin(ltHB[4]) &&
-	(totEA > 450) && (totEA < 550)               &&
-	(totEB > 450) && (totEB < 550)){
-      
-      thBin = GetThetaBin(ltHA[4]);
-      
-      for (Int_t i = 0 ; i < nCrystals ; i++){
-	if ( (i!=4)                  && 
-	     (thBin>-1)              && 
-	     (ltHA[i]<ThMax[thBin])  &&
-	     (ltHA[i]>ThMin[thBin]) ){
-	  phiA = CrystalToPhiA(i);
-	  indexA = i;
-	}
-	if ( (i!=4)                  &&
-	     (thBin>-1)              &&
-	     (ltHB[i]<ThMax[thBin])  &&
-	     (ltHB[i]>ThMin[thBin]) ){
-	  phiB = CrystalToPhiB(i);
-	  indexB = i;
-	}	
-      }
-    } // end of : if (GetThetaBin(ltHA
-    
-    if ( (phiA != -1) && (phiB != -1) ){
-      
-      hMEdiff->Fill(etHA[4],mintHAErr[4] - etHA[4]);
-      hMEdiff->Fill(etHA[indexA],mintHAErr[indexA] - etHA[indexA]);
-      hMEdiff->Fill(etHB[4],mintHBErr[4] - etHB[4]);
-      hMEdiff->Fill(etHB[indexB],mintHBErr[indexB] - etHB[indexB]);
-      hMEdiff->Fill(etHA[4],maxtHAErr[4] - etHA[4]);
-      hMEdiff->Fill(etHA[indexA],maxtHAErr[indexA] - etHA[indexA]);
-      hMEdiff->Fill(etHB[4],maxtHBErr[4] - etHB[4]);
-      hMEdiff->Fill(etHB[indexB],maxtHBErr[indexB] - etHB[indexB]);
-      
-      rA = (YposA[0]*YposA[0] + ZposA[0]*ZposA[0]);
-      rA = Sqrt(rA);
-      
-      betaA = rA;
-      betaA = betaA/XposA[0];
-      betaA = ATan(betaA);
-      betaA = betaA*RadToDeg();
-      
-      betaB = (YposB[0]*YposB[0] + ZposB[0]*ZposB[0]);
-      betaB = Sqrt(betaB);
-      betaB = betaB/XposB[0];
-      betaB = ATan(betaB);
-      betaB = betaB*RadToDeg();
-      
-      // lab phi now relative to photon reference frame
-      // hence add to get delta phi
-      phiDiff   = phiB + phiA;
-      //  phiDiff   = phiB - phiA;
-      
-      // shift (-360,0) to (0,360.)
-      if(phiDiff < 0.)
-	phiDiff += 360.;
-      
-      // 360 appears in one combination
-      // phiA = 180, phiB = 180
-      if(phiDiff==360)
-	phiDiff = 0;
-      
-      // from QETlab simulation:
-      // G4ThreeVector arbitraryRef = G4ThreeVector(1,1,1).unit();
-      // const G4ThreeVector y_axis = (z_axis.cross(arbitraryRef)).unit();
-      // ...
-      // phi = std::atan2(vScat_y,vScat_x) * 180/(pi);
-      //... see Tangle2SteppingAction.cc
-      
-      // simulation phi relative to photon reference frame
-      // hence add phis to get delta phi
-      dPhiXact  = simPhiA[0] + simPhiB[0];
-      
-      // shift (-360,0) to (0,360.)
-      if(dPhiXact < 0)
-	dPhiXact += 360.;
-      
-      dPhiXact2 = dPhiXact;
-      
-      // shift to 180 degrees to compare to 
-      // delta phi resolutions
-      dPhiXact2 = dPhiXact2 - phiDiff + 180.;
-      
-      if     (dPhiXact2 < 0.0 )
-	dPhiXact2 += 360.;
-      else if(dPhiXact2 > 360.0 )
-	dPhiXact2 -= 360.;
-      
-      hDPhi[thBin][fileNum]->Fill(dPhiXact);
-      
-      hYZ_dPhi[(Int_t)(phiDiff/90.)]->Fill(YposA[0],ZposA[0]);
-      
-      if (phiDiff == 0) {
 
-	// iterate dphi = 0 counts
-	AsymMatrix[thBin][0]+= 1;
-	n000++;
-	
-	hDPhiRes00[thBin]->Fill(dPhiXact2);	
-	
-	hThRes00[thBin]->Fill(simtHA[0]);
-	
-	hBeta000[thBin]->Fill(betaA);
-	
-      }
-      if (phiDiff == 90){
-	
-	// iterate dphi = 90 counts
-	AsymMatrix[thBin][1] += 1;
-	n090++;
-	
-	//!!hDPhiRes90[thBin]->Fill(dPhiXact2);
+   for (Int_t p = 0 ; p < 4 ; p ++){
 
-	hThRes90[thBin]->Fill(simtHA[0]);
-	
-	hBeta090[thBin]->Fill(betaA);
-	
-      }
-      if (phiDiff == 180 ){
-	
-	// iterate dphi = 180 counts
-	AsymMatrix[thBin][2] += 1;
-	n180++;
-	
-	hBeta180[thBin]->Fill(betaA);
+     Int_t dp = p*90;
 
-      }
-      if (phiDiff == 270){
-	
-	// iterate dphi = 270 counts
-	AsymMatrix[thBin][3] += 1;
-	n270++;
-	
-	//!!!
-	hDPhiRes90[thBin]->Fill(dPhiXact2);	
-	
-	hBeta090[thBin]->Fill(betaA);
-	
-      }
-      
+     hTitle.Form("hYZ_dPhi_%d",dp);
+     hYZ_dPhi[p] = new TH2F(hTitle,hTitle,
+			    32,-4.0, 4.0,
+			    32,-4.0, 4.0);
 
-      // When the beam is not in fixed (say x) 
-      // direction the lab phi distribution 
-      // is in a different plane to the
-      // real phi and therefore should
-      // be projected before comparing.
-      // The real phi plane is not unbiased when
-      // delta phi is selected as delta phi
-      // is biased in the raw data due to the
-      // central crystal thresholds
-      // this can be avoided by selecting
-      // the first hits in the centre
-      // but this may not give the correct
-      // measure of phi resolution for 
-      // the final lab data sample
-      // to do: test this hypothesis
-      // using a fixed axis beam
-      // and check phi resolutions
-      // for true lab with isotropic beam
-      
-      if     ( phiDiff == 0 )
-	hPhiRes000[thBin]->Fill(simPhiASft);
-      else if( phiDiff == 90 )
-	hPhiRes090[thBin]->Fill(simPhiASft);
-      if     ( phiDiff == 180 )
-	hPhiRes180[thBin]->Fill(simPhiASft);
-      if     ( phiDiff == 270 )
-	hPhiRes270[thBin]->Fill(simPhiASft);
-      
-      if     ( phiDiff == 0 )
-	hPhiRes[thBin]->Fill(simPhiASft);
-      
-      simPhiASft0 = simPhiA[0];
-      simPhiASft0 -= 45.0;  
-      simPhiASft0 += 180.;  
-      
-      if     (simPhiASft < 0.0 ) 
-	simPhiASft += 360.;
-      else if(simPhiASft > 360.0 ) 
-	simPhiASft -= 360.;
-      
-      //      if ( phiDiff == 0 ){
-      
-      if      (phiA == 0){
-	hPhi000Res[thBin]->Fill(simPhiA[0]);
-      }
-      else if(phiA == 90){
-	hPhi090Res[thBin]->Fill(simPhiA[0]);
-      }
-      else if(phiA == 180){
-	hPhi180Res[thBin]->Fill(simPhiA[0]);
-      }
-      else if(phiA == -90){
-	hPhi270Res[thBin]->Fill(simPhiA[0]);
-      }
-	//      }
-// 	if      (phiB==0){
-// 	  hPhi000Res[thBin]->Fill(simPhiB[0]);
-// 	}
-// 	else if(phiB==90){
-// 	  hPhi090Res[thBin]->Fill(simPhiB[0]);
-// 	}
-// 	else if(phiB==180){
-// 	  hPhi180Res[thBin]->Fill(simPhiB[0]);
-// 	}
-// 	else if(phiB==270){
-// 	  hPhi270Res[thBin]->Fill(simPhiB[0]);
-// 	}
-	
-	
-	//}
-      
-      
-      hBetaVsDPhi->Fill(dPhiXact,betaA);
-      hRVsDPhi->Fill(dPhiXact,rA);
-      
-      wF = -1.*Cos(2*dPhiXact*DegToRad());
-      
-      
-      // exact dphi for final event sample
-      
-      
-      // only using array A for now
-      hBeta[thBin]->Fill(betaA);
-      hXY[thBin]->Fill(Abs(XposA[0]),YposA[0]);
-      hYZ[thBin]->Fill(YposA[0],ZposA[0]);
-      
-      
-      
-      hThExaSubThEI->Fill(etHA[4],simtHA[0]-etHA[4]);
-      hThExaSubThEI->Fill(etHB[4],simtHB[0]-etHB[4]);
-      
-      hThExaSubThEO->Fill(etHA[4],simtHA[0]-etHA[indexA]);
-      hThExaSubThEO->Fill(etHB[4],simtHB[0]-etHB[indexB]);
+     hTitle.Form("hYZ_dPhi_TL_%d",dp);
+     hYZ_dPhi_TL[p] = new TH2F(hTitle,hTitle,
+			       32,-1.5, 1.5,
+			       32,-1.5, 1.5);
+   }
 
-      hThExaSubThLI->Fill(ltHA[4],simtHA[0]-ltHA[4]);
-      hThExaSubThLI->Fill(ltHB[4],simtHB[0]-ltHB[4]);
-            
-      // 'true lab' analysis
-      if (
-// 	  Abs(simtHA[0]- etHA[4]) < 5.0 &&
-// 	  Abs(simtHB[0]- etHB[4]) < 5.0 &&
-//        simtHA[0]<ThMax[thBin] && 
-// 	  simtHA[0]>ThMin[thBin] &&
-// 	  simtHB[0]<ThMax[thBin] && 
-// 	  simtHB[0]>ThMin[thBin] &&
-	  CentralYZ(YposA[0])    && 
-	  CentralYZ(ZposA[0])    &&
-	  CentralYZ(YposB[0])    && 
-	  CentralYZ(ZposB[0])    
-	  //betaA < 1.0 &&
-	  //betaB < 1.0
-	  // nb_ComptA[4] == 1.     && 
-	  // 	  nb_ComptB[4] == 1.    
-	  ){
+   cout << endl;
+   cout << " Getting asymmetry " << endl;
 
-	if     ( phiDiff == 0 )
-	  hPhiRes_TL[thBin]->Fill(simPhiASft);
-	
-	if     ( phiDiff == 0 )
-	  hPhiRes000_TL[thBin]->Fill(simPhiASft);
-	else if( phiDiff == 90 )
-	  hPhiRes090_TL[thBin]->Fill(simPhiASft);
-	if     ( phiDiff == 180 )
-	  hPhiRes180_TL[thBin]->Fill(simPhiASft);
-	if     ( phiDiff == 270 )
-	  hPhiRes270_TL[thBin]->Fill(simPhiASft);
-	
-	//if ( phiDiff == 0 ){
-// 	  if      (phiA==0){
-// 	    hPhi000Res_TL[thBin]->Fill(simPhiA[0]);
-// 	  }
-// 	  else if(phiA==90){
-// 	    hPhi090Res_TL[thBin]->Fill(simPhiA[0]);
-// 	  }
-// 	  else if(phiA==180){
-// 	    hPhi180Res_TL[thBin]->Fill(simPhiA[0]);
-// 	  }
-// 	  else if(phiA==270){
-// 	    hPhi270Res_TL[thBin]->Fill(simPhiA[0]);
-// 	  }
-	  
-	  //}
-      
-	hYZ_dPhi_TL[(Int_t)(phiDiff/90.)]->Fill(YposA[0],ZposA[0]);
 
-	hThExaSubThEI_TL->Fill(etHA[4],simtHA[0]-etHA[4]);
-	hThExaSubThEI_TL->Fill(etHB[4],simtHB[0]-etHB[4]);
-	
-	hThExaSubThEO_TL->Fill(etHA[4],simtHA[0]-etHA[indexA]);
-	hThExaSubThEO_TL->Fill(etHB[4],simtHB[0]-etHB[indexB]);
-	
-	hThExaSubThLI_TL->Fill(ltHA[4],simtHA[0]-ltHA[4]);
-	hThExaSubThLI_TL->Fill(ltHB[4],simtHB[0]-ltHB[4]);
-      
-	hThLabSubThE_Vs_ThE->Fill(etHA[4],ltHA[4] - etHA[4]);
-//      hThLabSubThE_Vs_ThE->Fill(etHA[indexA],ltHA[indexA] - etHA[indexA]);
-// 	hThLabSubThE_Vs_ThE->Fill(etHB[4],ltHB[4] - etHB[4]);
-// 	hThLabSubThE_Vs_ThE->Fill(etHB[indexB],ltHB[indexB] - etHB[indexB]);
-      
+   TString plotName;
+   plotName = "../Plots/Asym_" + inputFileNumber;
 
-	hDPhi_TL[thBin][fileNum]->Fill(dPhiXact);
-		
-	hBeta_TL[thBin]->Fill(betaA);
-	hXY_TL[thBin]->Fill(Abs(XposA[0]),YposA[0]);
-	hYZ_TL[thBin]->Fill(YposA[0],ZposA[0]);
-      
-	if (phiDiff == 0.){
-	  AsymTrue[thBin][0] += 1;
-	  
-	  hThRes00_TL[thBin]->Fill(simtHA[0]);	
-	  
-	  hDPhiRes00_TL[thBin]->Fill(dPhiXact2);	
-	  hBeta000_TL[thBin]->Fill(betaA);
-	}
-	if ( phiDiff == 90 ){
-	  AsymTrue[thBin][1] += 1;
-	  
-	  hThRes90_TL[thBin]->Fill(simtHA[0]);
-	  //!!!
-	  //hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
-	  hBeta090_TL[thBin]->Fill(betaA);	
-	}
-	if ( phiDiff == 180 ){
-	  AsymTrue[thBin][2] += 1;
-	  
-	  hBeta180_TL[thBin]->Fill(betaA);	
-	}
-	if (phiDiff == 270){
-	  AsymTrue[thBin][3] += 1;
+   plotName = plotName + ".pdf";
 
-	  hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
-	  hBeta090_TL[thBin]->Fill(betaA);	
-	}
-	
-      }
-    }
-  }
+   TString inputFileName = "../Data/sort" + inputFileNumber;
+   inputFileName  = inputFileName + ".root";
 
-  cout << endl;
-  cout << " Lab Asymmetry"<<endl;
-  cout << " theta \t" << "dPhi=0 \t" 
-       << "90 \t" << "180 \t" << "270" << endl;
-  for (Int_t i = 0 ; i < 8 ; i++)
-    cout << " " << plotTheta[i]     << "\t"
-	 << " " << AsymMatrix[i][0] << "\t" 
-	 << " " << AsymMatrix[i][1] << "\t"
-	 << " " << AsymMatrix[i][2] << "\t" 
-	 << " " << AsymMatrix[i][3] << endl;
-  
-  cout << endl;
-  cout << " True Asymmetry"<<endl;
-  cout << " theta \t" << "dPhi=0 \t" 
-       << "90 \t" << "180 \t" << "270" << endl;
-    for (Int_t i = 0 ; i < 8 ; i++)
-    cout << " " << plotTheta[i]   << "\t "
-	 << " " << AsymTrue[i][0] << "\t "
-	 << " " << AsymTrue[i][1] << "\t " 
-	 << " " << AsymTrue[i][2] << "\t " 
-	 << " " << AsymTrue[i][3] << endl;
-  cout << endl;
-  
-  TCanvas *canvas = new TCanvas("canvas","canvas",
-				1500,1000);
+   cout << endl;
+   cout << " Input File : " << inputFileName  << endl;
+   cout << endl;
 
-  Char_t plotN[128];
+   TFile* inputFile = new TFile(inputFileName);
 
-  hThLabSubThE_Vs_ThE->Draw("colz");
-  hThLabSubThE_Vs_ThE->GetXaxis()->SetTitle("energy #theta (deg)");
-  hThLabSubThE_Vs_ThE->GetYaxis()->SetTitle("lab #theta - energy #theta (deg)");
+   TTree *sortDataTree2;
 
-  plotName = "../Plots/hThLabSubThE_Vs_ThE_" + inputFileNumber;
-  plotName += ".pdf";
+   sortDataTree2=(TTree*)inputFile->Get("sortDataTree");
 
-  canvas->SaveAs(plotName);
+   sortDataTree2->SetBranchAddress("EA",EA);
+   sortDataTree2->SetBranchAddress("EB",EB);
+
+   sortDataTree2->SetBranchAddress("EAX",EAX);
+   sortDataTree2->SetBranchAddress("EBX",EBX);
+
+   sortDataTree2->SetBranchAddress("etHA",etHA);
+   sortDataTree2->SetBranchAddress("etHB",etHB);
+
+   sortDataTree2->SetBranchAddress("ltHA",ltHA);
+   sortDataTree2->SetBranchAddress("ltHB",ltHB);
+
+   sortDataTree2->SetBranchAddress("mintHAErr",mintHAErr);
+   sortDataTree2->SetBranchAddress("mintHBErr",mintHBErr);
+   sortDataTree2->SetBranchAddress("maxtHAErr",maxtHAErr);
+   sortDataTree2->SetBranchAddress("maxtHBErr",maxtHBErr);
+
+   sortDataTree2->SetBranchAddress("simtHA",&simtHA);
+   sortDataTree2->SetBranchAddress("simtHB",&simtHB);
+   sortDataTree2->SetBranchAddress("simPhiA",&simPhiA);
+   sortDataTree2->SetBranchAddress("simPhiB",&simPhiB);
+
+   sortDataTree2->SetBranchAddress("nb_ComptA",&nb_ComptA);
+   sortDataTree2->SetBranchAddress("nb_ComptB",&nb_ComptB);
+
+   sortDataTree2->SetBranchAddress("XposA",&XposA);
+   sortDataTree2->SetBranchAddress("YposA",&YposA);
+   sortDataTree2->SetBranchAddress("ZposA",&ZposA);
+
+   sortDataTree2->SetBranchAddress("XposB",&XposB);
+   sortDataTree2->SetBranchAddress("YposB",&YposB);
+   sortDataTree2->SetBranchAddress("ZposB",&ZposB);
+
+   n000 = 0;
+   n090 = 0;
+   n180 = 0;
+   n270 = 0;
+
+   for(Int_t j = 0 ; j <nThbins; j++){
+     for(Int_t k = 0 ; k < 4; k++){
+       AsymMatrix[j][k] = 0;}
+   }
+
+   for(Int_t j = 0 ; j < nThbins; j++){
+     for(Int_t k = 0 ; k < 4; k++){
+       AsymTrue[j][k] = 0;}
+   }
+
+   Long64_t nEntries = sortDataTree2->GetEntries();
+
+   for(Int_t j = 0 ; j < nThbins; j++){
+     P_lab[j]  = 0.;
+     Pq_lab[j] = 0.;
+     P_true_lab[j]  = 0.;
+     Pq_true_lab[j] = 0.;
+   }
+
+   Int_t   thBin  = -1;
+   Int_t   thBinA = -1;
+   Int_t   thBinB = -1;
+   Float_t phiA   = -1;
+   Float_t phiB   = -1;
+   Int_t   indexA = -1;
+   Int_t   indexB = -1;
+   Float_t totEA  = 0;
+   Float_t totEB  = 0;
+
+   Float_t totEAX  = 0;
+   Float_t totEBX  = 0;
+
+   Float_t phiDiff = -10.;
+   Float_t dPhiXact = -999.;
+   Float_t dPhiXact2 = -999.;
+   Float_t betaA = -99;
+   Float_t betaB = -99;
+   Float_t rA    = -99;
+
+   Float_t simPhiASft = -999.;
+   Float_t simPhiBSft = -999.;
+
+   Float_t simPhiASft0 = -999.;
+   Float_t simPhiBSft0 = -999.;
+
+   Float_t wF = 1.0;
+
+   Int_t nDuplicatesAB = 0;
+   Int_t nDuplicatesB  = 0;
+   Int_t nDuplicatesA  = 0;
+
+
+ //   for(Int_t i = 0 ; i < nThbins ; i++){
+ //     cout << " ThMin[" << i << "] = " << ThMin[i] << endl;
+ //     cout << " ThMax[" << i << "] = " << ThMax[i] << endl;
+ //   }
+
+   for (Int_t i = 0 ; i < nThbins ; i++){
+     hPhi000Res[i]->SetMinimum(0);
+     hPhi090Res[i]->SetMinimum(0);
+   }
+
+   // Event loop
+   for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
+     
+     //cout << " start " << endl;
+     
+     sortDataTree2->GetEvent(ientry);
+     
+     totEA  = 0;
+     totEB  = 0;
+
+     totEAX  = 0;
+     totEBX  = 0;
+
+     for (Int_t k = 0; k < nCrystals; k++){
+       totEA  += EA[k];
+       totEB  += EB[k];
+       totEAX += EAX[k];
+       totEBX += EBX[k];
+     }
+
+     thBinA = -1;
+     thBinB = -1;
+     thBin  = -1;
+     phiA   = -1;
+     phiB   = -1;
+     indexA = -1;
+     indexB = -1;
+     betaA = -99;
+     betaB = -99;
+     rA    = -99;
+     wF    = 1.0;
+
+     // thBinA = GetThetaBin(simtHA[0]);
+ //     thBinB = GetThetaBin(simtHB[0]);
+
+     thBinA = GetThetaBin(etHA[4]);
+     thBinB = GetThetaBin(etHB[4]);
+     
+     // exact value plots
+     if( (totEA > 450 )  &&
+	 (totEA < 550 )  &&
+	 (thBinA != -1 ) &&
+	 (totEB > 450 )  &&
+	 (totEB < 550 )  &&
+	 (thBinB != -1 ) &&
+	 (thBinA == thBinB) 
+	 ){
+
+       for (Int_t i = 0 ; i < nCrystals ; i++){
+
+	 if( i == 4 || i == 0 || i == 2 ||
+	     i == 6 || i == 8 ) continue;
+
+	 if ( ( etHA[i] < ThMax[thBinA])  &&
+	      ( etHA[i] > ThMin[thBinA])  
+	      ){
+	   //hPhi000Res[thBinA]->Fill(simPhiA[0]);
+	 }
+
+	 if ( ( etHB[i] < ThMax[thBinB])  &&
+	      ( etHB[i] > ThMin[thBinB]) 
+	      ){
+	   //hPhi090Res[thBinB]->Fill(simPhiB[0]);
+	 }
+
+       } // end of :for (Int_t i = 0 ; i < nCr...
+     }
+
+     //cout << " before only interested in events " << endl;
+     
+     //-----------
+     // only interested in events with
+     // full energy deposited
+     if( (totEA < 450) || 
+	 (totEA > 550) ||
+	 (totEB < 450) ||
+	 (totEB > 550) )
+       continue;
+
    
-  hThExaSubThEI->Draw("colz");
-  hThExaSubThEI->GetXaxis()->SetTitle("#theta_{exact} (deg)");
-  hThExaSubThEI->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
-  
-  plotName = "../Plots/hThExaSubThEI_" + inputFileNumber;
-  plotName += ".pdf";
+     // Select same theta bins
+     if ( GetThetaBin(ltHA[4]) == GetThetaBin(ltHB[4]) &&
+	  GetThetaBin(ltHA[4]) != -1 ){ 
 
-  canvas->SaveAs(plotName);
-  
-  hThExaSubThLI->Draw("colz");
-  hThExaSubThLI->GetXaxis()->SetTitle("#theta_{exact} (deg)");
-  hThExaSubThLI->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
-  
-  plotName = "../Plots/hThExaSubThLI_" + inputFileNumber;
-  plotName += ".pdf";
-  
-  canvas->SaveAs(plotName);
-  
-  hThExaSubThEI_TL->Draw("colz");
-  hThExaSubThEI_TL->GetXaxis()->SetTitle("#theta_{exact} (deg)");
-  hThExaSubThEI_TL->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
-  
-  plotName = "../Plots/hThExaSubThEI_TL_" + inputFileNumber;
-  plotName += ".pdf";
+       thBin = GetThetaBin(ltHA[4]);
+       
+       nDuplicatesA  = 0;
+       nDuplicatesB  = 0;
+       nDuplicatesAB = 0;
 
-  canvas->SaveAs(plotName);
-  
-  hThExaSubThLI_TL->Draw("colz");
-  hThExaSubThLI_TL->GetXaxis()->SetTitle("#theta_{exact} (deg)");
-  hThExaSubThLI_TL->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
-  
-  plotName = "../Plots/hThExaSubThLI_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  
-  canvas->SaveAs(plotName);
-  
-  hThExaSubThEO->Draw("colz");
-  hThExaSubThEO->GetXaxis()->SetTitle("#theta_{exact} (deg)");
-  hThExaSubThEO->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
-    
-  plotName = "../Plots/hThExaSubThE0_" + inputFileNumber;
-  plotName += ".pdf";
+       //cout << " before assign phiA and phiB " << endl;
 
-  canvas->SaveAs(plotName);
+       // assign phiA and phiB
+       for (Int_t i = 0 ; i < nCrystals ; i++){
 
-  hThExaSubThEO_TL->Draw("colz");
-  hThExaSubThEO_TL->GetXaxis()->SetTitle("#theta_{exact} (deg)");
-  hThExaSubThEO_TL->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
-    
-  plotName = "../Plots/hThExaSubThE0_TL_" + inputFileNumber;
-  plotName += ".pdf";
+	 // phi determined by outer crystals
+	 if( i == 4 ) continue;
 
-  canvas->SaveAs(plotName);
-  
-  hBetaVsDPhi->Draw("colz");
-  hBetaVsDPhi->GetXaxis()->SetTitle("#Delta #phi (deg)");
-  hBetaVsDPhi->GetYaxis()->SetTitle("#beta (deg)");
-  
-  plotName = "../Plots/hBetaVsDPhi_" + inputFileNumber;
-  plotName += ".pdf";
+	 // array B phi 
+	 if ( ( ltHB[i]         < ThMax[thBin])  &&
+	      ( ltHB[i]         > ThMin[thBin])  &&
+	      ( (EB[i] + EB[4]) > 450.        )  &&
+	      ( (EB[i] + EB[4]) < 550.        )  
+	      ) {
+	   phiB = CrystalToPhiB(i);
+	   indexB = i;
+	   nDuplicatesB++;
+	 }
 
-  canvas->SaveAs(plotName);
+	 // array A phi
+	 if ( ( ltHA[i]         < ThMax[thBin])  &&
+	      ( ltHA[i]         > ThMin[thBin])  &&
+	      ( (EA[i] + EA[4]) > 450.        )  &&
+	      ( (EA[i] + EA[4]) < 550.        )
+	      ) {
+	   phiA = CrystalToPhiA(i);
+	   indexA = i;
+	   nDuplicatesA++;
+	 }
 
-  hRVsDPhi->Draw("colz");
-  hRVsDPhi->GetXaxis()->SetTitle("#Delta #phi (deg)");
-  hRVsDPhi->GetYaxis()->SetTitle("(y^{2} + z^{2})^{1/2}");
-  
-  plotName = "../Plots/hRVsDPhi_" + inputFileNumber;
-  plotName += ".pdf";
+       } // end of: for (Int_t i = 0 ; i < nCryst
 
-  canvas->SaveAs(plotName);
+       nDuplicatesAB = nDuplicatesA + nDuplicatesB;
 
-  hMEdiff->Draw("colz");
-  hMEdiff->GetXaxis()->SetTitle("energy #theta (deg)");
-  hMEdiff->GetYaxis()->SetTitle("max/min lab #theta - energy #theta (deg)");
-  
-  sprintf(plotN,"../Plots/histME_%d.pdf",inputFileInt);
-  
-  plotName = "../Plots/histME_" + inputFileNumber;
-  plotName += ".pdf";
+     } // end of : if (GetThetaBin(ltHA
+        
+     
+     if( nDuplicatesAB > 2 ){
+	cout << " nDuplicatesA  = " << nDuplicatesA  << endl;
+	cout << " nDuplicatesB  = " << nDuplicatesB  << endl;
+	cout << " nDuplicatesAB = " << nDuplicatesAB << endl;
+	continue;
+      }
 
-  canvas->SaveAs(plotName);
-  
-  canvas->Clear();
-  
-  Int_t nRows = 2; 
-  Int_t nColumns = nThbins/nRows;
-  
-  canvas->Divide(nColumns,nRows);
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){
+     if ( (phiA  == -1) || 
+	  (phiB  == -1) ||
+	  (thBin == -1) )
+       continue;
+     
+     if( nDuplicatesAB != 2 ){
+       cout << " nDuplicatesA  = " << nDuplicatesA  << endl;
+       cout << " nDuplicatesB  = " << nDuplicatesB  << endl;
+       cout << " nDuplicatesAB = " << nDuplicatesAB << endl;
+       continue;
+     }
 
-    hDPhi[th][fileNum]->SetLineColor(kBlue);
-    hDPhi[th][fileNum]->SetMinimum(0.0);
+     hMEdiff->Fill(etHA[4],mintHAErr[4] - etHA[4]);
+     hMEdiff->Fill(etHA[indexA],mintHAErr[indexA] - etHA[indexA]);
+     hMEdiff->Fill(etHB[4],mintHBErr[4] - etHB[4]);
+     hMEdiff->Fill(etHB[indexB],mintHBErr[indexB] - etHB[indexB]);
+     hMEdiff->Fill(etHA[4],maxtHAErr[4] - etHA[4]);
+     hMEdiff->Fill(etHA[indexA],maxtHAErr[indexA] - etHA[indexA]);
+     hMEdiff->Fill(etHB[4],maxtHBErr[4] - etHB[4]);
+     hMEdiff->Fill(etHB[indexB],maxtHBErr[indexB] - etHB[indexB]);
 
-    hDPhi_TL[th][fileNum]->SetLineColor(kBlue);
-    hDPhi_TL[th][fileNum]->SetMinimum(0.0);
+     rA = (YposA[0]*YposA[0] + ZposA[0]*ZposA[0]);
+     rA = Sqrt(rA);
 
-    if(fileNum==1){
-    
-      hDPhi[th][1]->Divide(hDPhi[th][0]);
-      hDPhi_TL[th][1]->Divide(hDPhi_TL[th][0]);
+     betaA = rA;
+     betaA = betaA/XposA[0];
+     betaA = ATan(betaA);
+     betaA = betaA*RadToDeg();
+
+     betaB = (YposB[0]*YposB[0] + ZposB[0]*ZposB[0]);
+     betaB = Sqrt(betaB);
+     betaB = betaB/XposB[0];
+     betaB = ATan(betaB);
+     betaB = betaB*RadToDeg();
+
+     // lab phi now relative to photon reference frame
+     // hence add to get delta phi
+     phiDiff   = phiB + phiA;
+
+     // shift (-360,0) to (0,360.)
+     if(phiDiff < 0.)
+       phiDiff += 360.;
+
+     // 360 appears in one combination
+     // phiA = 180, phiB = 180
+     if(phiDiff==360)
+       phiDiff = 0;
+
+     // from QETlab simulation:
+     // phi = std::atan2(vScat_y,vScat_x) * 180/(pi);
+     //... see Tangle2SteppingAction.cc
+
+     // simulation phi relative to photon reference frame
+     // hence add phis to get delta phi
+     dPhiXact  = simPhiA[0] + simPhiB[0];
+
+
+     // shift (-360,0) to (0,360.)
+     if(dPhiXact < 0)
+       dPhiXact += 360.;
+     
+     //!!!
+     // if(phiDiff==90)
+//        cout << " dPhiXact = " << dPhiXact << endl;
+     
+     // for resolution plots
+     dPhiXact2 = dPhiXact;
+
+     // shift to 180 degrees to compare 
+     // delta phi resolutions
+     dPhiXact2 = dPhiXact2 - phiDiff + 180.;
+
+     if     (dPhiXact2 < 0.0 )
+       dPhiXact2 += 360.;
+     else if(dPhiXact2 > 360.0 )
+       dPhiXact2 -= 360.;
+
+     hDPhi[thBin][fileNum]->Fill(dPhiXact);
+
+     // first hit positions distributions 
+     // depend on delta phi
+     hYZ_dPhi[(Int_t)(phiDiff/90.)]->Fill(YposA[0],ZposA[0]);
+
+     if (phiDiff == 0) {
+
+       // iterate dphi = 0 counts
+       AsymMatrix[thBin][0]+= 1;
+       n000++;
+
+       hDPhiRes00[thBin]->Fill(dPhiXact2);	
+
+       hThRes00[thBin]->Fill(simtHA[0]);
+
+       hBeta000[thBin]->Fill(betaA);
+
+     }
+     if (phiDiff == 90){
+
+       // iterate dphi = 90 counts
+       AsymMatrix[thBin][1] += 1;
+       n090++;
+
+       hDPhiRes90[thBin]->Fill(dPhiXact2);
+
+       hThRes90[thBin]->Fill(simtHA[0]);
+
+       hBeta090[thBin]->Fill(betaA);
+
+     }
+     if (phiDiff == 180 ){
+
+       // iterate dphi = 180 counts
+       AsymMatrix[thBin][2] += 1;
+       n180++;
+
+       hBeta180[thBin]->Fill(betaA);
+
+     }
+     if (phiDiff == 270){
+
+       // iterate dphi = 270 counts
+       AsymMatrix[thBin][3] += 1;
+       n270++;
+
+       //!!!
+       //hDPhiRes90[thBin]->Fill(dPhiXact2);	
+
+       hBeta090[thBin]->Fill(betaA);
+
+     }
+
+
+     // When the beam is not in fixed (say x) 
+     // direction the lab phi distribution 
+     // is in a different plane to the
+     // real phi and therefore should
+     // be projected before comparing.
+     // The real phi plane is not unbiased when
+     // delta phi is selected as delta phi
+     // is biased in the raw data due to the
+     // central crystal thresholds
+     // this can be avoided by selecting
+     // the first hits in the centre
+     // but this may not give the correct
+     // measure of phi resolution for 
+     // the final lab data sample
+     // to do: test this hypothesis
+     // using a fixed axis beam
+     // and check phi resolutions
+     // for true lab with isotropic beam
+
+     simPhiASft = simPhiA[0];
+
+     // if     (simPhiASft < 0.0 ) 
+     // 	simPhiASft += 360.;
+     //       else if(simPhiASft > 360.0 ) 
+     // 	simPhiASft -= 360.;
+
+     if     ( phiDiff == 0 )
+       hPhiRes000[thBin]->Fill(simPhiASft);
+     else if( phiDiff == 90 )
+       hPhiRes090[thBin]->Fill(simPhiASft);
+     if     ( phiDiff == 180 )
+       hPhiRes180[thBin]->Fill(simPhiASft);
+     if     ( phiDiff == 270 )
+       hPhiRes270[thBin]->Fill(simPhiASft);
+
+     if     ( phiDiff == 0 )
+       hPhiRes[thBin]->Fill(simPhiASft);
+
+     if      (phiA == 0){
+       hPhi000Res[thBin]->Fill(simPhiA[0]);
+     }
+     else if(phiA == 90){
+       hPhi090Res[thBin]->Fill(simPhiA[0]);
+     }
+     else if(phiA == 180){
+       hPhi180Res[thBin]->Fill(simPhiA[0]);
+     }
+     else if(phiA == -90){
+       hPhi270Res[thBin]->Fill(simPhiA[0]);
+     }
+     
+     if      (phiB==0){
+       hPhi000Res[thBin]->Fill(simPhiB[0]);
+     }
+     else if(phiB==90){
+       hPhi090Res[thBin]->Fill(simPhiB[0]);
+     }
+     else if(phiB==180){
+       hPhi180Res[thBin]->Fill(simPhiB[0]);
+     }
+     else if(phiB==-90){
+       hPhi270Res[thBin]->Fill(simPhiB[0]);
+     }
+
+     hBetaVsDPhi->Fill(dPhiXact,betaA);
+     hRVsDPhi->Fill(dPhiXact,rA);
+
+     wF = -1.*Cos(2*dPhiXact*DegToRad());
+
+
+     // exact dphi for final event sample
+
+
+     // only using array A for now
+     hBeta[thBin]->Fill(betaA);
+     hXY[thBin]->Fill(Abs(XposA[0]),YposA[0]);
+     hYZ[thBin]->Fill(YposA[0],ZposA[0]);
+
+
+
+     hThExaSubThEI->Fill(etHA[4],simtHA[0]-etHA[4]);
+     hThExaSubThEI->Fill(etHB[4],simtHB[0]-etHB[4]);
+
+     hThExaSubThEO->Fill(etHA[4],simtHA[0]-etHA[indexA]);
+     hThExaSubThEO->Fill(etHB[4],simtHB[0]-etHB[indexB]);
+
+     hThExaSubThLI->Fill(ltHA[4],simtHA[0]-ltHA[4]);
+     hThExaSubThLI->Fill(ltHB[4],simtHB[0]-ltHB[4]);
+
+     //cout << " before 'true lab' " << endl;
+
+     // 'true lab' analysis
+     if (
+ // 	  Abs(simtHA[0]- etHA[4]) < 5.0 &&
+ // 	  Abs(simtHB[0]- etHB[4]) < 5.0 &&
+ //      simtHA[0]<ThMax[thBin] && 
+ // 	simtHA[0]>ThMin[thBin] &&
+ // 	simtHB[0]<ThMax[thBin] && 
+ // 	simtHB[0]>ThMin[thBin] &&
+	 CentralYZ(YposA[0])    && 
+	 CentralYZ(ZposA[0])    &&
+	 CentralYZ(YposB[0])    && 
+	 CentralYZ(ZposB[0])    
+	 //betaA < 1.0 &&
+	   //betaB < 1.0
+	   // nb_ComptA[4] == 1.     && 
+	   // 	  nb_ComptB[4] == 1.    
+	 ){
+
+//        hPhi000Res_TL[thBin]->Fill(simPhiA[0]);
+//        hPhi090Res_TL[thBin]->Fill(simPhiB[0]);
+
+
+       if     ( phiDiff == 0 )
+	 hPhiRes_TL[thBin]->Fill(simPhiASft);
+
+       if     ( phiDiff == 0 )
+	 hPhiRes000_TL[thBin]->Fill(simPhiASft);
+       else if( phiDiff == 90 )
+	 hPhiRes090_TL[thBin]->Fill(simPhiASft);
+       if     ( phiDiff == 180 )
+	   hPhiRes180_TL[thBin]->Fill(simPhiASft);
+       if     ( phiDiff == 270 )
+	 hPhiRes270_TL[thBin]->Fill(simPhiASft);
+
+       //if ( phiDiff == 0 ){
+       // 	  if      (phiA==0){
+       // 	    hPhi000Res_TL[thBin]->Fill(simPhiA[0]);
+       // 	  }
+       // 	  else if(phiA==90){
+       // 	    hPhi090Res_TL[thBin]->Fill(simPhiA[0]);
+       // 	  }
+       // 	  else if(phiA==180){
+ // 	    hPhi180Res_TL[thBin]->Fill(simPhiA[0]);
+ // 	  }
+ // 	  else if(phiA==270){
+ // 	    hPhi270Res_TL[thBin]->Fill(simPhiA[0]);
+ // 	  }
+
+       //}
+
+       hYZ_dPhi_TL[(Int_t)(phiDiff/90.)]->Fill(YposA[0],ZposA[0]);
+
+       hThExaSubThEI_TL->Fill(etHA[4],simtHA[0]-etHA[4]);
+       hThExaSubThEI_TL->Fill(etHB[4],simtHB[0]-etHB[4]);
+
+       hThExaSubThEO_TL->Fill(etHA[4],simtHA[0]-etHA[indexA]);
+       hThExaSubThEO_TL->Fill(etHB[4],simtHB[0]-etHB[indexB]);
+
+       hThExaSubThLI_TL->Fill(ltHA[4],simtHA[0]-ltHA[4]);
+       hThExaSubThLI_TL->Fill(ltHB[4],simtHB[0]-ltHB[4]);
+
+       hThLabSubThE_Vs_ThE->Fill(etHA[4],ltHA[4] - etHA[4]);
+       //      hThLabSubThE_Vs_ThE->Fill(etHA[indexA],ltHA[indexA] - etHA[indexA]);
+       // 	hThLabSubThE_Vs_ThE->Fill(etHB[4],ltHB[4] - etHB[4]);
+       // 	hThLabSubThE_Vs_ThE->Fill(etHB[indexB],ltHB[indexB] - etHB[indexB]);
+
+
+       hDPhi_TL[thBin][fileNum]->Fill(dPhiXact);
+
+       hBeta_TL[thBin]->Fill(betaA);
+       hXY_TL[thBin]->Fill(Abs(XposA[0]),YposA[0]);
+       hYZ_TL[thBin]->Fill(YposA[0],ZposA[0]);
+
+       if (phiDiff == 0.){
+	 AsymTrue[thBin][0] += 1;
+
+	 hThRes00_TL[thBin]->Fill(simtHA[0]);	
+
+	 hDPhiRes00_TL[thBin]->Fill(dPhiXact2);	
+	 hBeta000_TL[thBin]->Fill(betaA);
+       }
+       if ( phiDiff == 90 ){
+	 AsymTrue[thBin][1] += 1;
+
+	 hThRes90_TL[thBin]->Fill(simtHA[0]);
+	 //!!!
+	 //hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
+	 hBeta090_TL[thBin]->Fill(betaA);	
+       }
+       if ( phiDiff == 180 ){
+	 AsymTrue[thBin][2] += 1;
+
+	 hBeta180_TL[thBin]->Fill(betaA);	
+       }
+       if (phiDiff == 270){
+	 AsymTrue[thBin][3] += 1;
+
+	 hDPhiRes90_TL[thBin]->Fill(dPhiXact2);
+	 hBeta090_TL[thBin]->Fill(betaA);	
+       }
+
+     }
+     
+     //cout << " end " << endl;
+
+   } // end of : for (Int_t ientry = 0 ; ien.....
+   
+   
+   cout << endl;
+   cout << " Lab Asymmetry"<<endl;
+   cout << " theta \t" << "dPhi=0 \t" 
+	<< "90 \t" << "180 \t" << "270" << endl;
+   for (Int_t i = 0 ; i < 8 ; i++){
+     cout << " " << plotTheta[i]     << "\t"
+	  << " " << AsymMatrix[i][0] << "\t" 
+	  << " " << AsymMatrix[i][1] << "\t"
+	  << " " << AsymMatrix[i][2] << "\t" 
+	  << " " << AsymMatrix[i][3] << endl;
+   }
+   
+   cout << endl;
+   cout << " True Asymmetry"<<endl;
+   cout << " theta \t" << "dPhi=0 \t" 
+	<< "90 \t" << "180 \t" << "270" << endl;
+   for (Int_t i = 0 ; i < 8 ; i++){
+     cout << " " << plotTheta[i]   << "\t "
+	  << " " << AsymTrue[i][0] << "\t "
+	  << " " << AsymTrue[i][1] << "\t " 
+	  << " " << AsymTrue[i][2] << "\t " 
+	  << " " << AsymTrue[i][3] << endl;
+   }
+   cout << endl;
+   
+   TCanvas *canvas = new TCanvas("canvas","canvas",
+				 1500,1000);
+   
+   hThLabSubThE_Vs_ThE->Draw("colz");
+   hThLabSubThE_Vs_ThE->GetXaxis()->SetTitle("energy #theta (deg)");
+   hThLabSubThE_Vs_ThE->GetYaxis()->SetTitle("lab #theta - energy #theta (deg)");
+   
+   plotName = "../Plots/hThLabSubThE_Vs_ThE_" + inputFileNumber;
+   plotName += ".pdf";
+   
+   canvas->SaveAs(plotName);
+
+   hThExaSubThEI->Draw("colz");
+   hThExaSubThEI->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+   hThExaSubThEI->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+
+   plotName = "../Plots/hThExaSubThEI_" + inputFileNumber;
+   plotName += ".pdf";
+
+   canvas->SaveAs(plotName);
+
+   hThExaSubThLI->Draw("colz");
+   hThExaSubThLI->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+   hThExaSubThLI->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+
+   plotName = "../Plots/hThExaSubThLI_" + inputFileNumber;
+   plotName += ".pdf";
+
+   canvas->SaveAs(plotName);
+
+   hThExaSubThEI_TL->Draw("colz");
+   hThExaSubThEI_TL->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+   hThExaSubThEI_TL->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+
+   plotName = "../Plots/hThExaSubThEI_TL_" + inputFileNumber;
+   plotName += ".pdf";
+
+   canvas->SaveAs(plotName);
+
+   hThExaSubThLI_TL->Draw("colz");
+   hThExaSubThLI_TL->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+   hThExaSubThLI_TL->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+
+   plotName = "../Plots/hThExaSubThLI_TL_" + inputFileNumber;
+   plotName += ".pdf";
+
+   canvas->SaveAs(plotName);
+
+   hThExaSubThEO->Draw("colz");
+   hThExaSubThEO->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+   hThExaSubThEO->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+
+   plotName = "../Plots/hThExaSubThE0_" + inputFileNumber;
+   plotName += ".pdf";
+
+   canvas->SaveAs(plotName);
+
+   hThExaSubThEO_TL->Draw("colz");
+   hThExaSubThEO_TL->GetXaxis()->SetTitle("#theta_{exact} (deg)");
+   hThExaSubThEO_TL->GetYaxis()->SetTitle("#theta_{exact} - #theta_{E} (deg)");
+
+   plotName = "../Plots/hThExaSubThE0_TL_" + inputFileNumber;
+   plotName += ".pdf";
+
+   canvas->SaveAs(plotName);
+
+   hBetaVsDPhi->Draw("colz");
+   hBetaVsDPhi->GetXaxis()->SetTitle("#Delta #phi (deg)");
+   hBetaVsDPhi->GetYaxis()->SetTitle("#beta (deg)");
+
+   plotName = "../Plots/hBetaVsDPhi_" + inputFileNumber;
+   plotName += ".pdf";
+
+   canvas->SaveAs(plotName);
+   
+   hRVsDPhi->Draw("colz");
+   
+   hRVsDPhi->GetXaxis()->SetTitle("#Delta #phi (deg)");
+   
+   hRVsDPhi->GetYaxis()->SetTitle("(y^{2} + z^{2})^{1/2}");
+   
+   plotName = "../Plots/hRVsDPhi_" + inputFileNumber;
+   plotName += ".pdf";
+   
+   canvas->SaveAs(plotName);
+
+   hMEdiff->Draw("colz");
+   hMEdiff->GetXaxis()->SetTitle("energy #theta (deg)");
+   hMEdiff->GetYaxis()->SetTitle("max/min lab #theta - energy #theta (deg)");
+   
+   plotName = "../Plots/histME_" + inputFileNumber;
+   plotName += ".pdf";
+   
+   canvas->SaveAs(plotName);
+
+   canvas->Clear();
+
+   Int_t nRows = 2; 
+   Int_t nColumns = nThbins/nRows;
+   
+   canvas->Divide(nColumns,nRows);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+
+     hDPhi[th][fileNum]->SetLineColor(kBlue);
+     hDPhi[th][fileNum]->SetMinimum(0.0);
+
+     hDPhi_TL[th][fileNum]->SetLineColor(kBlue);
+     hDPhi_TL[th][fileNum]->SetMinimum(0.0);
+
+     if(fileNum==1){
+
+       hDPhi[th][1]->Divide(hDPhi[th][0]);
+       hDPhi_TL[th][1]->Divide(hDPhi_TL[th][0]);
+       
+     }
+     
+     // hDPhiRes90[th]->Scale(1./2);
+     // hDPhiRes90_TL[th]->Scale(1./2);
+
+     hThRes00[th]->SetLineColor(kBlue);
+     hDPhiRes00[th]->SetLineColor(kBlue);
+     
+     hThRes90[th]->SetLineColor(kRed);
+     hDPhiRes90[th]->SetLineColor(kRed);
+     
+     hThRes00_TL[th]->SetLineColor(kBlue);
+     hDPhiRes00_TL[th]->SetLineColor(kBlue);
+     
+     hThRes90_TL[th]->SetLineColor(kRed);
+     hDPhiRes90_TL[th]->SetLineColor(kRed);
+
+     hThRes00[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
+     hDPhiRes00[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
+
+     hThRes90[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
+     hDPhiRes90[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
+
+     hThRes00_TL[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
+     hDPhiRes00_TL[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
+
+     hThRes90_TL[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
+     hDPhiRes90_TL[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
+
+     hThRes00[th]->GetYaxis()->SetTitle("Counts");
+     hDPhiRes00[th]->GetYaxis()->SetTitle("Counts");
+
+     hThRes90[th]->GetYaxis()->SetTitle("Counts");
+     hDPhiRes90[th]->GetYaxis()->SetTitle("Counts");
+
+     hThRes00_TL[th]->GetYaxis()->SetTitle("Counts");
+     hDPhiRes00_TL[th]->GetYaxis()->SetTitle("Counts");
+
+     hThRes90_TL[th]->GetYaxis()->SetTitle("Counts");
+     hDPhiRes90_TL[th]->GetYaxis()->SetTitle("Counts");
+
+     hPhiRes[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes[th]->GetXaxis()->SetTitle("#phi");
+     hPhiRes[th]->SetLineColor(kBlue);    
+
+     hPhiRes_TL[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes_TL[th]->GetXaxis()->SetTitle("#phi");
+     hPhiRes_TL[th]->SetLineColor(kRed);    
+
+     hPhiRes000[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes000[th]->GetXaxis()->SetTitle("#phi");
+     hPhiRes000[th]->SetLineColor(kBlue);    
+
+     hPhiRes000_TL[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes000_TL[th]->GetXaxis()->SetTitle("#phi");
+     hPhiRes000_TL[th]->SetLineColor(kBlue);    
+
+     hPhiRes090[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes090[th]->GetXaxis()->SetTitle("#phi}");
+     hPhiRes090[th]->SetLineColor(kRed);    
+
+     hPhiRes090_TL[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes090_TL[th]->GetXaxis()->SetTitle("#phi}");
+     hPhiRes090_TL[th]->SetLineColor(kRed);    
+
+     hPhiRes180[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes180[th]->GetXaxis()->SetTitle("#phi");
+     //hPhiRes180[th]->SetLineColor(kGreen);    
+
+     hPhiRes180_TL[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes180_TL[th]->GetXaxis()->SetTitle("#phi");
+     //hPhiRes180_TL[th]->SetLineColor(kGreen);    
+
+     hPhiRes270[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes270[th]->GetXaxis()->SetTitle("#phi");
+     hPhiRes270[th]->SetLineColor(kMagenta);    
+
+     hPhiRes270_TL[th]->GetYaxis()->SetTitle("Counts");
+     hPhiRes270_TL[th]->GetXaxis()->SetTitle("#phi");
+     hPhiRes270_TL[th]->SetLineColor(kMagenta);    
+
+     hPhi000Res[th]->GetYaxis()->SetTitle("Counts");
+     hPhi000Res[th]->GetXaxis()->SetTitle("#phi");
+     hPhi000Res[th]->SetLineColor(kBlue);    
+
+     hPhi090Res[th]->GetYaxis()->SetTitle("Counts");
+     hPhi090Res[th]->GetXaxis()->SetTitle("#phi");
+     hPhi090Res[th]->SetLineColor(kRed);    
+
+     hPhi180Res[th]->GetYaxis()->SetTitle("Counts");
+     hPhi180Res[th]->GetXaxis()->SetTitle("#phi");
+     hPhi180Res[th]->SetLineColor(kGreen);    
+     
+     hPhi270Res[th]->GetYaxis()->SetTitle("Counts");
+     hPhi270Res[th]->GetXaxis()->SetTitle("#phi");
+     hPhi270Res[th]->SetLineColor(kMagenta);    
+     
+//      hPhi000Res_TL[th]->GetYaxis()->SetTitle("Counts");
+//      hPhi000Res_TL[th]->GetXaxis()->SetTitle("#phi");
+//      hPhi000Res_TL[th]->SetLineColor(kBlue);    
+
+//      hPhi090Res_TL[th]->GetYaxis()->SetTitle("Counts");
+//      hPhi090Res_TL[th]->GetXaxis()->SetTitle("#phi");
+//      hPhi090Res_TL[th]->SetLineColor(kRed);    
+
+
+//      hPhi180Res_TL[th]->GetYaxis()->SetTitle("Counts");
+//      hPhi180Res_TL[th]->GetXaxis()->SetTitle("#phi");
+//      hPhi180Res_TL[th]->SetLineColor(kGreen);    
+
+//      hPhi270Res_TL[th]->GetYaxis()->SetTitle("Counts");
+//      hPhi270Res_TL[th]->GetXaxis()->SetTitle("#phi");
+//      hPhi270Res_TL[th]->SetLineColor(kMagenta);    
+
+
+     hBeta000[th]->SetLineColor(kBlue);
+     hBeta090[th]->SetLineColor(kRed);
+     hBeta180[th]->SetLineColor(kGreen);
+
+     hBeta000_TL[th]->SetLineColor(kBlue);
+     hBeta090_TL[th]->SetLineColor(kRed);
+     hBeta180_TL[th]->SetLineColor(kGreen);
+
+     hBeta090[th]->Scale(1./2);
+     hBeta090_TL[thBin]->Scale(1./2);
+
+     hBeta_TL[th]->SetLineColor(kGreen);
+     
+   } 
+
+   canvas->Clear();
+   canvas->Divide(nColumns,nRows);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){ 
+     canvas->cd(th+1);
+     
+     //cout << " th+1 " << (th+1) << endl;
+     
+     hPhi000Res[th]->Draw("");
+     hPhi090Res[th]->Draw("same");
+          
+     hPhi180Res[th]->Draw("same");
+     hPhi270Res[th]->Draw("same");
+   }
+   plotName = "../Plots/hPhiXXXRes_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
       
-    }
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hThRes90[th]->Draw("");
+     hThRes00[th]->Draw("same");  
+   }
+   plotName = "../Plots/hThRes_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hThRes90_TL[th]->Draw("");
+     hThRes00_TL[th]->Draw("same");  
+   }
+   plotName = "../Plots/hThRes_TL_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hDPhiRes90[th]->Draw("HIST");
+     hDPhiRes00[th]->Draw("same");  
+   }
+   plotName = "../Plots/hDPhiRes_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
 
-    // hDPhiRes90[th]->Scale(1./2);
-//     hDPhiRes90_TL[th]->Scale(1./2);
-    
-    hThRes00[th]->SetLineColor(kBlue);
-    hDPhiRes00[th]->SetLineColor(kBlue);
+   for( Int_t th = 0 ; th < nThbins ; th++){ 
+     canvas->cd(th+1);
+     hPhiRes090[th]->Draw("");
+     hPhiRes270[th]->Draw("same");
+     hPhiRes180[th]->Draw("same");
+     hPhiRes000[th]->Draw("same");
+   }
+   plotName = "../Plots/hPhiResXXX_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){ 
+     canvas->cd(th+1);
+     
+     hPhiRes090_TL[th]->Draw("");
+     hPhiRes270_TL[th]->Draw("same");
+     hPhiRes000_TL[th]->Draw("same");
+     hPhiRes180_TL[th]->Draw("same");
+     
+   }
+   plotName = "../Plots/hPhiResXXX_TL_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){ 
 
-    hThRes90[th]->SetLineColor(kRed);
-    hDPhiRes90[th]->SetLineColor(kRed);
-    
-    hThRes00_TL[th]->SetLineColor(kBlue);
-    hDPhiRes00_TL[th]->SetLineColor(kBlue);
-    
-    hThRes90_TL[th]->SetLineColor(kRed);
-    hDPhiRes90_TL[th]->SetLineColor(kRed);
-    
-    hThRes00[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
-    hDPhiRes00[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
-
-    hThRes90[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
-    hDPhiRes90[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
-
-    hThRes00_TL[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
-    hDPhiRes00_TL[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
-    
-    hThRes90_TL[th]->GetXaxis()->SetTitle("#theta_{A} (deg)");
-    hDPhiRes90_TL[th]->GetXaxis()->SetTitle("#Delta#phi (deg)");
-    
-    hThRes00[th]->GetYaxis()->SetTitle("Counts");
-    hDPhiRes00[th]->GetYaxis()->SetTitle("Counts");
-    
-    hThRes90[th]->GetYaxis()->SetTitle("Counts");
-    hDPhiRes90[th]->GetYaxis()->SetTitle("Counts");
-      
-    hThRes00_TL[th]->GetYaxis()->SetTitle("Counts");
-    hDPhiRes00_TL[th]->GetYaxis()->SetTitle("Counts");
-    
-    hThRes90_TL[th]->GetYaxis()->SetTitle("Counts");
-    hDPhiRes90_TL[th]->GetYaxis()->SetTitle("Counts");
-
-    hPhiRes[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes[th]->GetXaxis()->SetTitle("#phi");
-    hPhiRes[th]->SetLineColor(kBlue);    
-
-    hPhiRes_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes_TL[th]->GetXaxis()->SetTitle("#phi");
-    hPhiRes_TL[th]->SetLineColor(kRed);    
-    
-    hPhiRes000[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes000[th]->GetXaxis()->SetTitle("#phi");
-    hPhiRes000[th]->SetLineColor(kBlue);    
-
-    hPhiRes000_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes000_TL[th]->GetXaxis()->SetTitle("#phi");
-    hPhiRes000_TL[th]->SetLineColor(kBlue);    
-    
-    hPhiRes090[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes090[th]->GetXaxis()->SetTitle("#phi}");
-    hPhiRes090[th]->SetLineColor(kRed);    
-    
-    hPhiRes090_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes090_TL[th]->GetXaxis()->SetTitle("#phi}");
-    hPhiRes090_TL[th]->SetLineColor(kRed);    
-    
-    hPhiRes180[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes180[th]->GetXaxis()->SetTitle("#phi");
-    hPhiRes180[th]->SetLineColor(kGreen);    
-
-    hPhiRes180_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes180_TL[th]->GetXaxis()->SetTitle("#phi");
-    hPhiRes180_TL[th]->SetLineColor(kGreen);    
-    
-    hPhiRes270[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes270[th]->GetXaxis()->SetTitle("#phi");
-    hPhiRes270[th]->SetLineColor(kMagenta);    
-
-    hPhiRes270_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhiRes270_TL[th]->GetXaxis()->SetTitle("#phi");
-    hPhiRes270_TL[th]->SetLineColor(kMagenta);    
-
-    hPhi000Res[th]->GetYaxis()->SetTitle("Counts");
-    hPhi000Res[th]->GetXaxis()->SetTitle("#phi");
-    hPhi000Res[th]->SetLineColor(kBlue);    
-
-    hPhi000Res_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhi000Res_TL[th]->GetXaxis()->SetTitle("#phi");
-    hPhi000Res_TL[th]->SetLineColor(kBlue);    
-    
-    hPhi090Res[th]->GetYaxis()->SetTitle("Counts");
-    hPhi090Res[th]->GetXaxis()->SetTitle("#phi}");
-    hPhi090Res[th]->SetLineColor(kRed);    
-    
-    hPhi090Res_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhi090Res_TL[th]->GetXaxis()->SetTitle("#phi}");
-    hPhi090Res_TL[th]->SetLineColor(kRed);    
-    
-    hPhi180Res[th]->GetYaxis()->SetTitle("Counts");
-    hPhi180Res[th]->GetXaxis()->SetTitle("#phi");
-    hPhi180Res[th]->SetLineColor(kGreen);    
-
-    hPhi180Res_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhi180Res_TL[th]->GetXaxis()->SetTitle("#phi");
-    hPhi180Res_TL[th]->SetLineColor(kGreen);    
-    
-    hPhi270Res[th]->GetYaxis()->SetTitle("Counts");
-    hPhi270Res[th]->GetXaxis()->SetTitle("#phi");
-    hPhi270Res[th]->SetLineColor(kMagenta);    
-
-    hPhi270Res_TL[th]->GetYaxis()->SetTitle("Counts");
-    hPhi270Res_TL[th]->GetXaxis()->SetTitle("#phi");
-    hPhi270Res_TL[th]->SetLineColor(kMagenta);    
-    
-
-    hBeta000[th]->SetLineColor(kBlue);
-    hBeta090[th]->SetLineColor(kRed);
-    hBeta180[th]->SetLineColor(kGreen);
-    
-    hBeta000_TL[th]->SetLineColor(kBlue);
-    hBeta090_TL[th]->SetLineColor(kRed);
-    hBeta180_TL[th]->SetLineColor(kGreen);
-    
-    hBeta090[th]->Scale(1./2);
-    hBeta090_TL[thBin]->Scale(1./2);
-    
-    hBeta_TL[th]->SetLineColor(kGreen);
-    
-  }    
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hThRes90[th]->Draw("");
-    hThRes00[th]->Draw("same");  
-  }
-  plotName = "../Plots/hThRes_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hThRes90_TL[th]->Draw("");
-    hThRes00_TL[th]->Draw("same");  
-  }
-  plotName = "../Plots/hThRes_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hDPhiRes90[th]->Draw("HIST");
-    hDPhiRes00[th]->Draw("same");  
-  }
-  plotName = "../Plots/hDPhiRes_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){ 
-    canvas->cd(th+1);
-    hPhi000Res[th]->Draw("");
-    hPhi090Res[th]->Draw("same");
-    hPhi180Res[th]->Draw("same");
-    hPhi270Res[th]->Draw("same");
-    
-  }
-  plotName = "../Plots/hPhiXXXRes_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){ 
-    canvas->cd(th+1);
-    
-    hPhiRes090[th]->Draw("");
-    hPhiRes270[th]->Draw("same");
-    hPhiRes180[th]->Draw("same");
-    hPhiRes000[th]->Draw("same");
-  }
-  plotName = "../Plots/hPhiResXXX_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){ 
-    canvas->cd(th+1);
-
-    hPhiRes090_TL[th]->Draw("");
-    hPhiRes270_TL[th]->Draw("same");
-    hPhiRes000_TL[th]->Draw("same");
-    hPhiRes180_TL[th]->Draw("same");
-    
-  }
-  plotName = "../Plots/hPhiResXXX_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-
-  for( Int_t th = 0 ; th < nThbins ; th++){ 
-    canvas->cd(th+1);
-    hPhiRes_TL[th]->Scale(hPhiRes[th]->Integral()/hPhiRes_TL[th]->Integral());
-    hPhiRes_TL[th]->Draw("hist");
-    
-    hPhiRes[th]->Draw("same");
-  }
-  plotName = "../Plots/hPhiRes_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){ 
-    canvas->cd(th+1);
-    hPhi000Res_TL[th]->Draw("");
-    hPhi090Res_TL[th]->Draw("same");
-    hPhi180Res_TL[th]->Draw("same");
-    hPhi270Res_TL[th]->Draw("same");
-    
-  }
-  plotName = "../Plots/hPhiXXXRes_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-  
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hDPhiRes90_TL[th]->Draw("HIST");
-    hDPhiRes00_TL[th]->Draw("same");  
-  }
-  plotName = "../Plots/hDPhiRes_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hXY[th]->Draw("colz");
-  }
-  plotName = "../Plots/hXY_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hXY_TL[th]->Draw("colz");
-  }
-  plotName = "../Plots/hXY_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hYZ[th]->Draw("colz");
-  }
-  plotName = "../Plots/hYZ_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hYZ_TL[th]->Draw("colz");
-  }
-  plotName = "../Plots/hYZ_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t p = 0 ; p < 4 ; p++){
-    canvas->cd(p+1);
-    hYZ_dPhi[p]->Draw("colz");
-  }
-  plotName = "../Plots/hYZ_dPhi_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t p = 0 ; p < 4 ; p++){
-    canvas->cd(p+5);
-    hYZ_dPhi_TL[p]->Draw("colz");
-  }
-  plotName = "../Plots/hYZ_dPhi_TL" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hBeta[th]->Draw("");
-  }
-  plotName = "../Plots/hBeta_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hBeta_TL[th]->Draw("same");
-  }
-  plotName = "../Plots/hBeta_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    
-    hBeta180[th]->Draw();
-    hBeta090[th]->Draw("same HIST");
-    hBeta000[th]->Draw("same");
-  }
-  plotName = "../Plots/hBetaX_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    
-    hBeta090_TL[th]->Draw("HIST");
-    hBeta180_TL[th]->Draw("same");
-    hBeta000_TL[th]->Draw("same");
-  }
-  plotName = "../Plots/hBetaX_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hDPhi[th][fileNum]->Draw("");
-  }
-  plotName = "../Plots/hDPhi_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-
-  for( Int_t th = 0 ; th < nThbins ; th++){
-    canvas->cd(th+1);
-    hDPhi_TL[th][fileNum]->Draw("");
-  }
-  plotName = "../Plots/hDPhi_TL_" + inputFileNumber;
-  plotName += ".pdf";
-  canvas->SaveAs(plotName);
-  
-  return 0;
-}
+     canvas->cd(th+1);
+     
+     if(hPhiRes[th]->Integral()    > 0.0 &&
+	hPhiRes_TL[th]->Integral() > 0.0)
+       hPhiRes_TL[th]->Scale(hPhiRes[th]->Integral()/hPhiRes_TL[th]->Integral());
+     
+     hPhiRes_TL[th]->Draw("hist");
+     
+     hPhiRes[th]->Draw("same");
+   }
+   plotName = "../Plots/hPhiRes_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+//    for( Int_t th = 0 ; th < nThbins ; th++){ 
+//      canvas->cd(th+1);
+//      hPhi000Res_TL[th]->Draw("");
+//      hPhi090Res_TL[th]->Draw("same");
+     
+//      hPhi180Res_TL[th]->Draw("same");
+//      hPhi270Res_TL[th]->Draw("same");
+     
+//    }
+//    plotName = "../Plots/hPhiXXXRes_TL_" + inputFileNumber;
+//    plotName += ".pdf";
+//    canvas->SaveAs(plotName);
+   
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hDPhiRes90_TL[th]->Draw("HIST");
+     hDPhiRes00_TL[th]->Draw("same");  
+   }
+   plotName = "../Plots/hDPhiRes_TL_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hXY[th]->Draw("colz");
+   }
+   plotName = "../Plots/hXY_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hXY_TL[th]->Draw("colz");
+   }
+   plotName = "../Plots/hXY_TL_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hYZ[th]->Draw("colz");
+   }
+   plotName = "../Plots/hYZ_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hYZ_TL[th]->Draw("colz");
+   }
+   plotName = "../Plots/hYZ_TL_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t p = 0 ; p < 4 ; p++){
+     canvas->cd(p+1);
+     hYZ_dPhi[p]->Draw("colz");
+   }
+   plotName = "../Plots/hYZ_dPhi_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t p = 0 ; p < 4 ; p++){
+     canvas->cd(p+5);
+     hYZ_dPhi_TL[p]->Draw("colz");
+   }
+   plotName = "../Plots/hYZ_dPhi_TL" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hBeta[th]->Draw("");
+   }
+   plotName = "../Plots/hBeta_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hBeta_TL[th]->Draw("same");
+   }
+   plotName = "../Plots/hBeta_TL_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     
+     hBeta180[th]->Draw();
+     hBeta090[th]->Draw("same HIST");
+     hBeta000[th]->Draw("same");
+   }
+   plotName = "../Plots/hBetaX_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     
+     hBeta090_TL[th]->Draw("HIST");
+     hBeta180_TL[th]->Draw("same");
+     hBeta000_TL[th]->Draw("same");
+   }
+   plotName = "../Plots/hBetaX_TL_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hDPhi[th][fileNum]->Draw("");
+   }
+   plotName = "../Plots/hDPhi_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hDPhi_TL[th][fileNum]->Draw("");
+   }
+   plotName = "../Plots/hDPhi_TL_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   return 0;
+ }
 
 void TSim::GraphAsymmetryLab(TString inputFileNumber1,
 			     TString inputFileNumber2) {
@@ -1917,6 +2074,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   // To do: change to have this second
   // with the unpolarised calculated 
   // first as is done in TLab.C
+  
   CalculateAsymmetryLab(inputFileNumber1);
   
   Int_t inputFileInt1 = inputFileNumber1.Atoi();
@@ -2189,8 +2347,6 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   alpha1 = alpha1*RadToDeg();
   theoryLegendTitle.Form("theory #alpha_{#phi} = %.1f^{o}", alpha1);
   
-  Char_t  plotN[128];
-  //TString plotName = "";
   Char_t  yAxis[128];
   
   if(nFiles==1)
@@ -2210,11 +2366,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   leg->Draw();
 
   if     (nFiles==1){
-    sprintf(plotN,"../Plots/A_%d_%d.pdf",inputFileInt1,dPhiDiff);
     plotName = "../Plots/A_" + inputFileNumber1;
   }
   else if(nFiles==2){
-    sprintf(plotN,"../Plots/A_%d_%d_%d.pdf",inputFileInt1,inputFileInt2,dPhiDiff);
     plotName  =  "../Plots/A_" + inputFileNumber1;
     plotName += "_";
     plotName += inputFileNumber2;
@@ -2772,12 +2926,8 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   Float_t AsMx_simEU[nThbins][nPhibinsSim] = {{0.},{0.}};
   Float_t AsMx_simEUInt[nThbins] = {0.}; 
   
-  Int_t inputFileInt1 = inputFileNumber1.Atoi();
-  Int_t inputFileInt2 = inputFileNumber2.Atoi();
-  
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				200,200,1400,1000);
-  
   
   Double_t halfBinSize = 180.0/nPhibinsSim;
   
@@ -3007,9 +3157,6 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
     grC[g]->SetMarkerColor( g+1 );
   }
   
-  cout << endl;
-  cout << " one" << endl;
-  
   // Theory Curve
   Float_t aTheory[nThbins];
   
@@ -3021,16 +3168,12 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   Char_t theoryLegendTitle[128];
   
-  Char_t  plotN[128];
-  TString plotName;
+  TString plotName = "";
   
   Char_t yAxis[128];
   
   alpha1 = RadToDeg()*alpha1;
 
-  cout << endl;
-  cout << " two" << endl;
-  
   sprintf(theoryLegendTitle,
 	  "theory curve #alpha_{#phi} = %.1f^{o}",
 	  alpha1);  
@@ -3053,10 +3196,6 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   hr->GetYaxis()->SetTitle(yAxis);
   hr->GetYaxis()->SetTitleOffset(0.7);
   
-  cout << endl;
-  cout << " three" << endl;
-
-  // Not getting past here
   
   TLegend *leg = new TLegend(0.6,0.75,0.9,0.85);
   
@@ -3129,14 +3268,25 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   
   leg->Draw();
   
-  if(nThetaSBins==0)
-    sprintf(plotN,"../Plots/A_%d_%d_%d_%dPhiBins.pdf", 
-	    dPhiDiff, inputFileInt1, inputFileInt2, nPhibinsSim);
-  else
-    sprintf(plotN,"../Plots/A_%d_Scattered_%d_%dPhiBins.pdf", 
-	    dPhiDiff, inputFileInt1, nPhibinsSim);  
+  plotName = "../Plots/" ;
+  plotName += inputFileNumber1;
+  plotName += "_";
   
-  canvas->SaveAs(plotN);
+  if(nThetaSBins==0){
+    plotName += inputFileNumber2;
+    plotName += "_A_%d_";  
+    plotName += "_%d";
+    plotName += "_%d";
+    plotName.Form(plotName,nPhibinsSim);
+  }
+  else{
+    plotName += "_A_%d_";  
+    plotName += "Scattered_%d";
+    plotName.Form(plotName,dPhiDiff,nPhibinsSim);
+
+  }
+  plotName += "dPhiBins.pdf";
+  canvas->SaveAs(plotName);
   
   //-----------------------------------------------------------------
   // Graphing Ratio of Asymms for Entangled,Polarised to Unpolarised
@@ -3217,17 +3367,23 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
     
   }
   
-  if(nThetaSBins==0)
-    sprintf(plotN,"../Plots/FourierCoeffs_%d_%d_%dPhiBins.pdf", 
-	    inputFileInt1, inputFileInt2, nPhibinsSim);
-  else
-    sprintf(plotN,"../Plots/FourierCoeffs_Scattered_%d_%dPhiBins.pdf", 
-	    inputFileInt1, nPhibinsSim);  
-  
+  if(nThetaSBins==0){
+    plotName =  "../Plots/FourierCoeffs_";
+    plotName += inputFileNumber1;
+    plotName += inputFileNumber2;
+    plotName += "_%dPhiBins.pdf";
+    plotName.Form(plotName,nPhibinsSim);
+  }
+  else{
+    plotName = "../Plots/FourierCoeffs_Scattered_";
+    plotName += inputFileNumber1;
+    plotName += "_%dPhiBins.pdf";
+    plotName.Form(plotName,nPhibinsSim);
+  }
 
   leg->Draw();
   
-  canvas->SaveAs(plotN);
+  canvas->SaveAs(plotName);
   
   cout << "                   " << endl;
   cout << " GraphAsymmetrySim " << endl;
