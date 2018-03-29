@@ -136,7 +136,7 @@ class TSim : public TObject{
   Int_t fileNum = -1;
 
   TH1F * hDPhi[nThbins][2];
-  TH1F * hDPhi_TL[nThbins][2];
+  TH1F * hDPhi_2[nThbins][2];
   
   // must be multiple of 4
   static const Int_t nPhibinsSim = 8; 
