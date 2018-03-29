@@ -28,7 +28,6 @@ class TSim : public TObject{
 
   //==================================
   // 
-
   
   Int_t CalculateAsymmetrySim(TString);
   Int_t CalculateAsymmetrySimScattered(TString,
@@ -45,6 +44,26 @@ class TSim : public TObject{
 			 Float_t thSMin = 0.,
 			 Float_t thSMax = 0.);
   
+  Float_t CalculateR(Float_t y,
+		     Float_t z);
+  
+  Float_t CalculateBeta(Float_t x,
+			Float_t y,
+			Float_t z);
+  
+  Float_t GetDeltaPhi(Float_t phiA,
+		      Float_t phiB);
+    
+
+  Float_t GetDeltaPhiRes(Float_t dPhiX,
+			 Float_t dPhiL);
+
+  Float_t GetPhiRes(Float_t phi,
+		    Float_t phiL);
+  
+  Float_t ShiftPhi(Float_t phiX,
+		   Float_t lowEdge);
+ 
   Int_t CalculateAsymmetryLab(TString);
   void  GraphAsymmetryLab(TString,
 			  TString file2);
