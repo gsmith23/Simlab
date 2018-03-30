@@ -65,6 +65,9 @@ class TSim : public TObject{
 		   Float_t lowEdge);
  
   Int_t CalculateAsymmetryLab(TString);
+  
+  Int_t InvestigateAcceptance(TString);
+  
   void  GraphAsymmetryLab(TString,
 			  TString file2);
   
@@ -244,8 +247,6 @@ class TSim : public TObject{
   
   // corresponding tree
   TTree *sortDataTree;
-  
-  TTree *sortDataTree2;
   
   TTree  *simDataTree;
   
