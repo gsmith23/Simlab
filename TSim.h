@@ -103,6 +103,20 @@ class TSim : public TObject{
   
   Bool_t GoodTheta(Float_t);
   
+  Bool_t GoodTotalEnergy(Float_t);
+  
+  Bool_t GoodInnerEnergy(Float_t);
+    
+  Bool_t GoodThetaBinAB(Float_t,Float_t);
+  
+  Bool_t GoodPhi(Float_t,Int_t,
+		 Float_t,Float_t);
+  
+  Int_t ExactToLabPhi(Float_t);
+  
+  Bool_t GoodOuterTheta(Float_t,Int_t);
+
+
   Bool_t CentralYZ(Double_t);
   Bool_t OuterYZ(Double_t);
   
@@ -146,15 +160,15 @@ class TSim : public TObject{
   Float_t maxtHAErr[nCrystals];
   Float_t maxtHBErr[nCrystals];
   
-  Int_t nb_ComptA[nCrystals];
-  Int_t nb_ComptB[nCrystals];
-
-  static const Int_t  nThbins = 8;
+  Int_t   nb_ComptA[nCrystals];
+  Int_t   nb_ComptB[nCrystals];
+  
+  Float_t thetaLowEdge  = 30.;
+  Float_t thetaHighEdge = 150.;
+  
+  static const Int_t  nThbins = 6;
   static const Int_t nPhibins = 4;
 
-  //!!! temporary
-  //  looking at division of
-  //  pol by unpol
   Int_t fileNum = -1;
 
   TH1F * hDPhi[nThbins][2];

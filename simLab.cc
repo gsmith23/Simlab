@@ -405,7 +405,9 @@ Int_t main(int argc, char **argv){
        simData->GraphAsymmetryLab(argv[2],"??");
     else if(argc==4)
       simData->GraphAsymmetryLab(argv[2],argv[3]);
-    
+
+    simData->InvestigateAcceptance(argv[2]);
+
     delete simData;
   
   }/////////////////////////////////////////////////////////////////

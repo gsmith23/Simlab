@@ -1134,7 +1134,6 @@ void TLab::GraphAsymmetry(Char_t option){
   // The ratio to be calculated for the
   // lab data:  90 e.g corresponds to 
   // A(90) = N(90)/N(0) 
-  //!!
   Int_t   dPhiDiff = 90;
 
   Float_t  phi[nPhiBins];
@@ -1161,7 +1160,6 @@ void TLab::GraphAsymmetry(Char_t option){
       maxY = 2.0;
       minY = 0.0;
     }
-      
     
   }
   
@@ -1253,60 +1251,85 @@ void TLab::GraphAsymmetry(Char_t option){
     cout << endl;
     cout << " Calculating asymmetry values and " << endl;
     cout << " associated errors for lab data ... " << endl;
-
+    
+    //----------------------------------
+    // Lab data
+    
+    // Iterate the counting variables
     CalculateAsymmetry();
     
+    // Calcaulte the ratios
     for (Int_t i = 0 ; i < nThBins ; i++){
       
-      if (AsymMatrix[i][0] != 0){
+      AsPhiDiff[i] = 0.;
+      AePhiDiff[i] = 1.;
+      
+      if (AsymMatrix[i][0] == 0) continue;
+      
+      if (dPhiDiff  == 90){
+	
+	if(AsymMatrix[i][1]==0) continue;	
+	
+	if(!use270){
+	  AsPhiDiff[i] = AsymMatrix[i][1]/AsymMatrix[i][0];
+	  
+	  AePhiDiff[i] = 1./AsymMatrix[i][1] + 1./AsymMatrix[i][0];
+	  AePhiDiff[i] = Sqrt(AePhiDiff[i]);
+	  AePhiDiff[i] = AsPhiDiff[i]*AePhiDiff[i];
+	  
+	}
+	else{
+	  if(AsymMatrix[i][3]==0) continue;
+	  
+	  AsPhiDiff[i] = AsymMatrix[i][1]+AsymMatrix[i][3];
+	  AsPhiDiff[i] = AsPhiDiff[i]/(2*AsymMatrix[i][0]);
+	  
+	  AePhiDiff[i]  = 1./(AsymMatrix[i][1] + AsymMatrix[i][3]) ;
+	  AePhiDiff[i] += 1./AsymMatrix[i][0];
+	  AePhiDiff[i]  = Sqrt(AePhiDiff[i]);
+	  AePhiDiff[i]  = AsPhiDiff[i]*AePhiDiff[i];
+	}
 	
 	mu[i] = (AsymMatrix[i][1] - AsymMatrix[i][0]);
 	mu[i] = mu[i]/(AsymMatrix[i][1] + AsymMatrix[i][0]);
 	
-	if (dPhiDiff  == 90){
-	  
-	  if(!use270){
-	    AsPhiDiff[i] =
-	      AsymMatrix[i][1]/AsymMatrix[i][0];
-	    
-	    if(AsymMatrix[i][1]!=0)
-	      AePhiDiff[i] =
-		AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
-	  }
-	  else{
-	    AsPhiDiff[i] =
-	      (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
-	    AePhiDiff[i] =
-	      AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
-	  }
-	}
-	if (dPhiDiff  == 180){
-	  AsPhiDiff[i] =
-	    AsymMatrix[i][2]/AsymMatrix[i][0];
-	  AePhiDiff[i] =
-	    AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][2])+(1/AsymMatrix[i][0]));
-	}
-	if (dPhiDiff  == 270){
-	  AsPhiDiff[i] =
-	    AsymMatrix[i][3]/AsymMatrix[i][0];
-	  AePhiDiff[i] =
-	    AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][3])+(1/AsymMatrix[i][0]));
-	}
+      }
+      if (dPhiDiff  == 180){
+	if( AsymMatrix[i][2] == 0 ) continue; 
+	
+	AsPhiDiff[i] = AsymMatrix[i][2]/AsymMatrix[i][0];
+	
+	AePhiDiff[i] = 1./AsymMatrix[i][2] + 1./AsymMatrix[i][0];
+	AePhiDiff[i] = Sqrt(AePhiDiff[i]);
+	AePhiDiff[i] = AsPhiDiff[i]*AePhiDiff[i];
+      }
+      if (dPhiDiff  == 270){
+	if( AsymMatrix[i][3] == 0 ) continue; 
+	AsPhiDiff[i] = AsymMatrix[i][3]/AsymMatrix[i][0];
+	
+	AePhiDiff[i] = 1./AsymMatrix[i][3] + 1./AsymMatrix[i][0];
+	AePhiDiff[i] = Sqrt(AePhiDiff[i]);
+	AePhiDiff[i] = AsPhiDiff[i]*AePhiDiff[i];
       }
       
-    // Only plot points in axis range
-      if(AsPhiDiff[i] < 0.5 )//|| AsPhiDiff[i] > maxY)
-      	AsPhiDiff[i] = 0.0; 
+      // Only plot points in axis range
+      if(AsPhiDiff[i] < minY  || 
+	 AsPhiDiff[i] > maxY){
+	AsPhiDiff[i] = 0.0; 
+      }
       
       cout << " AsPhiDiff[" << i << "] = " 
-	   <<  AsPhiDiff[i] << endl;
+	 <<  AsPhiDiff[i] << endl;
       
-    }
+    } // end of : for (Int_t i = 0 ; i < nThB
     
   }// end of: if( option!='t' &...
-
-
-  // theory and lab
+  
+  // Lab data
+  //----------------------------------  
+  
+  //----------------------------------
+  // Theory data
   if( option=='t' ||
       option=='b'  ){
     
@@ -1331,8 +1354,12 @@ void TLab::GraphAsymmetry(Char_t option){
     
   }// end of:  if( option=='t'
 
+  
+  // Theory data
+  //----------------------------------
 
-  // sim
+  //----------------------------------
+  // Simulated data
   if( option=='a' || 
       option=='d' || 
       option=='f' || 
@@ -1373,8 +1400,7 @@ void TLab::GraphAsymmetry(Char_t option){
       aSimE[i]     = simData->GetAsymLabErr(dPhiDiff,i);
       aSimTrue[i]  = simData->GetAsymLabTrue(dPhiDiff,i);
       aSimTrueE[i] = simData->GetAsymLabTrueErr(dPhiDiff,i);
-      
-      
+            
       // divide lab data by unpolarised sim
       AsPhiDiffD[i] = (AsPhiDiff[i]/aSim[i]);
       AePhiDiffD[i] = AsPhiDiffD[i] * 
@@ -1473,7 +1499,7 @@ void TLab::GraphAsymmetry(Char_t option){
 	    nSimTrueU[i][p] =  nSimTrueU[i][p]/nSimTrueUInt[i];
 	    
 	    nSimTrueUE[i][p] = nSimTrueU[i][p]*nSimTrueUE[i][p];
-	    }
+	  }
 	  
 	  cout << " nSimTrueU[" << i << "][" << p << "] = "
 	       << nSimTrueU[i][p] << endl;
@@ -1817,6 +1843,10 @@ void TLab::GraphAsymmetry(Char_t option){
     }
     
   }// end of:  if( option=='t' || option=='T'
+  
+  // Simulated data
+  //----------------------------------
+  
   
   cout << endl;
   cout << " ... done.  " << endl;
