@@ -1379,8 +1379,6 @@ void TLab::GraphAsymmetry(Char_t option){
       // (no sort file creations yet)
       simData = new TSim(simRun,simRunU);
       
-      //!!  temporary
-      //simData->InitHs();
       // unpolarised (second file) first
       simData->CalculateAsymmetryLab(simRunU);
     }
