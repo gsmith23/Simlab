@@ -496,7 +496,7 @@ Bool_t TSim::CentralYZ(Double_t posYZ){
 
    Bool_t centralYZ = kFALSE;
 
-   Float_t crystalHalfSizeYZ =  2.0;
+   Float_t crystalHalfSizeYZ =  1.0;
 
    posYZ = Abs(posYZ);
 
@@ -1233,7 +1233,7 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    Int_t nDuplicatesB  = 0;
    Int_t nDuplicatesA  = 0;
    
-   Bool_t testTrue = kTRUE;
+   Bool_t testTrue = kFALSE;
    Bool_t testBadEvents = kFALSE;
    
    for (Int_t i = 0 ; i < nThbins ; i++){
@@ -2236,7 +2236,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    Int_t nDuplicatesB  = 0;
    Int_t nDuplicatesA  = 0;
    
-   Bool_t testTrue = kTRUE;
+   Bool_t testTrue = kFALSE;
    Bool_t testBadEvents = kFALSE;
 
    // Event loop
