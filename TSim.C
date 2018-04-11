@@ -867,6 +867,8 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
 				120,-50,70);
 
    
+
+   
    // 'max/min lab theta' - 'energy theta'
    TH2F* hMaxThdiff = new TH2F("hMaxThdiff",
 			      "max/min - energy theta",
@@ -933,11 +935,15 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    TH1F * hThRes00_2[nThbins];
    TH1F * hThRes90_2[nThbins];
 
-
+   
    TH1F * hBeta000[nThbins], * hBeta000_2[nThbins];
    TH1F * hBeta090[nThbins], * hBeta090_2[nThbins];
    TH1F * hBeta180[nThbins], * hBeta180_2[nThbins];
    
+   TH1F * hE[nThbins], * hE_2[nThbins];
+   TH1F * hEI[nThbins], * hEI_2[nThbins];
+   TH1F * hEO[nThbins], * hEO_2[nThbins];
+
    //------------------------
    // Initialise Histos
 
@@ -958,7 +964,7 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
      hTitle.Form("hDPhiRes00_%d",th);
      hDPhiRes00[th] = new TH1F(hTitle,hTitle,
 			       32, -180.,180.);
-
+     
      hTitle.Form("hDPhiRes90_%d",th);
      hDPhiRes90[th] = new TH1F(hTitle,hTitle,
 			       32, -180.,180.);
@@ -1122,6 +1128,32 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
      hYZ_2[th] = new TH2F(hTitle,hTitle,
 			  nYZBins, minYZ, maxYZ,
 			  nYZBins, minYZ, maxYZ);
+     
+     
+     hTitle.Form("hE_%d",th);
+     hE[th] = new TH1F(hTitle,hTitle,
+		       64,0.,600.);
+
+     hTitle.Form("hEI_%d",th);
+     hEI[th] = new TH1F(hTitle,hTitle,
+			64,0.,600.);
+
+     hTitle.Form("hEO_%d",th);
+     hEO[th] = new TH1F(hTitle,hTitle,
+		       64,0.,600.);
+
+     hTitle.Form("hE_2_%d",th);
+     hE_2[th] = new TH1F(hTitle,hTitle,
+			 64,0.,600.);
+       
+     
+     hTitle.Form("hEI_2_%d",th);
+     hEI_2[th] = new TH1F(hTitle,hTitle,
+			  64,0.,600.);
+
+     hTitle.Form("hEO_2_%d",th);
+     hEO_2[th] = new TH1F(hTitle,hTitle,
+			  64,0.,600.);
 
 
    }
@@ -1206,8 +1238,6 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    Long64_t nEntries = sortDataTree->GetEntries();
 
    Int_t   thBin  = -1;
-   Int_t   thBinA = -1;
-   Int_t   thBinB = -1;
    Float_t phiA   = -1;
    Float_t phiB   = -1;
    Int_t   indexA = -1;
@@ -1224,7 +1254,6 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    Float_t dPhiXactRes = -999.;
    
    Float_t betaA = -99;
-   Float_t betaB = -99;
    Float_t rA    = -99;
 
    Float_t simPhiARes = -999.;
@@ -1244,13 +1273,6 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    hPhiA->SetMinimum(0);
    hPhiB->SetMinimum(0);
 
-   // Some histograms
-   // have multiples
-   // per file e.g.
-   // polarised/unpolarised
-   fileNum++;
-   cout << endl;
-   cout << " fileNum = " << fileNum << endl;
    
    // Event loop
    for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
@@ -1296,7 +1318,7 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
      
      //----------------------------------------
      // Event Selection
-
+     
      if ( !GoodTotalEnergy(totEA) ||
 	  !GoodTotalEnergy(totEB) )
        continue;
@@ -1391,6 +1413,7 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
 			   YposA[0],
 			   ZposA[0]);
      
+     
      //--------------------------------------
      // Theta angle study
      
@@ -1421,6 +1444,15 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
 		      maxtHBErr[indexB] - etHB[indexB]);
      
      //--------------------------------------
+     // Energies by theta bin
+     
+     totEA = EA[4] + EA[indexA];
+     
+     hE[thBin]->Fill(totEA);
+     hEI[thBin]->Fill(EA[4]);
+     hEO[thBin]->Fill(EA[indexA]);
+     
+     //--------------------------------------
      // First hit position / 
      // incident angle study
      
@@ -1432,10 +1464,6 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
      hBetaVsDPhi->Fill(dPhiXact,betaA);
      hBeta[thBin]->Fill(betaA);
      
-     //exact angles delta phi
-     //this will be acceptance corrected 
-     //for two file (pol/unpol) case 
-     hDPhi[thBin][fileNum]->Fill(dPhiXact);
 
      //first hit positions distributions 
      //depend on delta phi
@@ -1542,7 +1570,11 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
      hThExaSubThLI_2->Fill(ltHA[4],simtHA[0]-ltHA[4]);
      hThExaSubThLI_2->Fill(ltHB[4],simtHB[0]-ltHB[4]);
      
-     hDPhi_2[thBin][fileNum]->Fill(dPhiXact);     
+     hE_2[thBin]->Fill(totEA);
+     hEI_2[thBin]->Fill(EA[4]);
+     hEO_2[thBin]->Fill(EA[indexA]);
+     
+
      hYZ_dPhi_2[(Int_t)(dPhiLab/90.)]->Fill(YposA[0],ZposA[0]);
      hBeta_2[thBin]->Fill(betaA);
      hXY_2[thBin]->Fill(Abs(XposA[0]),YposA[0]);
@@ -1722,18 +1754,18 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    
    for( Int_t th = 0 ; th < nThbins ; th++){
 
-     hDPhi[th][fileNum]->SetLineColor(kBlue);
-     hDPhi[th][fileNum]->SetMinimum(0.0);
+     
+     hEI[th]->SetLineColor(kViolet);
+     hEO[th]->SetLineColor(kOrange);
 
-     hDPhi_2[th][fileNum]->SetLineColor(kBlue);
-     hDPhi_2[th][fileNum]->SetMinimum(0.0);
+     hE[th]->GetXaxis()->SetTitle("Energy (keV)");
+     hE[th]->GetYaxis()->SetTitle("Counts");
 
-     if(fileNum==1){
+     hEI_2[th]->SetLineColor(kViolet);
+     hEO_2[th]->SetLineColor(kOrange);
 
-       hDPhi[th][1]->Divide(hDPhi[th][0]);
-       hDPhi_2[th][1]->Divide(hDPhi_2[th][0]);
-       
-     }
+     hE_2[th]->GetXaxis()->SetTitle("Energy (keV)");
+     hE_2[th]->GetYaxis()->SetTitle("Counts");
      
      hThRes00[th]->SetLineColor(kBlue);
      hDPhiRes00[th]->SetLineColor(kBlue);
@@ -1852,6 +1884,28 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
 
    canvas->Clear();
    canvas->Divide(nColumns,nRows);
+
+   // Energy deposited (inner, outer, combined)
+
+   for( Int_t th = 0 ; th < nThbins ; th++){ 
+     canvas->cd(th+1);
+     hE[th]->Draw("");
+     hEI[th]->Draw("same");
+     hEO[th]->Draw("same");
+   }
+   plotName = "../Plots/hE_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){ 
+     canvas->cd(th+1);
+     hE_2[th]->Draw("");
+     hEI_2[th]->Draw("same");
+     hEO_2[th]->Draw("same");
+   }
+   plotName = "../Plots/hE_2_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
    
    for( Int_t th = 0 ; th < nThbins ; th++){ 
      canvas->cd(th+1);
@@ -2074,30 +2128,13 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    if(plotAll)
      canvas->SaveAs(plotName);
    
-   
-   for( Int_t th = 0 ; th < nThbins ; th++){
-     canvas->cd(th+1);
-     hDPhi[th][fileNum]->Draw("");
-   }
-   plotName = "../Plots/hDPhi_" + inputFileNumber;
-   plotName += ".pdf";
-   canvas->SaveAs(plotName);
-   
-   for( Int_t th = 0 ; th < nThbins ; th++){
-     canvas->cd(th+1);
-     hDPhi_2[th][fileNum]->Draw("");
-   }
-   plotName = "../Plots/hDPhi_2_" + inputFileNumber;
-   plotName += ".pdf";
-   canvas->SaveAs(plotName);
-   
+      
    return 0;
    
 } // End of: InvestigateAcceptance()
 
 Bool_t TSim::GoodTotalEnergy(Float_t totalEnergy){
   
-  //!!!
   Float_t totEnergyMin = 450;
   Float_t totEnergyMax = 550;
   
@@ -2177,7 +2214,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
    sortDataTree->SetBranchAddress("EAX",EAX);
    sortDataTree->SetBranchAddress("EBX",EBX);
-
+   
    sortDataTree->SetBranchAddress("etHA",etHA);
    sortDataTree->SetBranchAddress("etHB",etHB);
 
@@ -2220,8 +2257,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    Int_t   thBin  = -1;
    Float_t phiA   = -1;
    Float_t phiB   = -1;
-   Int_t   indexA = -1;
-   Int_t   indexB = -1;
    Float_t totEA  = 0;
    Float_t totEB  = 0;
 
@@ -2239,6 +2274,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    Bool_t testTrue = kFALSE;
    Bool_t testBadEvents = kFALSE;
 
+   fileNum++;
+   cout << endl;
+   cout << " fileNum = " << fileNum << endl;
+   
    // Event loop
    for (Int_t ientry = 0 ; ientry < nEntries ; ientry++){
      
@@ -2285,9 +2324,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      
      // fixed threshold
      if( !GoodInnerEnergy(EA[4]) ||
-	 !GoodInnerEnergy(EB[4]) )
+     	 !GoodInnerEnergy(EB[4]) )
        continue;
      
+     // thetas in same bin
      if(!GoodThetaBinAB(ltHA[4],ltHB[4]))
        continue;
      else
@@ -2295,8 +2335,6 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      
      phiA   = -1;
      phiB   = -1;
-     indexA = -1;
-     indexB = -1;
      nDuplicatesA  = 0;
      nDuplicatesB  = 0;
      nDuplicatesAB = 0;
@@ -2309,13 +2347,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
        
        if( GoodPhi( ltHB[i], thBin, EB[i], EB[4]) ){
 	 phiB = CrystalToPhiB(i);
-	 indexB = i;
 	 nDuplicatesB++;
        }
        
        if( GoodPhi( ltHA[i], thBin, EA[i], EA[4]) ){
 	 phiA = CrystalToPhiA(i);
-	 indexA = i;
 	 nDuplicatesA++;
        }
        
@@ -2362,6 +2398,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      //Exact delta phi in [0,360) range
      dPhiXact  = GetDeltaPhi(simPhiA[0],simPhiB[0]);
      
+     //exact angles delta phi
+     //this will be acceptance corrected 
+     //for two file (pol/unpol) case 
+     hDPhi[thBin][fileNum]->Fill(dPhiXact);
+
      //------------------------------------
      //------------------------------------
      //------------------------------------
@@ -2413,9 +2454,48 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      else if (dPhiLab == 270)
        AsymTrue[thBin][3] += 1;
      
+     hDPhi_2[thBin][fileNum]->Fill(dPhiXact);    
      
    } // end of : for (Int_t ientry = 0 ; ien.....
 
+   TCanvas *canvas = new TCanvas("canvas","canvas",
+				 1500,1000);
+   
+   canvas->Clear();
+   
+   Int_t nRows = 2; 
+   Int_t nColumns = nThbins/nRows;;
+   canvas->Divide(nColumns,nRows);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     hDPhi[th][fileNum]->SetLineColor(kBlue);
+     hDPhi[th][fileNum]->SetMinimum(0.0);
+     
+     hDPhi_2[th][fileNum]->SetLineColor(kBlue);
+     hDPhi_2[th][fileNum]->SetMinimum(0.0);
+     
+     if(fileNum==1){
+       
+       hDPhi[th][0]->Divide(hDPhi[th][1]);
+       hDPhi_2[th][0]->Divide(hDPhi_2[th][1]);
+     }
+   }
+     
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hDPhi[th][0]->Draw("");
+   }
+   plotName = "../Plots/hDPhi_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
+   
+   for( Int_t th = 0 ; th < nThbins ; th++){
+     canvas->cd(th+1);
+     hDPhi_2[th][0]->Draw("");
+   }
+   plotName = "../Plots/hDPhi_2_" + inputFileNumber;
+   plotName += ".pdf";
+   canvas->SaveAs(plotName);
    
    cout << endl;
    cout << " Lab Asymmetry"<<endl;
@@ -2664,12 +2744,17 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
+
   
+
+  canvas->Clear();
+
+
   TH1F *hr;
   
   Float_t maxY = 2.8;
   Float_t minY = 0.8;
-//   maxY = 1.4;
+  //   maxY = 1.4;
 //   minY = 0.9;
   
   if(dPhiDiff==180){
@@ -2681,6 +2766,8 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   
   hr = canvas->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
   hr->GetXaxis()->SetTitle("#theta (deg)");
+
+    
 
   TGraphErrors *grAsym[3];
   
