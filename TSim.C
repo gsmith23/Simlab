@@ -558,13 +558,13 @@ Float_t TSim::CrystalToPhi(Int_t crystal){
 Float_t TSim::CrystalToPhiA(Int_t crystal){
   
   Float_t crystalToPhiA[9] = { -1.  ,  0.  ,  -1.,
-			       -90. ,  -1. ,  90.,
-			       -1.  , 180. , -1.};
+  			       -90. ,  -1. ,  90.,
+  			       -1.  , 180. , -1.};
   
- //   // corner crystals
- //   Float_t crystalToPhiA[9] = { 45.  , -1.  , -45.,
- // 			       -1.  , -1. ,  -1.,
- // 			       135. , -1. , -135.};
+  //  // corner crystals
+  // Float_t crystalToPhiA[9] = { 45.  , -1.  , -45.,
+  // 			       -1.  , -1. ,  -1.,
+  // 			       135. , -1. , -135.};
 
 return crystalToPhiA[crystal];
  }
@@ -572,13 +572,13 @@ return crystalToPhiA[crystal];
 Float_t TSim::CrystalToPhiB(Int_t crystal){
 
    Float_t crystalToPhiB[9] = { -1. ,  0.  , -1.,
-				90. ,  -1. , -90.,
-				-1. , 180. , -1.};
+   				90. ,  -1. , -90.,
+   				-1. , 180. , -1.};
    
 
- //   Float_t crystalToPhiB[9] = { -45. , -1. , 45.,
- // 			       -1.  , -1. , -1.,
- // 			       -135., -1. , 135.};
+   // Float_t crystalToPhiB[9] = { -45. , -1. , 45.,
+   // 			       -1.  , -1. , -1.,
+   // 			       -135., -1. , 135.};
 
    return crystalToPhiB[crystal];
  }
