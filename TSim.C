@@ -1,5 +1,7 @@
 #include "TSim.h"
 
+// sugar!
+
 #if !defined(__CINT__)
 ClassImp(TSim)
 #endif
