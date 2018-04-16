@@ -363,8 +363,10 @@ void TLab::MakeCalibratedDataTreeFile(){
   cout << " Making calibrated data tree " << endl;
 
   SetPedestals();
+  
+  //To Do: SetPhotopeaks();
   FitPhotopeaks();
-
+  
   Float_t temp_phoQ = 0.;
   
   // HWHM QDC to energy
