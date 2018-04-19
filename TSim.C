@@ -1264,7 +1264,7 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    Int_t nDuplicatesB  = 0;
    Int_t nDuplicatesA  = 0;
    
-   Bool_t testTrue = kFALSE;
+   Bool_t testTrue = kTRUE;
    Bool_t testBadEvents = kFALSE;
    
    for (Int_t i = 0 ; i < nThbins ; i++){
@@ -1306,6 +1306,10 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
      //----------------------------------------
      
      // swap lab variables for exact variables
+     
+     // energy    -> unsmeared
+     // lab theta -> exact theta
+     
      if (testTrue) { 
        totEA = totEAX;
        totEB = totEBX;
@@ -2137,8 +2141,8 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
 
 Bool_t TSim::GoodTotalEnergy(Float_t totalEnergy){
   
-  Float_t totEnergyMin = 450;
-  Float_t totEnergyMax = 550;
+  Float_t totEnergyMin = 500;
+  Float_t totEnergyMax = 522;
   
   if( (totalEnergy > totEnergyMin) &&
       (totalEnergy < totEnergyMax) )
@@ -2273,7 +2277,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    Int_t nDuplicatesB  = 0;
    Int_t nDuplicatesA  = 0;
    
-   Bool_t testTrue = kFALSE;
+   Bool_t testTrue = kTRUE;
    Bool_t testBadEvents = kFALSE;
 
    fileNum++;
@@ -2315,9 +2319,11 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
        for (Int_t k = 0; k < nCrystals; k++){
 	 EA[k]   = EAX[k];
 	 EB[k]   = EBX[k];
+	 
+	 ltHA[k] = simtHA[0];
+ 	 ltHB[k] = simtHB[0];
+	 
        }
-	 ltHA[4] = simtHA[0];
- 	 ltHB[4] = simtHB[0];
      }
      
      if ( !GoodTotalEnergy(totEA) ||
@@ -2895,8 +2901,8 @@ void TSim::CalculateABC(){
       fABC[i][j] = fABC[i][j]/4.;
       pABC[i][j] = fABC[i][j]/fABC[i][bin000];
       
-      cout << " pABC["<< i << "][" << j << "] = " 
-	   <<  pABC[i][j] << endl;
+//       cout << " pABC["<< i << "][" << j << "] = " 
+// 	   <<  pABC[i][j] << endl;
     }
   }
   
@@ -3316,14 +3322,14 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   entangled[0] = kFALSE;
   entangled[1] = kFALSE;
   
-  entangled[0] = kTRUE;
+  //  entangled[0] = kTRUE;
   //entangled[1] = kTRUE;
   
   polarised[0] = kFALSE;
   polarised[1] = kFALSE;
 
-  if(!entangled[0])
-    polarised[0] = kTRUE;
+//   if(!entangled[0])
+//     polarised[0] = kTRUE;
   
   // if(!entangled[1])
   //   polarised[1] = kTRUE;
@@ -3694,41 +3700,52 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   plotName += "_";
   
   if(nThetaSBins==0){
-    plotName += inputFileNumber2;
-    plotName += "_A_%d_";  
-    plotName += "_%d";
-    plotName += "_%d";
-    plotName.Form(plotName,nPhibinsSim);
+    
+    if(nGraphs==1){
+      plotName.Form( "../Plots/" 
+		     + inputFileNumber1 + "_" + 
+		     "A_%d_%d_dPhiBins.pdf" ,dPhiDiff,nPhibinsSim);
+    }
+    else{
+    plotName.Form( "../Plots/" 
+		   + inputFileNumber1 + "_" 
+		   + inputFileNumber2 +
+		   "_A_%d_%d_dPhiBins.pdf" ,dPhiDiff,nPhibinsSim);
+    }
   }
   else{
-    plotName += "_A_%d_";  
-    plotName += "Scattered_%d";
-    plotName.Form(plotName,dPhiDiff,nPhibinsSim);
-
+    plotName.Form( "../Plots/" 
+		   + inputFileNumber1 + "_" 
+		   + inputFileNumber2 +
+		   "_A_%d_scat_%d_dPhiBins.pdf" ,dPhiDiff,nPhibinsSim);
+    
   }
-  plotName += "dPhiBins.pdf";
+  
   canvas->SaveAs(plotName);
   
   //-----------------------------------------------------------------
   // Graphing Ratio of Asymms for Entangled,Polarised to Unpolarised
-  
-  leg->Clear();
-  //leg->AddEntry(grAsymR,gLegTitle,"E P");
-  
-  hr = canvas->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
-  hr->GetXaxis()->SetTitle("#theta (deg)");
-  sprintf(yAxis,"A^{E,P}/A^{E,U} #Delta #phi = %d",dPhiDiff);
-  hr->GetYaxis()->SetTitle(yAxis);
-  hr->GetYaxis()->SetTitleOffset(0.7);
-  
-  grAsymR->Draw("P L E");
 
-  plotName =  "../Plots/A_" + inputFileNumber1;
-  plotName += "_";
-  plotName += inputFileNumber2;
-  plotName += ".pdf";
-  
-  canvas->SaveAs(plotName);
+  if(nGraphs==2){
+    leg->Clear();
+    //leg->AddEntry(grAsymR,gLegTitle,"E P");
+    
+    hr = canvas->DrawFrame(thetaLowEdge,minY,thetaHighEdge,maxY);
+    hr->GetXaxis()->SetTitle("#theta (deg)");
+    sprintf(yAxis,"A^{E,P}/A^{E,U} #Delta #phi = %d",dPhiDiff);
+    hr->GetYaxis()->SetTitle(yAxis);
+    hr->GetYaxis()->SetTitleOffset(0.7);
+    
+    
+    grAsymR->Draw("P L E");
+    
+    plotName.Form("../Plots/" 
+		  + inputFileNumber1 + "_" 
+		  + inputFileNumber2 + "_" 
+		  "A_%d.pdf", dPhiDiff);
+    
+    canvas->SaveAs(plotName);
+  }
   
   // ------------------------------------------------
   //  Fourier Coefficients Graph
@@ -3789,17 +3806,16 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   }
   
   if(nThetaSBins==0){
-    plotName =  "../Plots/FourierCoeffs_";
-    plotName += inputFileNumber1;
-    plotName += inputFileNumber2;
-    plotName += "_%dPhiBins.pdf";
-    plotName.Form(plotName,nPhibinsSim);
+    plotName.Form("../Plots/" + 
+		  inputFileNumber1 + "_"    +
+		  inputFileNumber2 + "_"    +
+		  "FC_%d_PhiBins.pdf",nPhibinsSim);
   }
   else{
-    plotName = "../Plots/FourierCoeffs_Scattered_";
-    plotName += inputFileNumber1;
-    plotName += "_%dPhiBins.pdf";
-    plotName.Form(plotName,nPhibinsSim);
+    plotName.Form("../Plots/" + 
+		  inputFileNumber1 + "_"    +
+		  inputFileNumber2 + "_"    +
+		  "FC_%d_scat_PhiBins.pdf",nPhibinsSim);
   }
 
   leg->Draw();

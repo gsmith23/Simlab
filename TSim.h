@@ -163,10 +163,10 @@ class TSim : public TObject{
   Int_t   nb_ComptA[nCrystals];
   Int_t   nb_ComptB[nCrystals];
   
-  Float_t thetaLowEdge  = 30.;
-  Float_t thetaHighEdge = 150.;
+  Float_t thetaLowEdge  = 10.;
+  Float_t thetaHighEdge = 170.;
   
-  static const Int_t  nThbins = 6;
+  static const Int_t  nThbins = 8;
   static const Int_t nPhibins = 4;
 
   Int_t fileNum = -1;
