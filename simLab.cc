@@ -32,7 +32,10 @@ Int_t main(int argc, char **argv){
        ( strcmp(argv[1],"3")==0 && argc != 4) &&
        ( strcmp(argv[1],"3")==0 && argc != 5) 
        )                                         ||
-      ( strcmp(argv[1],"4")==0 && argc != 4)     ||
+      (
+       ( strcmp(argv[1],"4")==0 && argc != 3)    &&
+       ( strcmp(argv[1],"4")==0 && argc != 4)    
+       )                                         ||
       ( strcmp(argv[1],"5")==0 && argc != 3)     ||
       ( strcmp(argv[1],"6")==0 && argc != 2)     ||
       ( strcmp(argv[1],"8")==0 && argc != 5)     ||
@@ -93,12 +96,11 @@ Int_t main(int argc, char **argv){
     cout << " simulated data file number (polarised)" << endl;
     cout << " OR, for single file analysis..        " << endl; 
     cout << " simulated data file number            " << endl;
-    cout << " same simulated data file number       " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Examples:                             " << endl; 
     cout << " ./simLab 4 001132000 000132000;       " << endl;
-    cout << " ./simLab 4 001132000 001132000;       " << endl;
+    cout << " ./simLab 4 001132000                  " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " ------------------------------------- " << endl;
     cout << " Option 5 - two further arguments      " << endl;
@@ -536,17 +538,25 @@ Int_t main(int argc, char **argv){
     cout << "       | for two simulations |" << endl;
     cout << "       ----------------------" << endl; 
     cout << endl;
+    
+    TSim * simData = NULL;
 
     cout << endl;
-    cout << " Analysing : " << argv[2] << " and "<< argv[3] << endl;
-    
-    TSim * simData = new TSim(argv[2], argv[3]);
-    
+    if     (argc==3){
+      cout << " Analysing : " << argv[2]  << endl;
+      simData = new TSim(argv[2], argv[2]);
+      simData->GraphAsymmetrySim(argv[2], argv[2]);
+    }
+    else if(argc==4){
+      cout << " Analysing : " << argv[2] << " and "<< argv[3] << endl;
+      simData = new TSim(argv[2], argv[3]);
+      simData->GraphAsymmetrySim(argv[2], argv[3]);
+    }
     
     cout << endl;
     cout << " Calculating & Plotting Asymmetry " << endl;
     
-    simData->GraphAsymmetrySim(argv[2], argv[3]);
+    
         
     delete simData;
     
