@@ -35,8 +35,8 @@ class TSim : public TObject{
 				       Float_t);
   
   void CalculateABC();
-  void CalculateABC_Lab();
-  void CalculateABC_True();
+  void CalculateABC_L1();
+  void CalculateABC_L2();
   
   void GraphAsymmetrySim(TString, 
 			 TString, 
@@ -141,7 +141,6 @@ class TSim : public TObject{
   //======================
   //======================
 
-  //bin sizes
   static const Int_t nCrystals = 9;
 
   Double_t EA[nCrystals];
@@ -169,10 +168,13 @@ class TSim : public TObject{
   static const Int_t  nThbins = 8;
   static const Int_t nPhibins = 4;
 
-  Int_t fileNum = -1;
-
-  TH1F * hDPhi[nThbins][2];
-  TH1F * hDPhi_2[nThbins][2];
+  Int_t fileNum = 0;
+  
+  TH1F * hDPhi_F1_L1[nThbins];
+  TH1F * hDPhi_F2_L1[nThbins];
+  
+  TH1F * hDPhi_F1_L2[nThbins];
+  TH1F * hDPhi_F2_L2[nThbins];
   
   // must be multiple of 4
   static const Int_t nPhibinsSim = 8; 
@@ -200,19 +202,17 @@ class TSim : public TObject{
   Float_t ThMax[nThbins];
   Float_t plotTheta[nThbins]; 
   
-  Float_t AsymMatrix_sim[nThbins][nPhibinsSim];
-  Float_t AsymMatrix[nThbins][nPhibins];
-  Float_t AsymTrue[nThbins][nPhibins];
+  Float_t N_dPhi_X[nThbins][nPhibinsSim];
+  Float_t N_dPhi_L1[nThbins][nPhibins];
+  Float_t N_dPhi_L2[nThbins][nPhibins];
 
-  Float_t AsPhiDiff[nThbins];
-  Float_t AePhiDiff[nThbins];
-  Float_t AsTrue[nThbins];
-  Float_t AeTrue[nThbins];
+  Float_t A_L1[nThbins];
+  Float_t A_L1_E[nThbins];
+  Float_t A_L2[nThbins];
+  Float_t A_L2_E[nThbins];
 
-  Float_t f_AsPhiDiff[nThbins];
-  Float_t f_AePhiDiff[nThbins];
-
-  
+  Float_t f_A_L1[nThbins];
+  Float_t f_A_L1_E[nThbins];
 
   Float_t fABC[nThbins][3];
   Float_t pABC[nThbins][3];
@@ -220,28 +220,28 @@ class TSim : public TObject{
   Float_t pB[nThbins];
   Float_t pC[nThbins];
   
-  Float_t fABC_Lab[nThbins][3];
-  Float_t pABC_Lab[nThbins][3];
-  Float_t pA_Lab[nThbins];
-  Float_t pB_Lab[nThbins];
-  Float_t pC_Lab[nThbins];
+  Float_t fABC_L1[nThbins][3];
+  Float_t pABC_L1[nThbins][3];
+  Float_t pA_L1[nThbins];
+  Float_t pB_L1[nThbins];
+  Float_t pC_L1[nThbins];
 
-  Float_t fABC_True[nThbins][3];
-  Float_t pABC_True[nThbins][3];
-  Float_t pA_True[nThbins];
-  Float_t pB_True[nThbins];
-  Float_t pC_True[nThbins];
+  Float_t fABC_L2[nThbins][3];
+  Float_t pABC_L2[nThbins][3];
+  Float_t pA_L2[nThbins];
+  Float_t pB_L2[nThbins];
+  Float_t pC_L2[nThbins];
 
   Int_t n000;
   Int_t n090;
   Int_t n180;
   Int_t n270;
 
-  Double_t P_lab[nThbins];
-  Double_t Pq_lab[nThbins];
+  Double_t P_L1[nThbins];
+  Double_t Pq_L1[nThbins];
 
-  Double_t P_true_lab[nThbins];
-  Double_t Pq_true_lab[nThbins];
+  Double_t P_L2[nThbins];
+  Double_t Pq_L2[nThbins];
   
   Double_t sigmaA[nCrystals];
   Double_t sigmaB[nCrystals];

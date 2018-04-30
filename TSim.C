@@ -605,87 +605,87 @@ Int_t TSim::ExactToLabPhi(Float_t phi){
 
  Float_t TSim::GetAsymLab(Int_t dPhiDiff, Int_t i){
 
-   Float_t AsPhiDiff = 0;
-   if (AsymMatrix[i][0] != 0){
+   Float_t A_L1 = 0;
+   if (N_dPhi_L1[i][0] != 0){
        if (dPhiDiff  == 90){
-	 AsPhiDiff = AsymMatrix[i][1]/AsymMatrix[i][0];
+	 A_L1 = N_dPhi_L1[i][1]/N_dPhi_L1[i][0];
 	 //using average 90 and 270
-	 //AsPhiDiff = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
+	 //A_L1 = (N_dPhi_L1[i][1]+N_dPhi_L1[i][3])/(2*N_dPhi_L1[i][0]);
        }
        if (dPhiDiff  == 180)
-	 AsPhiDiff = AsymMatrix[i][2]/AsymMatrix[i][0];
+	 A_L1 = N_dPhi_L1[i][2]/N_dPhi_L1[i][0];
        if (dPhiDiff  == 270)
-	 AsPhiDiff = AsymMatrix[i][3]/AsymMatrix[i][0];
+	 A_L1 = N_dPhi_L1[i][3]/N_dPhi_L1[i][0];
      }
-   return AsPhiDiff;
+   return A_L1;
  }
 
  Float_t TSim::GetAsymLabErr(Int_t dPhiDiff, Int_t i){
 
-   Float_t AsPhiDiff = 0;
-   Float_t AePhiDiff = 0;
-   if (AsymMatrix[i][0] != 0){
+   Float_t A_L1 = 0;
+   Float_t A_L1_E = 0;
+   if (N_dPhi_L1[i][0] != 0){
        if (dPhiDiff  == 90){
-	 AsPhiDiff = AsymMatrix[i][1]/AsymMatrix[i][0];
-	 AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][1])+(1/AsymMatrix[i][0]));
+	 A_L1 = N_dPhi_L1[i][1]/N_dPhi_L1[i][0];
+	 A_L1_E = A_L1*Sqrt((1/N_dPhi_L1[i][1])+(1/N_dPhi_L1[i][0]));
 
 	 // using average 90 and 270
-	 //AsPhiDiff = (AsymMatrix[i][1]+AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
-	 //AePhiDiff = AsPhiDiff*Sqrt((1/(AsymMatrix[i][1]+AsymMatrix[i][3]))+(1/AsymMatrix[i][0]));
+	 //A_L1 = (N_dPhi_L1[i][1]+N_dPhi_L1[i][3])/(2*N_dPhi_L1[i][0]);
+	 //A_L1_E = A_L1*Sqrt((1/(N_dPhi_L1[i][1]+N_dPhi_L1[i][3]))+(1/N_dPhi_L1[i][0]));
        }
        if (dPhiDiff  == 180){
-	 AsPhiDiff = AsymMatrix[i][2]/AsymMatrix[i][0];
-	 AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][2])+(1/AsymMatrix[i][0]));
+	 A_L1 = N_dPhi_L1[i][2]/N_dPhi_L1[i][0];
+	 A_L1_E = A_L1*Sqrt((1/N_dPhi_L1[i][2])+(1/N_dPhi_L1[i][0]));
        }
        if (dPhiDiff  == 270){
-	 AsPhiDiff = AsymMatrix[i][3]/AsymMatrix[i][0];
-	 AePhiDiff = AsPhiDiff*Sqrt((1/AsymMatrix[i][3])+(1/AsymMatrix[i][0]));
+	 A_L1 = N_dPhi_L1[i][3]/N_dPhi_L1[i][0];
+	 A_L1_E = A_L1*Sqrt((1/N_dPhi_L1[i][3])+(1/N_dPhi_L1[i][0]));
        }
      }
 
-   return AePhiDiff;
+   return A_L1_E;
  }
 
  Float_t TSim::GetAsymLabTrue(Int_t dPhiDiff, Int_t i){
 
-   Float_t AsTrue = 0;
-   if (AsymTrue[i][0] != 0){
+   Float_t A_L2 = 0;
+   if (N_dPhi_L2[i][0] != 0){
        if (dPhiDiff  == 90){
-	 AsTrue = AsymTrue[i][1]/AsymTrue[i][0];
+	 A_L2 = N_dPhi_L2[i][1]/N_dPhi_L2[i][0];
 	 //using average 90 and 270
-	 //AsTrue = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
+	 //A_L2 = (N_dPhi_L2[i][1]+N_dPhi_L2[i][3])/(2*N_dPhi_L2[i][0]);
        }
        if (dPhiDiff  == 180)
-	 AsTrue = AsymTrue[i][2]/AsymTrue[i][0];
+	 A_L2 = N_dPhi_L2[i][2]/N_dPhi_L2[i][0];
        if (dPhiDiff  == 270)
-	 AsTrue = AsymTrue[i][3]/AsymTrue[i][0];
+	 A_L2 = N_dPhi_L2[i][3]/N_dPhi_L2[i][0];
      }
-   return AsTrue;
+   return A_L2;
  }
 
 Float_t TSim::GetAsymLabTrueErr(Int_t dPhiDiff, Int_t i){
 
-   Float_t AsTrue = 0;
-   Float_t AeTrue = 0;
-   if (AsymTrue[i][0] != 0){
+   Float_t A_L2 = 0;
+   Float_t A_L2_E = 0;
+   if (N_dPhi_L2[i][0] != 0){
        if (dPhiDiff  == 90){
-	 AsTrue = AsymTrue[i][1]/AsymTrue[i][0];
-	 AeTrue = AsTrue*Sqrt((1/AsymTrue[i][1])+(1/AsymTrue[i][0]));
+	 A_L2 = N_dPhi_L2[i][1]/N_dPhi_L2[i][0];
+	 A_L2_E = A_L2*Sqrt((1/N_dPhi_L2[i][1])+(1/N_dPhi_L2[i][0]));
 	 //using average 90 and 270
-	 // AsTrue = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
- // 	AeTrue = AsTrue*Sqrt((1/(AsymTrue[i][1]+AsymTrue[i][3]))+(1/AsymTrue[i][0]));
+	 // A_L2 = (N_dPhi_L2[i][1]+N_dPhi_L2[i][3])/(2*N_dPhi_L2[i][0]);
+ // 	A_L2_E = A_L2*Sqrt((1/(N_dPhi_L2[i][1]+N_dPhi_L2[i][3]))+(1/N_dPhi_L2[i][0]));
        }
        if (dPhiDiff  == 180){
-	 AsTrue = AsymTrue[i][2]/AsymTrue[i][0];
-	 AeTrue = AsTrue*Sqrt((1/AsymTrue[i][2])+(1/AsymTrue[i][0]));
+	 A_L2 = N_dPhi_L2[i][2]/N_dPhi_L2[i][0];
+	 A_L2_E = A_L2*Sqrt((1/N_dPhi_L2[i][2])+(1/N_dPhi_L2[i][0]));
        }
        if (dPhiDiff  == 270){
-	 AsTrue = AsymTrue[i][3]/AsymTrue[i][0];
-	 AeTrue = AsTrue*Sqrt((1/AsymTrue[i][3])+(1/AsymTrue[i][0]));
+	 A_L2 = N_dPhi_L2[i][3]/N_dPhi_L2[i][0];
+	 A_L2_E = A_L2*Sqrt((1/N_dPhi_L2[i][3])+(1/N_dPhi_L2[i][0]));
        }
      }
 
-   return AeTrue;
+   return A_L2_E;
  }
 
 void TSim::GetThetaBinValues(){
@@ -707,21 +707,23 @@ void TSim::InitHs(){
    for( Int_t th = 0 ; th < nThbins ; th++){
 
      TString hTitle = "";
-
-     hTitle.Form("hDPhi_%d_0",th);
-     hDPhi[th][0] = new TH1F(hTitle,hTitle,
-			     32, 0.,360.);
-     hTitle.Form("hDPhi_%d_1",th);
-     hDPhi[th][1] = new TH1F(hTitle,hTitle,
-			     32, 0.,360.);
-
-     hTitle.Form("hDPhi_2_%d_0",th);
-     hDPhi_2[th][0] = new TH1F(hTitle,hTitle,
+     
+     hTitle.Form("hDPhi_F1_L1_%d",th);
+     hDPhi_F1_L1[th] = new TH1F(hTitle,hTitle,
+				32, 0.,360.);
+     
+     hTitle.Form("hDPhi_F2_L1_%d",th);
+     hDPhi_F2_L1[th] = new TH1F(hTitle,hTitle,
 				32, 0.,360.);
 
-     hTitle.Form("hDPhi_2_%d_1",th);
-     hDPhi_2[th][1] = new TH1F(hTitle,hTitle,
-				32, 0.,360.);
+     hTitle.Form("hDPhi_F1_L2%d",th);
+     hDPhi_F1_L2[th] = new TH1F(hTitle,hTitle,
+				   32, 0.,360.);
+     
+     hTitle.Form("hDPhi_F2_L2_%d_0",th);
+     hDPhi_F2_L2[th] = new TH1F(hTitle,hTitle,
+				   32, 0.,360.);
+     
    }
 
 
@@ -1227,12 +1229,12 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
 
    for(Int_t j = 0 ; j <nThbins; j++){
      for(Int_t k = 0 ; k < 4; k++){
-       AsymMatrix[j][k] = 0;}
+       N_dPhi_L1[j][k] = 0;}
    }
 
    for(Int_t j = 0 ; j < nThbins; j++){
      for(Int_t k = 0 ; k < 4; k++){
-       AsymTrue[j][k] = 0;}
+       N_dPhi_L2[j][k] = 0;}
    }
 
    Long64_t nEntries = sortDataTree->GetEntries();
@@ -2249,12 +2251,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    
    for(Int_t j = 0 ; j <nThbins; j++){
      for(Int_t k = 0 ; k < 4; k++){
-       AsymMatrix[j][k] = 0;}
+       N_dPhi_L1[j][k] = 0;}
    }
 
    for(Int_t j = 0 ; j < nThbins; j++){
      for(Int_t k = 0 ; k < 4; k++){
-       AsymTrue[j][k] = 0;}
+       N_dPhi_L2[j][k] = 0;}
    }
 
    Long64_t nEntries = sortDataTree->GetEntries();
@@ -2277,7 +2279,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    Int_t nDuplicatesA  = 0;
    
    //In function CalculateAsymmetryLab(
-   Bool_t testTrue = kTRUE;
+   Bool_t testTrue = kFALSE;
    Bool_t testBadEvents = kFALSE;
 
    fileNum++;
@@ -2400,17 +2402,22 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      //------------------------
      // Delta phi and phi res
      
-     //Lablike delta phi in [0,360) range
+     // Lablike delta phi in [0,360) range
      dPhiLab   = GetDeltaPhi(phiA,phiB);
      
-     //Exact delta phi in [0,360) range
+     // Exact delta phi in [0,360) range
      dPhiXact  = GetDeltaPhi(simPhiA[0],simPhiB[0]);
      
-     //exact angles delta phi
-     //this will be acceptance corrected 
-     //for two file (pol/unpol) case 
-     hDPhi[thBin][fileNum]->Fill(dPhiXact);
-
+     // exact angles delta phi
+     // this will be acceptance corrected 
+     // for two file (pol/unpol) case 
+     if     (fileNum == 1){
+       hDPhi_F1_L1[thBin]->Fill(dPhiXact);
+     }
+     else if(fileNum == 2){
+       hDPhi_F2_L1[thBin]->Fill(dPhiXact);
+     }
+     
      //------------------------------------
      //------------------------------------
      //------------------------------------
@@ -2419,13 +2426,13 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      //------------------------------------
 
      if      (dPhiLab == 0) 
-       AsymMatrix[thBin][0] += 1;
+       N_dPhi_L1[thBin][0] += 1;
      else if (dPhiLab == 90)
-       AsymMatrix[thBin][1] += 1;
+       N_dPhi_L1[thBin][1] += 1;
      else if (dPhiLab == 180 )
-       AsymMatrix[thBin][2] += 1;
+       N_dPhi_L1[thBin][2] += 1;
      else if (dPhiLab == 270)
-       AsymMatrix[thBin][3] += 1;
+       N_dPhi_L1[thBin][3] += 1;
      
      // Lablike events Selected
      //--------------------------------------
@@ -2454,15 +2461,20 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      // with extra conditions
      
      if      (dPhiLab == 0.)
-       AsymTrue[thBin][0] += 1;
+       N_dPhi_L2[thBin][0] += 1;
      else if ( dPhiLab == 90 )
-       AsymTrue[thBin][1] += 1;
+       N_dPhi_L2[thBin][1] += 1;
      else if ( dPhiLab == 180 )
-       AsymTrue[thBin][2] += 1;
+       N_dPhi_L2[thBin][2] += 1;
      else if (dPhiLab == 270)
-       AsymTrue[thBin][3] += 1;
+       N_dPhi_L2[thBin][3] += 1;
      
-     hDPhi_2[thBin][fileNum]->Fill(dPhiXact);    
+     if     (fileNum == 1){
+       hDPhi_F1_L2[thBin]->Fill(dPhiXact);
+     }
+     else if(fileNum == 2){
+       hDPhi_F2_L2[thBin]->Fill(dPhiXact);
+     }
      
    } // end of : for (Int_t ientry = 0 ; ien.....
 
@@ -2476,32 +2488,35 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    canvas->Divide(nColumns,nRows);
    
    for( Int_t th = 0 ; th < nThbins ; th++){
-     hDPhi[th][fileNum]->SetLineColor(kBlue);
-     hDPhi[th][fileNum]->SetMinimum(0.0);
      
-     hDPhi_2[th][fileNum]->SetLineColor(kBlue);
-     hDPhi_2[th][fileNum]->SetMinimum(0.0);
-     
-     if(fileNum==1){
+     if     (fileNum == 1){
        
-       hDPhi[th][0]->Divide(hDPhi[th][1]);
-       hDPhi_2[th][0]->Divide(hDPhi_2[th][1]);
+       hDPhi_F1_L1[th]->SetLineColor(kBlue);
+       hDPhi_F1_L1[th]->SetMinimum(0.0);
+     }
+     else if(fileNum == 2){
+     
+       hDPhi_F2_L1[th]->SetLineColor(kBlue);
+       hDPhi_F2_L1[th]->SetMinimum(0.0);
+       
+       hDPhi_F1_L1[th]->Divide(hDPhi_F1_L1[th]);
+       hDPhi_F1_L2[th]->Divide(hDPhi_F2_L2[th]);
      }
    }
-     
+   
    for( Int_t th = 0 ; th < nThbins ; th++){
      canvas->cd(th+1);
-     hDPhi[th][0]->Draw("");
+     hDPhi_F1_L1[th]->Draw("");
    }
-   plotName = "../Plots/hDPhi_" + inputFileNumber;
+   plotName = "../Plots/hDPhi_F1_L1" + inputFileNumber;
    plotName += ".pdf";
    canvas->SaveAs(plotName);
    
    for( Int_t th = 0 ; th < nThbins ; th++){
      canvas->cd(th+1);
-     hDPhi_2[th][0]->Draw("");
+     hDPhi_F1_L2[th]OB->Draw("");
    }
-   plotName = "../Plots/hDPhi_2_" + inputFileNumber;
+   plotName = "../Plots/hDPhi_F1_L2" + inputFileNumber;
    plotName += ".pdf";
    canvas->SaveAs(plotName);
    
@@ -2511,10 +2526,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	<< "90 \t" << "180 \t" << "270" << endl;
    for (Int_t i = 0 ; i < nThbins ; i++){
      cout << " " << plotTheta[i]     << "\t"
-	  << " " << AsymMatrix[i][0] << "\t" 
-	  << " " << AsymMatrix[i][1] << "\t"
-	  << " " << AsymMatrix[i][2] << "\t" 
-	  << " " << AsymMatrix[i][3] << endl;
+	  << " " << N_dPhi_L1[i][0] << "\t" 
+	  << " " << N_dPhi_L1[i][1] << "\t"
+	  << " " << N_dPhi_L1[i][2] << "\t" 
+	  << " " << N_dPhi_L1[i][3] << endl;
    }
    
    cout << endl;
@@ -2523,10 +2538,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	<< "90 \t" << "180 \t" << "270" << endl;
    for (Int_t i = 0 ; i < nThbins; i++){
      cout << " " << plotTheta[i]   << "\t "
-	  << " " << AsymTrue[i][0] << "\t "
-	  << " " << AsymTrue[i][1] << "\t " 
-	  << " " << AsymTrue[i][2] << "\t " 
-	  << " " << AsymTrue[i][3] << endl;
+	  << " " << N_dPhi_L2[i][0] << "\t "
+	  << " " << N_dPhi_L2[i][1] << "\t " 
+	  << " " << N_dPhi_L2[i][2] << "\t " 
+	  << " " << N_dPhi_L2[i][3] << endl;
    }
    cout << endl;
    
@@ -2548,8 +2563,23 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     nFiles = 1;
   cout << endl;
   cout << " There are " << nFiles << " Files " << endl;
-  if(nFiles==2)
-    cout << " Dividing by unpolarised data " << endl;
+  
+  Int_t method = 1;
+
+  if(nFiles==2){
+    
+    cout << " Choose method: " << endl;
+    cout << " 1 - divide by unpolarised " << endl;
+    cout << " 2 - plot entangled and polarised" << endl;
+    cout << endl;
+    cin  >> method;
+    
+    if     ( method == 1 ) 
+      cout << " Dividing by unpolarised data " << endl;
+    else if( method == 2 )
+      cout << " Comparing entangled to polarised " << endl;
+  }
+  
   
   TString plotName = "plotName";
   
@@ -2560,22 +2590,22 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   
   // data members (declared in TSim.h)
   for (Int_t th = 0 ; th < nThbins ; th++){
-    AsPhiDiff[th] = 0.;
-    AePhiDiff[th] = 0.;
-    AsTrue[th] = 0.;
-    AeTrue[th] = 0.;
+    A_L1[th] = 0.;
+    A_L1_E[th] = 0.;
+    A_L2[th] = 0.;
+    A_L2_E[th] = 0.;
   }
 
   // Extras needed for multi-file case
-  Float_t AsPhiDiff1[nThbins] = {0.};
-  Float_t AePhiDiff1[nThbins] = {0.};
-  Float_t AsPhiDiffR[nThbins] = {0.};
-  Float_t AePhiDiffR[nThbins] = {0.};
+  Float_t A_L11[nThbins] = {0.};
+  Float_t A_L1_E1[nThbins] = {0.};
+  Float_t A_L1_R[nThbins] = {0.};
+  Float_t A_L1_R_E[nThbins] = {0.};
 
-  Float_t AsTrue1[nThbins] = {0.};
-  Float_t AeTrue1[nThbins] = {0.};
-  Float_t AsTrueR[nThbins] = {0.};
-  Float_t AeTrueR[nThbins] = {0.};
+  Float_t A_L21[nThbins] = {0.};
+  Float_t A_L2_E1[nThbins] = {0.};
+  Float_t A_L2_R[nThbins] = {0.};
+  Float_t A_L2_R_E[nThbins] = {0.};
   
   Float_t mu[nThbins]={0};
   Float_t muE[nThbins]={0};
@@ -2597,91 +2627,91 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
       CalculateAsymmetryLab(inputFileNumber2);
     
     for (Int_t i = 0 ; i < nThbins ; i++){
-      if (AsymMatrix[i][0] != 0){
+      if (N_dPhi_L1[i][0] != 0){
 	
-	mu[i] = (AsymMatrix[i][1] - AsymMatrix[i][0]);
-	mu[i] = mu[i]/(AsymMatrix[i][1] + AsymMatrix[i][0]);
+	mu[i] = (N_dPhi_L1[i][1] - N_dPhi_L1[i][0]);
+	mu[i] = mu[i]/(N_dPhi_L1[i][1] + N_dPhi_L1[i][0]);
 	
 	if (dPhiDiff  == 90){
 	  
 	  if(!use270){
-	    AsPhiDiff[i] = AsymMatrix[i][1]/AsymMatrix[i][0];
-	    AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][1])+
-					     (1/AsymMatrix[i][0]));
+	    A_L1[i] = N_dPhi_L1[i][1]/N_dPhi_L1[i][0];
+	    A_L1_E[i] = A_L1[i]*Sqrt((1/N_dPhi_L1[i][1])+
+					     (1/N_dPhi_L1[i][0]));
 	  }
 	  else{
-	    AsPhiDiff[i] = (AsymMatrix[i][1]+
-			    AsymMatrix[i][3])/(2*AsymMatrix[i][0]);
-	    AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/(AsymMatrix[i][1]+
-						 AsymMatrix[i][3]))+
-					     (1/AsymMatrix[i][0]));
+	    A_L1[i] = (N_dPhi_L1[i][1]+
+			    N_dPhi_L1[i][3])/(2*N_dPhi_L1[i][0]);
+	    A_L1_E[i] = A_L1[i]*Sqrt((1/(N_dPhi_L1[i][1]+
+						 N_dPhi_L1[i][3]))+
+					     (1/N_dPhi_L1[i][0]));
 	  }
 	}
 	if (dPhiDiff  == 180){
-	  AsPhiDiff[i] = AsymMatrix[i][2]/AsymMatrix[i][0];
-	  AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][2])+
-					   (1/AsymMatrix[i][0]));
+	  A_L1[i] = N_dPhi_L1[i][2]/N_dPhi_L1[i][0];
+	  A_L1_E[i] = A_L1[i]*Sqrt((1/N_dPhi_L1[i][2])+
+					   (1/N_dPhi_L1[i][0]));
 	}
 	if (dPhiDiff  == 270){
-	  AsPhiDiff[i] = AsymMatrix[i][3]/AsymMatrix[i][0];
-	  AePhiDiff[i] = AsPhiDiff[i]*Sqrt((1/AsymMatrix[i][3])+
-					   (1/AsymMatrix[i][0]));
+	  A_L1[i] = N_dPhi_L1[i][3]/N_dPhi_L1[i][0];
+	  A_L1_E[i] = A_L1[i]*Sqrt((1/N_dPhi_L1[i][3])+
+					   (1/N_dPhi_L1[i][0]));
 	}
       }
     
       // duplicate for later use in two file case
       if     (file==0){
-	AsPhiDiff1[i] = AsPhiDiff[i];
-	AePhiDiff1[i] = AePhiDiff[i];
+	A_L11[i] = A_L1[i];
+	A_L1_E1[i] = A_L1_E[i];
 	
       }
       else if(file==1){
-	AsPhiDiffR[i] = AsPhiDiff1[i]/AsPhiDiff[i] ;
-	AePhiDiffR[i] = AsPhiDiffR[i] * 
-	  Sqrt( AePhiDiff[i]*AePhiDiff[i]/(AsPhiDiff[i]*AsPhiDiff[i]) +
-		AePhiDiff1[i]*AePhiDiff1[i]/(AsPhiDiff1[i]*AsPhiDiff1[i]));
+	A_L1_R[i] = A_L11[i]/A_L1[i] ;
+	A_L1_R_E[i] = A_L1_R[i] * 
+	  Sqrt( A_L1_E[i]*A_L1_E[i]/(A_L1[i]*A_L1[i]) +
+		A_L1_E1[i]*A_L1_E1[i]/(A_L11[i]*A_L11[i]));
       }
              
     }
     
     for (Int_t i = 0 ; i < nThbins ; i++){
-      if (AsymTrue[i][0] != 0){
+      if (N_dPhi_L2[i][0] != 0){
 	if (dPhiDiff  == 90){
 	  
 	  if(!use270){
-	    AsTrue[i] = AsymTrue[i][1]/AsymTrue[i][0];
-	    AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][1])+
-				       (1/AsymTrue[i][0]));
+	    A_L2[i] = N_dPhi_L2[i][1]/N_dPhi_L2[i][0];
+	    A_L2_E[i] = A_L2[i]*Sqrt((1/N_dPhi_L2[i][1])+
+				       (1/N_dPhi_L2[i][0]));
 	  }
 	  else{
-	    AsTrue[i] = (AsymTrue[i][1]+AsymTrue[i][3])/(2*AsymTrue[i][0]);
-	    AeTrue[i] = AsTrue[i]*Sqrt((1/(AsymTrue[i][1]+
-					   AsymTrue[i][3]))+
-				       (1/AsymTrue[i][0]));
+	    A_L2[i] = (N_dPhi_L2[i][1]+N_dPhi_L2[i][3])/(2*N_dPhi_L2[i][0]);
+	    A_L2_E[i] = A_L2[i]*Sqrt((1/(N_dPhi_L2[i][1]+
+					   N_dPhi_L2[i][3]))+
+				       (1/N_dPhi_L2[i][0]));
 	  }
 	}
 	if (dPhiDiff  == 180){
-	  AsTrue[i] = AsymTrue[i][2]/AsymTrue[i][0];
-	  AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][2])+
-				     (1/AsymTrue[i][0]));
+	  A_L2[i] = N_dPhi_L2[i][2]/N_dPhi_L2[i][0];
+	  A_L2_E[i] = A_L2[i]*Sqrt((1/N_dPhi_L2[i][2])+
+				     (1/N_dPhi_L2[i][0]));
 	}
 	if (dPhiDiff  == 270){
-	  AsTrue[i] = AsymTrue[i][3]/AsymTrue[i][0];
-	  AeTrue[i] = AsTrue[i]*Sqrt((1/AsymTrue[i][3])+
-				     (1/AsymTrue[i][0]));
+	  A_L2[i] = N_dPhi_L2[i][3]/N_dPhi_L2[i][0];
+	  A_L2_E[i] = A_L2[i]*Sqrt((1/N_dPhi_L2[i][3])+
+				     (1/N_dPhi_L2[i][0]));
 	}
       }
       
       if     (file==0){
-	AsTrue1[i] = AsTrue[i];
-	AeTrue1[i] = AeTrue[i];
+	A_L21[i] = A_L2[i];
+	A_L2_E1[i] = A_L2_E[i];
 	
       }
       else if(file==1){
-	AsTrueR[i] = AsTrue1[i]/AsTrue[i] ;
-	AeTrueR[i] = AsTrueR[i] * 
-	  Sqrt( AeTrue[i]*AeTrue[i]/(AsTrue[i]*AsTrue[i]) + 
-		AeTrue1[i]*AeTrue1[i]/(AsTrue1[i]*AsTrue1[i]));
+	A_L2_R[i] = A_L21[i]/A_L2[i] ;
+	A_L2_R_E[i] = A_L2_R[i] * 
+	  Sqrt( A_L2_E[i]*A_L2_E[i]/(A_L2[i]*A_L2[i]) + 
+		A_L2_E1[i]*A_L2_E1[i]/(A_L21[i]*A_L21[i]));
       }
       
     } // end of: for (Int_t i = 0 ; i < nThbins ...
@@ -2742,28 +2772,24 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     }
     
     // acceptance
-    f_AsPhiDiff[i] = AsPhiDiff[i]/aTheoryX[i];
+    f_A_L1[i] = A_L1[i]/aTheoryX[i];
     // error on acceptance
-    f_AePhiDiff[i] = AePhiDiff[i]/aTheoryX[i];
+    f_A_L1_E[i] = A_L1_E[i]/aTheoryX[i];
     
     plotTheta[i] = plotTheta[i]*RadToDeg();
   }
   
-  
-  TCanvas *canvas = new TCanvas("canvas","canvas",
+TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
-
   
-
   canvas->Clear();
-
-
+  
   TH1F *hr;
   
   Float_t maxY = 2.8;
   Float_t minY = 0.8;
   //   maxY = 1.4;
-//   minY = 0.9;
+  //   minY = 0.9;
   
   if(dPhiDiff==180){
     maxY = 6.0;
@@ -2782,9 +2808,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
   TGraphErrors * grMu = new TGraphErrors(nThbins,plotTheta,mu,0,muE);
 
   if     (nFiles==1)
-    grAsym[0] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+    grAsym[0] = new TGraphErrors(nThbins,plotTheta,A_L1,0,A_L1_E);
   else if(nFiles == 2)
-    grAsym[0] = new TGraphErrors(nThbins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+    grAsym[0] = new TGraphErrors(nThbins,plotTheta,A_L1_R,0,A_L1_R_E);
   
   grAsym[1] = new TGraphErrors(nThbins,plotTheta,aTheory,0,aTheoryE);
 
@@ -2792,9 +2818,9 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     plotTheta[i] += 2.;
 
   if     (nFiles==1)
-    grAsym[2] = new TGraphErrors(nThbins,plotTheta,AsTrue,0,AeTrue);
+    grAsym[2] = new TGraphErrors(nThbins,plotTheta,A_L2,0,A_L2_E);
   else if(nFiles == 2)
-    grAsym[2] = new TGraphErrors(nThbins,plotTheta,AsTrueR,0,AeTrueR);
+    grAsym[2] = new TGraphErrors(nThbins,plotTheta,A_L2_R,0,A_L2_R_E);
 
   grAsym[0]->SetLineColor(kGreen+2.7);
   grAsym[0]->SetMarkerColor(kGreen+2.7);
@@ -2839,7 +2865,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     
   }  
   
-  plotName += "_A_lab";
+  plotName += "_A_Lab";
   plotName.Form(plotName + "_%d",dPhiDiff);
   plotName += ".pdf";
   
@@ -2881,23 +2907,23 @@ void TSim::CalculateABC(){
       pABC[i][j] = 0.;
     }
     
-    if (AsymMatrix_sim[i][bin000]== 0) continue;
+    if (N_dPhi_X[i][bin000]== 0) continue;
     
-    fABC[i][0]  =  AsymMatrix_sim[i][bin000];
-    fABC[i][1]  =  AsymMatrix_sim[i][bin000];
-    fABC[i][2]  =  AsymMatrix_sim[i][bin000];
+    fABC[i][0]  =  N_dPhi_X[i][bin000];
+    fABC[i][1]  =  N_dPhi_X[i][bin000];
+    fABC[i][2]  =  N_dPhi_X[i][bin000];
     
-    fABC[i][0] +=  AsymMatrix_sim[i][bin090];
-    fABC[i][1] +=  AsymMatrix_sim[i][bin000];
-    fABC[i][2] -=  AsymMatrix_sim[i][bin090];
+    fABC[i][0] +=  N_dPhi_X[i][bin090];
+    fABC[i][1] +=  N_dPhi_X[i][bin000];
+    fABC[i][2] -=  N_dPhi_X[i][bin090];
     
-    fABC[i][0] +=  AsymMatrix_sim[i][bin180];
-    fABC[i][1] -=  AsymMatrix_sim[i][bin180];
-    fABC[i][2] +=  AsymMatrix_sim[i][bin180];
+    fABC[i][0] +=  N_dPhi_X[i][bin180];
+    fABC[i][1] -=  N_dPhi_X[i][bin180];
+    fABC[i][2] +=  N_dPhi_X[i][bin180];
     
-    fABC[i][0] +=  AsymMatrix_sim[i][bin270];
-    fABC[i][1] -=  AsymMatrix_sim[i][bin180];
-    fABC[i][2] -=  AsymMatrix_sim[i][bin270];
+    fABC[i][0] +=  N_dPhi_X[i][bin270];
+    fABC[i][1] -=  N_dPhi_X[i][bin180];
+    fABC[i][2] -=  N_dPhi_X[i][bin270];
     
     for(Int_t j = 0 ; j < 3 ; j++){
       fABC[i][j] = fABC[i][j]/4.;
@@ -2910,45 +2936,45 @@ void TSim::CalculateABC(){
   
 }
 
-void TSim::CalculateABC_True(){
+void TSim::CalculateABC_L2(){
   
   Bool_t comments = kFALSE;
 
   for(Int_t i = 0 ; i < nThbins ; i++){
     
     for(Int_t j = 0 ; j < 3 ; j++){
-      fABC_True[i][j] = 0.;
-      pABC_True[i][j] = 0.;
+      fABC_L2[i][j] = 0.;
+      pABC_L2[i][j] = 0.;
     }
     
-    if (AsymTrue[i][bin000]== 0) continue;
+    if (N_dPhi_L2[i][bin000]== 0) continue;
     
-    fABC_True[i][0]  =  AsymTrue[i][0];
-    fABC_True[i][1]  =  AsymTrue[i][0];
-    fABC_True[i][2]  =  AsymTrue[i][0];
+    fABC_L2[i][0]  =  N_dPhi_L2[i][0];
+    fABC_L2[i][1]  =  N_dPhi_L2[i][0];
+    fABC_L2[i][2]  =  N_dPhi_L2[i][0];
     
-    fABC_True[i][0] +=  AsymTrue[i][1];
-    fABC_True[i][1] +=  AsymTrue[i][0];
-    fABC_True[i][2] -=  AsymTrue[i][1];
+    fABC_L2[i][0] +=  N_dPhi_L2[i][1];
+    fABC_L2[i][1] +=  N_dPhi_L2[i][0];
+    fABC_L2[i][2] -=  N_dPhi_L2[i][1];
     
-    fABC_True[i][0] +=  AsymTrue[i][2];
-    fABC_True[i][1] -=  AsymTrue[i][2];
-    fABC_True[i][2] +=  AsymTrue[i][2];
+    fABC_L2[i][0] +=  N_dPhi_L2[i][2];
+    fABC_L2[i][1] -=  N_dPhi_L2[i][2];
+    fABC_L2[i][2] +=  N_dPhi_L2[i][2];
     
-    fABC_True[i][0] +=  AsymTrue[i][3];
-    fABC_True[i][1] -=  AsymTrue[i][2];
-    fABC_True[i][2] -=  AsymTrue[i][3];
+    fABC_L2[i][0] +=  N_dPhi_L2[i][3];
+    fABC_L2[i][1] -=  N_dPhi_L2[i][2];
+    fABC_L2[i][2] -=  N_dPhi_L2[i][3];
     
 
     
     for(Int_t j = 0 ; j < 3 ; j++){
-      fABC_True[i][j] = fABC_True[i][j]/4.;
-      pABC_True[i][j] = fABC_True[i][j]/fABC_True[i][bin000];
+      fABC_L2[i][j] = fABC_L2[i][j]/4.;
+      pABC_L2[i][j] = fABC_L2[i][j]/fABC_L2[i][bin000];
     
       if( comments ){
 	cout << endl;
-	cout << " pABC_True["<< i << "][" << j << "] = " 
-	     <<  pABC_True[i][j] << endl;
+	cout << " pABC_L2["<< i << "][" << j << "] = " 
+	     <<  pABC_L2[i][j] << endl;
       }
     }
     
@@ -2956,47 +2982,47 @@ void TSim::CalculateABC_True(){
   
 }
 
-void TSim::CalculateABC_Lab(){
+void TSim::CalculateABC_L1(){
   
   for(Int_t i = 0 ; i < nThbins ; i++){
     
     for(Int_t j = 0 ; j < 3 ; j++){
-      fABC_Lab[i][j] = 0.;
-      pABC_Lab[i][j] = 0.;
+      fABC_L1[i][j] = 0.;
+      pABC_L1[i][j] = 0.;
     }
     
-    if (AsymMatrix[i][0]== 0) continue;
+    if (N_dPhi_L1[i][0]== 0) continue;
     
-    fABC_Lab[i][0]  =  AsymMatrix[i][0];
-    fABC_Lab[i][1]  =  AsymMatrix[i][0];
-    fABC_Lab[i][2]  =  AsymMatrix[i][0];
+    fABC_L1[i][0]  =  N_dPhi_L1[i][0];
+    fABC_L1[i][1]  =  N_dPhi_L1[i][0];
+    fABC_L1[i][2]  =  N_dPhi_L1[i][0];
         
-    fABC_Lab[i][0] +=  AsymMatrix[i][1];
-    fABC_Lab[i][1] +=  AsymMatrix[i][0];
-    fABC_Lab[i][2] -=  AsymMatrix[i][1];
+    fABC_L1[i][0] +=  N_dPhi_L1[i][1];
+    fABC_L1[i][1] +=  N_dPhi_L1[i][0];
+    fABC_L1[i][2] -=  N_dPhi_L1[i][1];
     
-    fABC_Lab[i][0] +=  AsymMatrix[i][2];
-    fABC_Lab[i][1] -=  AsymMatrix[i][2];
-    fABC_Lab[i][2] +=  AsymMatrix[i][2];
+    fABC_L1[i][0] +=  N_dPhi_L1[i][2];
+    fABC_L1[i][1] -=  N_dPhi_L1[i][2];
+    fABC_L1[i][2] +=  N_dPhi_L1[i][2];
     
-    fABC_Lab[i][0] +=  AsymMatrix[i][3];
-    fABC_Lab[i][1] -=  AsymMatrix[i][2];
-    fABC_Lab[i][2] -=  AsymMatrix[i][3];
+    fABC_L1[i][0] +=  N_dPhi_L1[i][3];
+    fABC_L1[i][1] -=  N_dPhi_L1[i][2];
+    fABC_L1[i][2] -=  N_dPhi_L1[i][3];
 
     Bool_t comments = kFALSE;
     if(comments){    
       cout << endl;
       for(Int_t j = 0 ; j < 3 ; j++){
-	//fABC_Lab[i][j] = 1.0*fABC_Lab[i][j]/4.;
-	pABC_Lab[i][j] = 1.0*fABC_Lab[i][j]/fABC_Lab[i][0];
+	//fABC_L1[i][j] = 1.0*fABC_L1[i][j]/4.;
+	pABC_L1[i][j] = 1.0*fABC_L1[i][j]/fABC_L1[i][0];
 	
-	cout << " pABC_Lab["<< i << "][" << j << "] = " 
-	     <<  pABC_Lab[i][j] << endl;
+	cout << " pABC_L1["<< i << "][" << j << "] = " 
+	     <<  pABC_L1[i][j] << endl;
       }
       
       for(Int_t j = 0 ; j < 4 ; j++){
-	cout << " AsymMatrix["<< i << "][" << j << "] = " 
-	     <<  AsymMatrix[i][j] << endl;
+	cout << " N_dPhi_L1["<< i << "][" << j << "] = " 
+	     <<  N_dPhi_L1[i][j] << endl;
       }
     }  
   
@@ -3040,7 +3066,7 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   
   for(Int_t j = 0 ; j <nThbins; j++)
     for(Int_t k = 0 ; k < nPhibinsSim; k++)
-      AsymMatrix_sim[j][k] = 0;
+      N_dPhi_X[j][k] = 0;
   
   Float_t  halfBinSize = 180./nPhibinsSim; 
   
@@ -3102,12 +3128,12 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
     // dphi=0 bin
     if( (dPhi_1st <   halfBinSize     ) || 
 	(dPhi_1st > (360-halfBinSize) ) )
-      AsymMatrix_sim[thBin][bin000] += 1;
+      N_dPhi_X[thBin][bin000] += 1;
     // fill the rest 
     for (Int_t i = 1 ; i < nPhibinsSim ; i++){
       if( (dPhi_1st > (halfBinSize*(2*i - 1)) ) &&
 	  (dPhi_1st < (halfBinSize*(2*i + 1)) ) )
-	AsymMatrix_sim[thBin][i] += 1;
+	N_dPhi_X[thBin][i] += 1;
     }
   }//end of: for(Int_t ientry...
 
@@ -3135,7 +3161,7 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
 	     << " and phi bin "               
 	     << k
 	     << " is "
-	     << AsymMatrix_sim[j][k] 
+	     << N_dPhi_X[j][k] 
 	     << endl;
   
   return 0;
@@ -3191,7 +3217,7 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
   
   for(Int_t j = 0 ; j <nThbins; j++){
     for(Int_t k = 0 ; k < nPhibinsSim; k++)
-      AsymMatrix_sim[j][k] = 0;
+      N_dPhi_X[j][k] = 0;
   }
   
   Long64_t nEntries = simDataTree->GetEntries();
@@ -3304,14 +3330,14 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 	if( (dPhi < halfBinSize       ) || 
 	    (dPhi > (360-halfBinSize) )
 	    )
-	  AsymMatrix_sim[thBin][bin000] += 1;
+	  N_dPhi_X[thBin][bin000] += 1;
 	
 	// fill the rest
 	for (Int_t i = 1 ; i < nPhibinsSim ; i++){
 	  if( dPhi > (halfBinSize*(2*i - 1))  &&
 	      dPhi < (halfBinSize*(2*i + 1))  
 	      ){
-	    AsymMatrix_sim[thBin][i] += 1;
+	    N_dPhi_X[thBin][i] += 1;
 	  }
 	}
       }
@@ -3329,7 +3355,7 @@ Int_t TSim::CalculateAsymmetrySimScattered(TString inputFileNumber,
 	     << " and phi bin "               
 	     << k
 	     << " is "
-	     << AsymMatrix_sim[j][k] 
+	     << N_dPhi_X[j][k] 
 	     << endl;
   }
   
@@ -3383,14 +3409,14 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
    
 
   // Calculating ratios for desired dPhiDiff
-  Float_t AsPhiDiff[nThbins] = {0.};
-  Float_t AePhiDiff[nThbins] = {0.};
+  Float_t A_L1[nThbins] = {0.};
+  Float_t A_L1_E[nThbins] = {0.};
   
-  Float_t AsPhiDiff1[nThbins] = {0.};
-  Float_t AePhiDiff1[nThbins] = {0.};
+  Float_t A_L11[nThbins] = {0.};
+  Float_t A_L1_E1[nThbins] = {0.};
 
-  Float_t AsPhiDiffR[nThbins] = {0.};
-  Float_t AePhiDiffR[nThbins] = {0.};
+  Float_t A_L1_R[nThbins] = {0.};
+  Float_t A_L1_R_E[nThbins] = {0.};
   
   // Entangled, Polarised
   Float_t AsMx_simEP[nThbins][nPhibinsSim] = {{0.},{0.}};
@@ -3445,7 +3471,7 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
   for (Int_t g = 0 ; g < nGraphs ; g++){
     
     if     ( g == 0 ){
-      // Set: AsymMatrix_sim[thBin][]
+      // Set: N_dPhi_X[thBin][]
       CalculateAsymmetrySim(inputFileNumber1);
       //cout << " skipping " << endl;
     }
@@ -3461,7 +3487,7 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
 				       thetaSHalf);
     }
     
-    // now that AsymMatrix_sim[thBin][phiBin]
+    // now that N_dPhi_X[thBin][phiBin]
     // is set ...
     CalculateABC();
     
@@ -3477,7 +3503,7 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
     
     // Set: N(dPhi)/N(0)
     for (Int_t i = 0 ; i < nThbins ; i++){
-      if (AsymMatrix_sim[i][0]== 0) continue;
+      if (N_dPhi_X[i][0]== 0) continue;
       
       if(subUnPol){
 	//-------------------
@@ -3490,11 +3516,11 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
 	// sum the contribrutions
 	for (Int_t p = 0 ; p < nPhibinsSim ; p++ ){
 	  if     (g == 0){
-	    AsMx_simEP[i][p]  = AsymMatrix_sim[i][p];
+	    AsMx_simEP[i][p]  = N_dPhi_X[i][p];
 	    AsMx_simEPInt[i] += AsMx_simEP[i][p];
 	  }
 	  else if(g == 1){
-	    AsMx_simEU[i][p]  = AsymMatrix_sim[i][p];
+	    AsMx_simEU[i][p]  = N_dPhi_X[i][p];
 	    AsMx_simEUInt[i] += AsMx_simEU[i][p];
 	  }
 	}
@@ -3532,11 +3558,11 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
 		  AsMx_simEUInt[i] != 0 ){
 	    AsMx_simEU[i][p]  = AsMx_simEU[i][p]/AsMx_simEUInt[i];
 	    
-	    AsymMatrix_sim[i][p] = AsMx_simEP[i][p] - AsMx_simEU[i][p] + 1./nPhibinsSim;
+	    N_dPhi_X[i][p] = AsMx_simEP[i][p] - AsMx_simEU[i][p] + 1./nPhibinsSim;
 	    
-	    cout << " AsymMatrix_sim[" << i 
+	    cout << " N_dPhi_X[" << i 
 		 << "][" << p << "] = "
-		 << AsymMatrix_sim[i][p] 
+		 << N_dPhi_X[i][p] 
 		 << endl;
 	  }
 	}
@@ -3548,48 +3574,48 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
       
       if (dPhiDiff  == 90){
 	
-	AsPhiDiff[i] = AsymMatrix_sim[i][bin090];
-	AsPhiDiff[i] = AsPhiDiff[i]/(AsymMatrix_sim[i][0]);
+	A_L1[i] = N_dPhi_X[i][bin090];
+	A_L1[i] = A_L1[i]/(N_dPhi_X[i][0]);
 	
 // 	cout << endl;
-// 	cout << " AsPhiDiff[" << i 
-// 	     << "] = " << AsPhiDiff[i] << endl;
+// 	cout << " A_L1[" << i 
+// 	     << "] = " << A_L1[i] << endl;
 	
-	//AsPhiDiff[i] = AsPhiDiff[i]+AsymMatrix_sim[i][bin270];
-	//AsPhiDiff[i] = AsPhiDiff[i]/(2.*AsymMatrix_sim[i][0]);
+	//A_L1[i] = A_L1[i]+N_dPhi_X[i][bin270];
+	//A_L1[i] = A_L1[i]/(2.*N_dPhi_X[i][0]);
 	
-	AePhiDiff[i] = AsymMatrix_sim[i][bin090];
-	//AePhiDiff[i] = AsymMatrix_sim[i][bin270];
-	AePhiDiff[i] = 1./AePhiDiff[i];
-	AePhiDiff[i] = AePhiDiff[i] + (1./AsymMatrix_sim[i][0]);
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt(AePhiDiff[i]);
+	A_L1_E[i] = N_dPhi_X[i][bin090];
+	//A_L1_E[i] = N_dPhi_X[i][bin270];
+	A_L1_E[i] = 1./A_L1_E[i];
+	A_L1_E[i] = A_L1_E[i] + (1./N_dPhi_X[i][0]);
+	A_L1_E[i] = A_L1[i]*Sqrt(A_L1_E[i]);
 	
       }
       else if (dPhiDiff  == 180){
-	AsPhiDiff[i] = AsymMatrix_sim[i][bin180];
-	AsPhiDiff[i] = AsPhiDiff[i]/AsymMatrix_sim[i][0];
+	A_L1[i] = N_dPhi_X[i][bin180];
+	A_L1[i] = A_L1[i]/N_dPhi_X[i][0];
 	
-	AePhiDiff[i] = (1./AsymMatrix_sim[i][bin180]);
-	AePhiDiff[i] = AePhiDiff[i] +(1./AsymMatrix_sim[i][0]);
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt(AePhiDiff[i]);
+	A_L1_E[i] = (1./N_dPhi_X[i][bin180]);
+	A_L1_E[i] = A_L1_E[i] +(1./N_dPhi_X[i][0]);
+	A_L1_E[i] = A_L1[i]*Sqrt(A_L1_E[i]);
       }
       else if (dPhiDiff  == 270){
-	AsPhiDiff[i] = AsymMatrix_sim[i][bin270];
-	AsPhiDiff[i] = AsPhiDiff[i]/AsymMatrix_sim[i][0];
+	A_L1[i] = N_dPhi_X[i][bin270];
+	A_L1[i] = A_L1[i]/N_dPhi_X[i][0];
 	
-	AePhiDiff[i] = 1./AsymMatrix_sim[i][bin270];
-	AePhiDiff[i] = AePhiDiff[i] + 1./AsymMatrix_sim[i][0];
-	AePhiDiff[i] = AsPhiDiff[i]*Sqrt(AePhiDiff[i]);
+	A_L1_E[i] = 1./N_dPhi_X[i][bin270];
+	A_L1_E[i] = A_L1_E[i] + 1./N_dPhi_X[i][0];
+	A_L1_E[i] = A_L1[i]*Sqrt(A_L1_E[i]);
       }	
       
       if(nThetaSBins==0){
 	if     (g == 0){
-	  AsPhiDiff1[i] = AsPhiDiff[i];
-	  AePhiDiff1[i] = AePhiDiff[i];
+	  A_L11[i] = A_L1[i];
+	  A_L1_E1[i] = A_L1_E[i];
 	}
 	else if(g == 1){
-	  AsPhiDiffR[i] = AsPhiDiff1[i]/AsPhiDiff[i];
-	  AePhiDiffR[i] = Sqrt(AePhiDiff[i]*AePhiDiff[i] + AePhiDiff1[i]*AePhiDiff1[i]);
+	  A_L1_R[i] = A_L11[i]/A_L1[i];
+	  A_L1_R_E[i] = Sqrt(A_L1_E[i]*A_L1_E[i] + A_L1_E1[i]*A_L1_E1[i]);
 	}
       }
       
@@ -3599,9 +3625,9 @@ void TSim::GraphAsymmetrySim(TString inputFileNumber1,
     } // end of: for (Int_t i = 0 ; i < nThbins ; i+ 
     
     
-    grAsym[g] = new TGraphErrors(nThbins,plotTheta,AsPhiDiff,0,AePhiDiff);
+    grAsym[g] = new TGraphErrors(nThbins,plotTheta,A_L1,0,A_L1_E);
     
-    grAsymR   = new TGraphErrors(nThbins,plotTheta,AsPhiDiffR,0,AePhiDiffR);
+    grAsymR   = new TGraphErrors(nThbins,plotTheta,A_L1_R,0,A_L1_R_E);
     
     grA[g]    = new TGraphErrors(nThbins,plotTheta,pA,0,0);
     grB[g]    = new TGraphErrors(nThbins,plotTheta,pB,0,0);

@@ -1447,12 +1447,12 @@ void TLab::GraphAsymmetry(Char_t option){
 	// record the counts per theta,phi bin
 	// and total per theta bin
 	for (Int_t p = 0 ; p < 4 ; p++){
-	  nSimU[i][p]  = simData->AsymMatrix[i][p];
+	  nSimU[i][p]  = simData->N_dPhi_L1[i][p];
 	  // computed only for completeness
 	  // this will be superceeded below
 	  nSimUE[i][p] = Sqrt(nSimU[i][p]);
 	  
-	  nSimTrueU[i][p]  = simData->AsymTrue[i][p];
+	  nSimTrueU[i][p]  = simData->N_dPhi_L2[i][p];
 	  nSimTrueUE[i][p] = Sqrt(nSimTrueU[i][p]);
 	    
 	  nSimUInt[i]     += nSimU[i][p];
@@ -1537,10 +1537,10 @@ void TLab::GraphAsymmetry(Char_t option){
 	  // Simulated Data
 	  
 	  for (Int_t p = 0 ; p < 4 ; p++){
-	    nSim[i][p]     =  simData->AsymMatrix[i][p];
+	    nSim[i][p]     =  simData->N_dPhi_L1[i][p];
 	    nSimE[i][p]    =  Sqrt(nSim[i][p]);
 	    
-	    nSimTrue[i][p]  =  simData->AsymTrue[i][p];
+	    nSimTrue[i][p]  =  simData->N_dPhi_L2[i][p];
 	    nSimTrueE[i][p] =  Sqrt(nSimTrue[i][p]);
 	    
 	    nSimInt[i]     += nSim[i][p];
