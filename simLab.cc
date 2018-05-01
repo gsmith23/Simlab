@@ -391,7 +391,8 @@ Int_t main(int argc, char **argv){
     cout << " Sort/Re-sort ROOT file ? " << endl;
     cout << " n (default)/ y " << endl;
     cout << " ";
-    cin  >> sort;
+    //!!!!
+    //cin  >> sort;
 
     if (sort == 'y' || sort == 'Y' ){
       cout << endl;

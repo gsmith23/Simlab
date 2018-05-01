@@ -1265,7 +1265,7 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    Int_t nDuplicatesA  = 0;
    
    // In fuction InvestigateAcceptance(
-   Bool_t testTrue = kTRUE;
+   Bool_t testTrue = kFALSE;
    Bool_t testBadEvents = kFALSE;
    
    for (Int_t i = 0 ; i < nThbins ; i++){
@@ -2142,8 +2142,8 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
 
 Bool_t TSim::GoodTotalEnergy(Float_t totalEnergy){
   
-  Float_t totEnergyMin = 500;
-  Float_t totEnergyMax = 522;
+  Float_t totEnergyMin = 450;
+  Float_t totEnergyMax = 550;
   
   if( (totalEnergy > totEnergyMin) &&
       (totalEnergy < totEnergyMax) )
@@ -2327,12 +2327,12 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 	 
        }
      }
-     
+     // 450 - 550 keV
      if ( !GoodTotalEnergy(totEA) ||
 	  !GoodTotalEnergy(totEB) )
        continue;
      
-     // fixed threshold
+     // fixed threshold (60 keV)
      if( !GoodInnerEnergy(EA[4]) ||
      	 !GoodInnerEnergy(EB[4]) )
        continue;
@@ -2354,7 +2354,9 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
        
        // phi determined by outer crystals
        if( i == 4 ) continue;
-       
+     
+       // theta matching inner crystals
+       // energy sum from inner and outer crystals (450,550)
        if( GoodPhi( ltHB[i], thBin, EB[i], EB[4]) ){
 	 phiB = CrystalToPhiB(i);
 	 nDuplicatesB++;
@@ -2499,7 +2501,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
        hDPhi_F2_L1[th]->SetLineColor(kBlue);
        hDPhi_F2_L1[th]->SetMinimum(0.0);
        
-       hDPhi_F1_L1[th]->Divide(hDPhi_F1_L1[th]);
+       hDPhi_F1_L1[th]->Divide(hDPhi_F2_L1[th]);
        hDPhi_F1_L2[th]->Divide(hDPhi_F2_L2[th]);
      }
    }
@@ -2508,16 +2510,16 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
      canvas->cd(th+1);
      hDPhi_F1_L1[th]->Draw("");
    }
-   plotName = "../Plots/hDPhi_F1_L1" + inputFileNumber;
-   plotName += ".pdf";
+   plotName = "../Plots/" + inputFileNumber;
+   plotName += "_hDPhi_F1_L1.pdf";
    canvas->SaveAs(plotName);
    
    for( Int_t th = 0 ; th < nThbins ; th++){
      canvas->cd(th+1);
-     hDPhi_F1_L2[th]OB->Draw("");
+     hDPhi_F1_L2[th]->Draw("");
    }
-   plotName = "../Plots/hDPhi_F1_L2" + inputFileNumber;
-   plotName += ".pdf";
+   plotName = "../Plots/" + inputFileNumber;
+   plotName += "_hDPhi_F1_L2.pdf";
    canvas->SaveAs(plotName);
    
    cout << endl;
@@ -2572,7 +2574,7 @@ void TSim::GraphAsymmetryLab(TString inputFileNumber1,
     cout << " 1 - divide by unpolarised " << endl;
     cout << " 2 - plot entangled and polarised" << endl;
     cout << endl;
-    cin  >> method;
+    //!!!cin  >> method;
     
     if     ( method == 1 ) 
       cout << " Dividing by unpolarised data " << endl;
@@ -3107,8 +3109,8 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
 
     hDPhi->Fill(dPhi_1st);
 
-    // // smear delta phi angle
-    dPhi_1st = rand3->Gaus(dPhi_1st,40.);
+    // !!! smear delta phi angle
+    //dPhi_1st = rand3->Gaus(dPhi_1st,40.);
 
     if     (dPhi_1st < 0)
       dPhi_1st = dPhi_1st + 360; 
