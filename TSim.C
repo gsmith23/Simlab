@@ -9,38 +9,51 @@ TSim::TSim(){
 
 TSim::TSim(TString fileNumber){
   
-  InitHs();
-  GetThetaBinValues();
+  Init();
   
   cout << endl;
   cout << " Constructing TSim object " << endl;
+
+  rootFileRawName =  dataFolder;
+  rootFileRawName += "sim";
+  rootFileRawName += fileNumber;
   
-  rootFileRawName = "../Data/sim" + fileNumber;
-  rootFileSortName = "../Data/sort" + fileNumber;
+  rootFileSortName =  dataFolder;
+  rootFileSortName += "sort";
+  rootFileSortName += fileNumber;
   
-  rootFileRawName = rootFileRawName + ".root";
-  rootFileSortName = rootFileSortName + ".root";
+  rootFileRawName  += ".root";
+  rootFileSortName += ".root";
   
 }
 
 TSim::TSim(TString fileNumber1, TString fileNumber2){
   
-  InitHs();
-  GetThetaBinValues();
+  Init();
 
   cout << endl;
   cout << " Constructing TSim object " << endl;
   
-  rootFileRawName1 = "../Data/sim" + fileNumber1;
-  rootFileSortName1 = "../Data/sort" + fileNumber1;
+  rootFileRawName1  =  dataFolder;
+  rootFileRawName1 += "sim";
+  rootFileRawName1 +=  fileNumber1;
+
+  rootFileSortName1  = dataFolder;
+  rootFileSortName1 += "sort";
+  rootFileSortName1 += fileNumber1;
   
-  rootFileRawName1 = rootFileRawName1 + ".root";
+  rootFileRawName1  = rootFileRawName1  + ".root";
   rootFileSortName1 = rootFileSortName1 + ".root";
   
-  rootFileRawName2 = "../Data/sim" + fileNumber2;
-  rootFileSortName2 = "../Data/sort" + fileNumber2;
+  rootFileRawName2  = dataFolder;
+  rootFileRawName2 += "sim";
+  rootFileRawName2 += fileNumber2;
   
-  rootFileRawName2 = rootFileRawName2 + ".root";
+  rootFileSortName2 = dataFolder;
+  rootFileSortName2 += "sort";
+  rootFileSortName2 += fileNumber2;
+  
+  rootFileRawName2  = rootFileRawName2 + ".root";
   rootFileSortName2 = rootFileSortName2 + ".root";
   
 }
@@ -701,6 +714,16 @@ void TSim::GetThetaBinValues(){
      //cout << " plotTheta[" << i << "] = " << plotTheta[i] << endl;
    }
  }
+
+void TSim::Init(){  
+  
+  InitHs();
+  
+  GetThetaBinValues();
+  dataFolder = "../Data/";
+  
+
+}
 
 void TSim::InitHs(){
 
@@ -2514,7 +2537,7 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
    
    for( Int_t th = 0 ; th < nThbins ; th++){
      canvas->cd(th+1);
-     hDPhi_F1_L2[th]OB->Draw("");
+     hDPhi_F1_L2[th]->Draw("");
    }
    plotName = "../Plots/hDPhi_F1_L2" + inputFileNumber;
    plotName += ".pdf";

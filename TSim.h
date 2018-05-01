@@ -133,6 +133,7 @@ class TSim : public TObject{
     return p[0] + 2*sintsq*sintsq/(gamma*gamma - 2*gamma*sintsq);
   }
 
+  void Init();
   void InitHs();
   
   //======================
@@ -256,6 +257,8 @@ class TSim : public TObject{
   TString rootFileRawName2;
   TString rootFileSortName2;
   
+  TString dataFolder;
+
   // corresponding file
   TFile  *theFile;
   
