@@ -23,7 +23,7 @@ class TSim : public TObject{
   //==================================
   // convert raw root file to root file
   // containing sorted events
-  Int_t  SortEvents(TString);
+  Int_t  SortEvents();
   Bool_t SortedROOTFileExists();
 
   //==================================

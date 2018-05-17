@@ -392,12 +392,13 @@ Int_t main(int argc, char **argv){
     cout << " n (default)/ y " << endl;
     cout << " ";
     //!!!!
-    //cin  >> sort;
+    cin  >> sort;
 
     if (sort == 'y' || sort == 'Y' ){
       cout << endl;
       cout << " Sorting data " << endl;
-      simData->SortEvents(argv[2]);
+      // sort argv[2]
+      simData->SortEvents();
     }
     
     cout << endl;

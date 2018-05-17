@@ -104,20 +104,11 @@ Int_t TSim::GetThetaBin(Float_t theta){
   return bin;
 }
 
-Int_t  TSim::SortEvents(TString fileNumber){
+Int_t  TSim::SortEvents(){
   
   //=========================
   // Initialise variables &
   // connect tree and leaves
-  
-  TString rootFileRawName;
-  TString rootFileSortName;
-
-   rootFileRawName = "../Data/sim" + fileNumber;
-   rootFileSortName = "../Data/sort" + fileNumber;
-
-   rootFileRawName = rootFileRawName + ".root";
-   rootFileSortName = rootFileSortName + ".root";
    
    TFile* inputFile = new TFile(rootFileRawName);
    TFile* outputFile = new TFile(rootFileSortName,"recreate");
@@ -722,7 +713,7 @@ void TSim::Init(){
   GetThetaBinValues();
   dataFolder = "../Data/";
   
-
+  //dataFolder = "/Volumes/G-DRIVE/Data/";
 }
 
 void TSim::InitHs(){
@@ -1206,14 +1197,17 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
 
    plotName = plotName + ".pdf";
 
-   TString inputFileName = "../Data/sort" + inputFileNumber;
-   inputFileName  = inputFileName + ".root";
+   // TString inputFileName = "../Data/sort" + inputFileNumber;
+   // inputFileName  = inputFileName + ".root";
+   
+   //
 
-   cout << endl;
-   cout << " Input File : " << inputFileName  << endl;
-   cout << endl;
+//    cout << endl;
+//    cout << " Input File : " << inputFileName  << endl;
+//    cout << endl;
 
-   TFile* inputFile = new TFile(inputFileName);
+   //TFile* inputFile = new TFile(inputFileName);
+   TFile* inputFile = new TFile(rootFileSortName);
 
    sortDataTree=(TTree*)inputFile->Get("sortDataTree");
 
@@ -2228,8 +2222,10 @@ Int_t TSim::CalculateAsymmetryLab(TString inputFileNumber){
 
    plotName = plotName + ".pdf";
 
-   TString inputFileName = "../Data/sort" + inputFileNumber;
-   inputFileName  = inputFileName + ".root";
+   TString inputFileName = dataFolder;
+   inputFileName += "sort";
+   inputFileName += inputFileNumber;
+   inputFileName += ".root";
 
    cout << endl;
    cout << " Input File : " << inputFileName  << endl;
@@ -3064,8 +3060,10 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   plotName = "../Plots/Asym_sim_" + inputFileNumber;
   plotName = plotName + ".pdf";
 
-  TString inputFileName = "../Data/sim" + inputFileNumber;
-  inputFileName  = inputFileName + ".root";
+  TString inputFileName = "../Data/";
+  inputFileName += "sim";
+  inputFileName += inputFileNumber;
+  inputFileName += ".root";
   
   cout << endl;
   cout << " Input File : " << inputFileName  << endl;
