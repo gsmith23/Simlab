@@ -3093,9 +3093,9 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
   
   Float_t  halfBinSize = 180./nPhibinsSim; 
   
-  TRandom3 * rand3   = new TRandom3(); 
-  TRandom3 * rand3_A = new TRandom3(); 
-  TRandom3 * rand3_B = new TRandom3(); 
+  // TRandom3 * rand3   = new TRandom3(); 
+  // TRandom3 * rand3_A = new TRandom3(); 
+  // TRandom3 * rand3_B = new TRandom3(); 
   
   TH1F * hDPhi = new TH1F("hDPhi",
 			  "hDPhi",
@@ -3120,6 +3120,7 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
     
     Float_t dPhi_1st = PhiA_1st + PhiB_1st;
 
+    // Smear phi angles 
     // PhiA_1st = rand3_A->Gaus(PhiA_1st,40.);
     // PhiB_1st = rand3_B->Gaus(PhiB_1st,40.);
     // dPhi_1st = PhiA_1st + PhiB_1st;
@@ -3130,8 +3131,8 @@ Int_t TSim::CalculateAsymmetrySim(TString inputFileNumber){
 
     hDPhi->Fill(dPhi_1st);
 
-    // !!! smear delta phi angle
-    //dPhi_1st = rand3->Gaus(dPhi_1st,40.);
+    // Smear delta phi angle
+    // dPhi_1st = rand3->Gaus(dPhi_1st,40.);
 
     if     (dPhi_1st < 0)
       dPhi_1st = dPhi_1st + 360; 

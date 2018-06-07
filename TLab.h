@@ -124,7 +124,17 @@ class TLab : public TObject{
   TCanvas *canvas2;
   
   // Raw data
-  TH1F   *hQ[nChannels][nRuns];
+  //TH1F   *hQ[nChannels][nRuns];
+  
+  // pre-run OR data
+  TH1F   *hQ_0[nChannels];
+  
+  // main run
+  TH1F   *hQ_1[nChannels];
+  
+  // post-run OR data
+  TH1F   *hQ_2[nChannels];
+  
   TH1F   *hT[nChannels];
 
   Long64_t eventNumber;

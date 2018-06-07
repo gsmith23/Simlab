@@ -219,14 +219,31 @@ void TLab::MakeRawDataTreeFile(){
   for(Int_t i = 0 ; i < nChannels ; i++ ){
 
     // usually three runs: OR, AND, OR
-    for(Int_t run = 0 ; run < nRuns ; run++ ){    
+    // for(Int_t run = 0 ; run < nRuns ; run++ ){    
+    //   nameHist.Form("hQ%d_%d",i,run);
+    //   titleHist.Form("hQ%d_%d;QDC bin;Counts",i,run);
+    //   hQ[i][run] = new TH1F(nameHist,titleHist,4096,0,4096);
+    // }
 
-      nameHist.Form("hQ%d_%d",i,run);
-      titleHist.Form("hQ%d_%d;QDC bin;Counts",i,run);
-      hQ[i][run] = new TH1F(nameHist,titleHist,4096,0,4096);
+    
+    //  pre-run OR data 
+    Int_t run = 0; 
+    nameHist.Form("hQ_%d_%d",run,i);
+    titleHist.Form("hQ_%d_%d;QDC bin;Counts",run,i);
+    hQ_0[i] = new TH1F(nameHist,titleHist,4096,0,4096);
+    
+    // main run 
+    run = 1;
+    nameHist.Form("hQ%d_%d",run,i);
+    titleHist.Form("hQ_%d_%d;QDC bin;Counts",run,i);
+    hQ_1[i] = new TH1F(nameHist,titleHist,4096,0,4096);
       
-    }
-
+    // post-run OR data 
+    run = 2;
+    nameHist.Form("hQ%d_%d",run,i);
+    titleHist.Form("hQ_%d_%d;QDC bin;Counts",run,i);
+    hQ_2[i] = new TH1F(nameHist,titleHist,4096,0,4096);
+      
     nameHist.Form("hT%d",i);
     titleHist.Form("hT%d;TDC bin;Counts",i);
     hT[i] = new TH1F(nameHist,titleHist,5200,0,5200);
@@ -277,13 +294,22 @@ void TLab::MakeRawDataTreeFile(){
     
       // one histogram per channel and per run
       if      ( eventNumber < nOR1 )
-	hQ[i][0]->Fill(Q[i]);
+	// pre-run OR data 
+	//hQ[i][0]->Fill(Q[i]);
+	hQ_0[i]->Fill(Q[i]);
       else if ( eventNumber > (nOR1+nAND)){
-	hQ[i][2]->Fill(Q[i]);
+	// post-run OR data 
+	
+	//hQ[i][2]->Fill(Q[i]);
+	hQ_2[i]->Fill(Q[i]);
       }
-      else
-      hQ[i][1]->Fill(Q[i]);
-      
+      else {
+	// main run
+
+	//hQ[i][1]->Fill(Q[i]);
+	hQ_1[i]->Fill(Q[i]);
+	
+      }
       hT[i]->Fill(T[i]);
       
     } // end of: for(Int_t i = 0 ; i < 16 ; i++ ...
@@ -579,15 +605,44 @@ void TLab::SetPedestals(){
   
   TString histName = "";
   
+  // cout << endl;
+  // for(Int_t run = 0 ; run < nRuns ; run++ ){    
+  //   for( Int_t i = 0 ; i < nChannels ; i++ ){
+  //     histName.Form("hQ%d_%d",i,run);
+  //     hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
+  //     pedQ[i][run] = hQ[i][run]->GetXaxis()->
+  // 	GetBinCenter(hQ[i][run]->GetMaximumBin());
+  //   }
+  // }
+  
   cout << endl;
-  for(Int_t run = 0 ; run < nRuns ; run++ ){    
-    for( Int_t i = 0 ; i < nChannels ; i++ ){
-      histName.Form("hQ%d_%d",i,run);
-      hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
-      pedQ[i][run] = hQ[i][run]->GetXaxis()->
-	GetBinCenter(hQ[i][run]->GetMaximumBin());
-    }
+  
+  Int_t run = 0;
+  for( Int_t i = 0 ; i < nChannels ; i++ ){
+    
+    // pre-run OR data 
+    histName.Form("hQ_%d_%d",run,i);
+    hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
+    pedQ[i][run] = hQ_0[i]->GetXaxis()->
+      GetBinCenter(hQ_0[i]->GetMaximumBin());
+
+    // pre-run OR data 
+    run = 1;
+    histName.Form("hQ_%d_%d",run,i);
+    hQ_1[i] = (TH1F*)rootFileRawData->Get(histName);
+    pedQ[i][run] = hQ_1[i]->GetXaxis()->
+      GetBinCenter(hQ_1[i]->GetMaximumBin());
+
+    // pre-run OR data 
+    run = 2;
+    histName.Form("hQ_%d_%d",run,i);
+    hQ_2[i] = (TH1F*)rootFileRawData->Get(histName);
+    pedQ[i][run] = hQ_2[i]->GetXaxis()->
+      GetBinCenter(hQ_2[i]->GetMaximumBin());
+
+    
   }
+  
   
   cout << endl;
   for(Int_t run = 0 ; run < nRuns ; run++ ){
@@ -628,42 +683,86 @@ void TLab::FitPhotopeaks(){
   
   TF1 *phoQfit = nullptr;
   
-  for(Int_t run = 0 ; run < nRuns ; run++){
-    for( Int_t i = 0 ; i < nChannels ; i++ ){
-      
-      histName.Form("hQ%d_%d",i,run);
-      hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
-      hQ[i][run]->GetXaxis()->SetRangeUser(2400,4000);
-      maxv = hQ[i][run]->GetXaxis()->
-	GetBinCenter(hQ[i][run]->GetMaximumBin());
-      
-      phoQfit = new TF1("phoQfit",
-			"[0]*exp(-0.5*(((x-[1])/[2])^2))",
-			maxv-250,maxv+250);
-      
-      phoQfit->SetLineColor(2);
-      phoQfit->SetParameters(10.,3000.,100.);
+  for( Int_t i = 0 ; i < nChannels ; i++ ){
 
-      if      (i == 9)
-	phoQfit->SetParameters(10.,2800.,100.);
-      else if (i == 2)
-	phoQfit->SetParameters(10.,3200.,100.);
-      
-      //phoQfit->SetParLimits(1.,2700.,3700.);
-      //phoQfit->SetParLimits(2.,100.,300.);
-      
-      hQ[i][run]->Fit("phoQfit","RQ");
-      
-      sprintf(plotName,"../Plots/%d_hQ%d_%d.pdf",
-	      runNumberInt,
-	      i,run);
-      
-      canvas->SaveAs(plotName);
-      
-      phoQ[i][run] = phoQfit->GetParameter(1.);
-      HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
+    phoQfit = new TF1("phoQfit",
+		      "[0]*exp(-0.5*(((x-[1])/[2])^2))",
+		      maxv-250,maxv+250);
+    
+    phoQfit->SetLineColor(2);
+    phoQfit->SetParameters(10.,3000.,100.);
+    
+    // adjust parameters for some channels
+    // To do: move to separate function
+    // with run number as argument
+    if      (i == 9)
+      phoQfit->SetParameters(10.,2800.,100.);
+    else if (i == 2)
+      phoQfit->SetParameters(10.,3200.,100.);
+    
+    //phoQfit->SetParLimits(1.,2700.,3700.);
+    //phoQfit->SetParLimits(2.,100.,300.);
+    
+    // pre-run OR data 
+    Int_t run = 0;
+    
+    histName.Form("hQ%d_%d",i,run);
+    hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
+    hQ_0[i]->GetXaxis()->SetRangeUser(2400,4000);
+    maxv = hQ_0[i]->GetXaxis()->
+      GetBinCenter(hQ_0[i]->GetMaximumBin());
+        
+    hQ_0[i]->Fit("phoQfit","RQ");
+    
+    sprintf(plotName,"../Plots/%d_hQ_%d_%d.pdf",
+	    runNumberInt,
+	    run,i);
+    
+    phoQ[i][run] = phoQfit->GetParameter(1.);
+    HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
+    
+    // main run AND data 
+    run = 1;
+    
+    histName.Form("hQ%d_%d",i,run);
+    hQ_1[i] = (TH1F*)rootFileRawData->Get(histName);
+    hQ_1[i]->GetXaxis()->SetRangeUser(2400,4000);
+    maxv = hQ_1[i]->GetXaxis()->
+      GetBinCenter(hQ_1[i]->GetMaximumBin());
+        
+    hQ_1[i]->Fit("phoQfit","RQ");
+    
+    sprintf(plotName,"../Plots/%d_hQ_%d_%d.pdf",
+	    runNumberInt,
+	    run,i);
+    
+    phoQ[i][run] = phoQfit->GetParameter(1.);
+    HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
+    
+    // post-run OR data 
+    run = 2;
+    
+    histName.Form("hQ%d_%d",i,run);
+    hQ_2[i] = (TH1F*)rootFileRawData->Get(histName);
+    hQ_2[i]->GetXaxis()->SetRangeUser(2400,4000);
+    maxv = hQ_2[i]->GetXaxis()->
+      GetBinCenter(hQ_2[i]->GetMaximumBin());
+        
+    hQ_2[i]->Fit("phoQfit","RQ");
+    
+    sprintf(plotName,"../Plots/%d_hQ_%d_%d.pdf",
+	    runNumberInt,
+	    run,i);
+    
+    phoQ[i][run] = phoQfit->GetParameter(1.);
+    HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
 
-    }
+    
+    canvas->SaveAs(plotName);
+    
+    // main run
+      
+    
   }
   
   
@@ -1197,9 +1296,9 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t nSimTrueInt[nThBins]={0};
   
   Float_t nSimE[nThBins][nPhiBins]={{0},{0}};
-  Float_t nSimIntE[nThBins]={0};
+  //  Float_t nSimIntE[nThBins]={0};
   Float_t nSimTrueE[nThBins][nPhiBins]={{0},{0}};
-  Float_t nSimTrueIntE[nThBins]={0};
+  //  Float_t nSimTrueIntE[nThBins]={0};
   
   Float_t nSimU[nThBins][nPhiBins]={{0},{0}};
   Float_t nSimUInt[nThBins]={0};
@@ -1221,7 +1320,7 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t nAsymMatrixInt[nThBins] = {0};
   
   Float_t nAsymMatrixE[nThBins][nPhiBins]={{0},{0}};
-  Float_t nAsymMatrixIntE[nThBins] = {0};
+  //Float_t nAsymMatrixIntE[nThBins] = {0};
   
   Float_t f_aSim[nThBins]={0};
   Float_t f_aSimE[nThBins]={0};
@@ -1547,8 +1646,8 @@ void TLab::GraphAsymmetry(Char_t option){
 	    nSimTrueInt[i] += nSimTrue[i][p];
 	  }
 	  
-	  nSimIntE[i] = Sqrt( nSimInt[i] );
-	  nSimTrueIntE[i] = Sqrt( nSimTrueInt[i] );
+	  //nSimIntE[i] = Sqrt( nSimInt[i] );
+	  //nSimTrueIntE[i] = Sqrt( nSimTrueInt[i] );
 	  
 	  // normalise to the total 
 	  // so the integral is one
@@ -1605,7 +1704,7 @@ void TLab::GraphAsymmetry(Char_t option){
 	    nAsymMatrixInt[i] += nAsymMatrix[i][p];
 	  }
 	  
-	  nAsymMatrixIntE[i] = Sqrt(nAsymMatrixInt[i]);
+	  //nAsymMatrixIntE[i] = Sqrt(nAsymMatrixInt[i]);
 	  
 	  // normalise to the total 
 	  // so the integral is one
