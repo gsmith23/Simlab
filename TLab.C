@@ -162,6 +162,17 @@ void TLab::SetEventNumbers(Int_t run){
     nAND = 22222222;
     nOR2 = 33333333;
   }
+  //-------
+  // NB New set up with active corner crystals
+  //-------
+  //-------
+  // Test with two files
+  //-------
+  else if(run == 49801){
+    nOR1 = 0;
+    nAND = 29824032;
+    nOR2 = 0;
+  }
   
 
   eventSum = nOR1 + nAND + nOR2;
@@ -234,13 +245,13 @@ void TLab::MakeRawDataTreeFile(){
     
     // main run 
     run = 1;
-    nameHist.Form("hQ%d_%d",run,i);
+    nameHist.Form("hQ_%d_%d",run,i);
     titleHist.Form("hQ_%d_%d;QDC bin;Counts",run,i);
     hQ_1[i] = new TH1F(nameHist,titleHist,4096,0,4096);
       
     // post-run OR data 
     run = 2;
-    nameHist.Form("hQ%d_%d",run,i);
+    nameHist.Form("hQ_%d_%d",run,i);
     titleHist.Form("hQ_%d_%d;QDC bin;Counts",run,i);
     hQ_2[i] = new TH1F(nameHist,titleHist,4096,0,4096);
       
@@ -292,6 +303,9 @@ void TLab::MakeRawDataTreeFile(){
     // with five channels per line
     for(Int_t i = index ; i < (index+5) ; i++ ){
     
+      if(Q[i] > 4090. )
+	continue;
+	
       // one histogram per channel and per run
       if      ( eventNumber < nOR1 )
 	// pre-run OR data 
@@ -617,32 +631,50 @@ void TLab::SetPedestals(){
   
   cout << endl;
   
+  cout << " prior to: for( Int_t i = 0 ; i < nCha " << endl;
   Int_t run = 0;
   for( Int_t i = 0 ; i < nChannels ; i++ ){
     
+    //-----------------
     // pre-run OR data 
+    run = 0;
+
     histName.Form("hQ_%d_%d",run,i);
     hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
     pedQ[i][run] = hQ_0[i]->GetXaxis()->
       GetBinCenter(hQ_0[i]->GetMaximumBin());
-
-    // pre-run OR data 
+    
+    if( pedQ[i][run] > 800.)
+      pedQ[i][run] = 600.0;
+    //-----------------
+    
+ 
+    //-----------------
+    // AND data 
     run = 1;
     histName.Form("hQ_%d_%d",run,i);
     hQ_1[i] = (TH1F*)rootFileRawData->Get(histName);
     pedQ[i][run] = hQ_1[i]->GetXaxis()->
       GetBinCenter(hQ_1[i]->GetMaximumBin());
+    
+    if( pedQ[i][run] > 800.)
+      pedQ[i][run] = 600.0;
+    //-----------------
+    
 
-    // pre-run OR data 
+    //-----------------
+    // post-run OR data 
     run = 2;
     histName.Form("hQ_%d_%d",run,i);
     hQ_2[i] = (TH1F*)rootFileRawData->Get(histName);
     pedQ[i][run] = hQ_2[i]->GetXaxis()->
       GetBinCenter(hQ_2[i]->GetMaximumBin());
+    //-----------------
 
-    
+    if( pedQ[i][run] > 800.)
+      pedQ[i][run] = 600.0;
+        
   }
-  
   
   cout << endl;
   for(Int_t run = 0 ; run < nRuns ; run++ ){
@@ -684,6 +716,17 @@ void TLab::FitPhotopeaks(){
   TF1 *phoQfit = nullptr;
   
   for( Int_t i = 0 ; i < nChannels ; i++ ){
+    
+    
+    
+    // pre-run OR data 
+    Int_t run = 0;
+    
+    histName.Form("hQ_%d_%d",run,i);
+    hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
+    hQ_0[i]->GetXaxis()->SetRangeUser(2400,4000);
+    maxv = hQ_0[i]->GetXaxis()->
+      GetBinCenter(hQ_0[i]->GetMaximumBin());
 
     phoQfit = new TF1("phoQfit",
 		      "[0]*exp(-0.5*(((x-[1])/[2])^2))",
@@ -695,23 +738,19 @@ void TLab::FitPhotopeaks(){
     // adjust parameters for some channels
     // To do: move to separate function
     // with run number as argument
-    if      (i == 9)
-      phoQfit->SetParameters(10.,2800.,100.);
-    else if (i == 2)
-      phoQfit->SetParameters(10.,3200.,100.);
+    // if      (i == 9)
+    //   phoQfit->SetParameters(10.,2800.,100.);
+    // else if (i == 2)
+    //   phoQfit->SetParameters(10.,3200.,100.);
     
     //phoQfit->SetParLimits(1.,2700.,3700.);
     //phoQfit->SetParLimits(2.,100.,300.);
     
-    // pre-run OR data 
-    Int_t run = 0;
-    
-    histName.Form("hQ%d_%d",i,run);
-    hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
-    hQ_0[i]->GetXaxis()->SetRangeUser(2400,4000);
-    maxv = hQ_0[i]->GetXaxis()->
-      GetBinCenter(hQ_0[i]->GetMaximumBin());
-        
+    if      (i == 3 ){
+      phoQfit->SetParameters(10.,3200.,100.);
+      phoQfit->SetParLimits(1.,3000.,3400.);
+    }
+
     hQ_0[i]->Fit("phoQfit","RQ");
     
     sprintf(plotName,"../Plots/%d_hQ_%d_%d.pdf",
@@ -721,15 +760,17 @@ void TLab::FitPhotopeaks(){
     phoQ[i][run] = phoQfit->GetParameter(1.);
     HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
     
+    canvas->SaveAs(plotName);
+    
     // main run AND data 
     run = 1;
     
-    histName.Form("hQ%d_%d",i,run);
+    histName.Form("hQ_%d_%d",run,i);
     hQ_1[i] = (TH1F*)rootFileRawData->Get(histName);
     hQ_1[i]->GetXaxis()->SetRangeUser(2400,4000);
     maxv = hQ_1[i]->GetXaxis()->
       GetBinCenter(hQ_1[i]->GetMaximumBin());
-        
+    
     hQ_1[i]->Fit("phoQfit","RQ");
     
     sprintf(plotName,"../Plots/%d_hQ_%d_%d.pdf",
@@ -739,15 +780,17 @@ void TLab::FitPhotopeaks(){
     phoQ[i][run] = phoQfit->GetParameter(1.);
     HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
     
+    canvas->SaveAs(plotName);
+    
     // post-run OR data 
     run = 2;
     
-    histName.Form("hQ%d_%d",i,run);
+    histName.Form("hQ_%d_%d",run,i);
     hQ_2[i] = (TH1F*)rootFileRawData->Get(histName);
     hQ_2[i]->GetXaxis()->SetRangeUser(2400,4000);
     maxv = hQ_2[i]->GetXaxis()->
       GetBinCenter(hQ_2[i]->GetMaximumBin());
-        
+    
     hQ_2[i]->Fit("phoQfit","RQ");
     
     sprintf(plotName,"../Plots/%d_hQ_%d_%d.pdf",
@@ -756,16 +799,11 @@ void TLab::FitPhotopeaks(){
     
     phoQ[i][run] = phoQfit->GetParameter(1.);
     HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
-
     
     canvas->SaveAs(plotName);
     
-    // main run
-      
-    
   }
-  
-  
+    
   for( Int_t run = 0 ; run < nRuns ; run++ ){
     cout << endl;  
     for( Int_t i = 0 ; i < nChannels ; i++ ){
