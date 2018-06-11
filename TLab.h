@@ -35,6 +35,8 @@ class TLab : public TObject{
   Float_t GetPedestal(Int_t);
   Int_t   DefaultPedestalRun();
   
+  void    SetPhotopeaks();
+  void    InitPhotopeaks();
   void    FitPhotopeaks();
   Float_t GetPhotopeak(Int_t);
   Int_t   DefaultPhotopeakRun(Int_t);
@@ -131,6 +133,9 @@ class TLab : public TObject{
   
   // main run
   TH1F   *hQ_1[nChannels];
+  
+  // main run outer summed with inner
+  TH1F   *hQQ_1[nChannels];
   
   // post-run OR data
   TH1F   *hQ_2[nChannels];
