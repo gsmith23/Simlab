@@ -170,8 +170,15 @@ void TLab::SetEventNumbers(Int_t run){
   //-------
   else if(run == 49801){
     nOR1 = 0;
-    nAND = 29824032;
+    nAND = 29824032; //AND on
     nOR2 = 0;
+    oneRun = kTRUE;
+  }
+  else if(run == 4980){
+    nOR1 = 0;
+    nAND = 500000; 
+    nOR2 = 0;
+    oneRun = kTRUE;
   }
   
 
@@ -722,17 +729,17 @@ void TLab::InitPhotopeaks(){
       
     }
   
-  phoQ[1][0] = 2610.; 
+  phoQ[0][1] = 2610.; 
   phoQ[1][1] = 2603.; 
-  phoQ[1][2] = 2757.; 
-  phoQ[1][3] = 2894.; 
-  phoQ[1][4] = 2740.; 
+  phoQ[2][1] = 2757.; 
+  phoQ[3][1] = 2894.; 
+  phoQ[4][1] = 2740.; 
   
-  phoQ[1][5] = 2821.; 
-  phoQ[1][6] = 2660.; 
-  phoQ[1][7] = 2628.; 
-  phoQ[1][8] = 2600.; 
-  phoQ[1][9] = 2761.; 
+  phoQ[5][1] = 2821.; 
+  phoQ[6][1] = 2660.; 
+  phoQ[7][1] = 2628.; 
+  phoQ[8][1] = 2600.; 
+  phoQ[9][1] = 2761.; 
  
   
 }
@@ -741,26 +748,38 @@ Float_t TLab::GetPhotopeak(Int_t channel){
   return phoQ[channel][DefaultPhotopeakRun(channel)]; 
 }
 
-// Int_t TLab::GetMinQ(Int_t ch){
+Int_t TLab::GetMinQ(Int_t ch){
 
-//   Int_t minQ = 2000;
+  Int_t minQ = 2000;
 
-//   if     ( runNumberInt == 49801 ){
-  
-//   }
-//   else if( runNumberInt == 1460  ){
+  if     ( runNumberInt == 49801 ){
     
-//     minQ = 
+    if     (ch == 2)
+      minQ = 1999;
+    else if(ch == 7)
+      minQ = 2001;
     
-
-//   }
+  }
   
-//   return minQ;
+  return minQ;
 
-// }
+}
 
+Int_t TLab::GetMaxQ(Int_t ch){
 
-//  Int_t maxQ = 4500;
+  Int_t maxQ = 4500;
+
+  if     ( runNumberInt == 49801 ){
+    
+    if     (ch == 2)
+      maxQ = 4499;
+    else if(ch == 7)
+      maxQ = 4501;
+    
+  }
+  return maxQ;
+}
+
 void TLab::FitPhotopeaks(){
 
   cout << endl;
@@ -789,6 +808,7 @@ void TLab::FitPhotopeaks(){
   
   for( Int_t i = 0 ; i < nChannels ; i++ ){
     
+
     //----------------------------------------------
     // pre-run OR data 
     Int_t run = 0;
@@ -797,23 +817,23 @@ void TLab::FitPhotopeaks(){
     
     hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
     
-    // minQ = GetMinQ(i);
-    // maxQ = GetMaxQ(i);
+    // histogram range
+    minQ = GetMinQ(i);
+    maxQ = GetMaxQ(i);
 
     hQ_0[i]->GetXaxis()->SetRangeUser(minQ,maxQ);
 
     maxBinQ = hQ_0[i]->GetXaxis()->
       GetBinCenter(hQ_0[i]->GetMaximumBin());
-
-
+    
 
     phoQfit = new TF1("phoQfit",
 		      "[0]*exp(-0.5*(((x-[1])/[2])^2))",
 		      maxBinQ-250,maxBinQ+250);
     
-    
-    
     phoQfit->SetLineColor(2);
+    
+    
     phoQfit->SetParameters(10.,3000.,100.);
     
     // adjust parameters for some channels
@@ -915,7 +935,7 @@ void TLab::FitPhotopeaks(){
 Int_t TLab::DefaultPedestalRun(){  
   
   //
-  if(runNumberInt==49801){
+  if(oneRun){
     // new runs use the main AND run
     // central channel method TBD
     return 1;
@@ -930,7 +950,7 @@ Int_t TLab::DefaultPhotopeakRun(Int_t channel){
   
   if( channel == 2  || 
       channel == 7  ||
-      runNumberInt == 49801)
+      oneRun)
     return 1;
   else  
     return 2;

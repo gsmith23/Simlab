@@ -37,7 +37,12 @@ class TLab : public TObject{
   
   void    SetPhotopeaks();
   void    InitPhotopeaks();
+
+  Int_t   GetMinQ(Int_t);
+  Int_t   GetMaxQ(Int_t);
+  
   void    FitPhotopeaks();
+  
   Float_t GetPhotopeak(Int_t);
   Int_t   DefaultPhotopeakRun(Int_t);
   
@@ -76,7 +81,9 @@ class TLab : public TObject{
   
   // OR, AND, OR
   const static Int_t nRuns = 3;
-  
+
+  Bool_t oneRun = kFALSE;
+    
   // crystals per array
   static const Int_t nCrystals = 9;
   
@@ -108,6 +115,8 @@ class TLab : public TObject{
   Int_t runNumberInt;
   TString simRun;
   TString simRunU;
+  
+
 
   ifstream *inData;
 
