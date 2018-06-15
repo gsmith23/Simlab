@@ -47,9 +47,9 @@ class TLab : public TObject{
   
   Float_t GetPhotopeak(Int_t);
   Int_t   DefaultPhotopeakRun(Int_t);
-
-  Bool_t QIsInComptonRange(Float_t, Int_t);
   
+  Bool_t QIsInComptonRange(Float_t, Int_t);
+
   Bool_t GoodTiming(Float_t);
   Bool_t GoodTheta(Float_t);
 
@@ -117,12 +117,12 @@ class TLab : public TObject{
   Float_t plotTheta[nThBins]; 
   Float_t AsymMatrix[nThBins][nPhiBins];
   
+  //Float_t comp
+  
   Int_t runNumberInt;
   TString simRun;
   TString simRunU;
   
-
-
   ifstream *inData;
 
   TFile  *rootFileRawData;
