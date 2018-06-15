@@ -35,6 +35,7 @@ class TLab : public TObject{
   Float_t GetPedestal(Int_t);
   Int_t   DefaultPedestalRun();
   
+  void    FillQSumHistos()
   void    SetPhotopeaks();
   void    InitPhotopeaks();
 
@@ -88,6 +89,7 @@ class TLab : public TObject{
   static const Int_t nCrystals = 9;
   
   // only five per array are recorded
+  //static const Int_t nChannels = 18;
   static const Int_t nChannels = 10;
   
   // For Graphing
