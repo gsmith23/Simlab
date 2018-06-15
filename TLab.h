@@ -45,6 +45,8 @@ class TLab : public TObject{
   
   Float_t GetPhotopeak(Int_t);
   Int_t   DefaultPhotopeakRun(Int_t);
+
+  Bool_t QIsInComptonRange(Float_t, Int_t);
   
   Bool_t GoodTiming(Float_t);
   Bool_t GoodTheta(Float_t);

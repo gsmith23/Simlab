@@ -721,14 +721,13 @@ void TLab::SetPhotopeaks(){
 
 void TLab::InitPhotopeaks(){
   
-  for (Int_t ch = 0 ; ch < nChannels ; ch++)
+  for (Int_t ch = 0 ; ch < nChannels ; ch++){
     for (Int_t run = 0 ; run < nRuns ; run++){
-      
       phoQ[ch][run] = 2600.;
       HWHM[ch][run] = 125;
-      
     }
-  
+  }
+
   phoQ[0][1] = 2610.; 
   phoQ[1][1] = 2603.; 
   phoQ[2][1] = 2757.; 
@@ -743,6 +742,18 @@ void TLab::InitPhotopeaks(){
  
   
 }
+
+
+void TLab::InitComptonRanges(){
+
+  for (Int_t ch = 0 ; ch < nChannels ; ch++){
+    comp[0][ch] = 2600.;
+    comp[1][ch] = 2600.;
+  }
+  
+}
+
+
 
 Float_t TLab::GetPhotopeak(Int_t channel){
   return phoQ[channel][DefaultPhotopeakRun(channel)]; 
