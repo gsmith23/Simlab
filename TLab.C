@@ -180,7 +180,20 @@ void TLab::SetEventNumbers(Int_t run){
     nOR2 = 0;
     oneRun = kTRUE;
   }
-  
+  else if(run == 5010){
+    nOR1 = 0;
+    nAND = 2792427; 
+    nOR2 = 0;
+    oneRun = kTRUE;
+  }
+  else{
+
+    cout << endl;
+    cout << "----------------------------------------------------" << endl; 
+    cout << " Warning: no event number information for this run. " << endl; 
+    cout << "----------------------------------------------------" << endl; 
+    cout << endl;
+  }
 
   eventSum = nOR1 + nAND + nOR2;
 
@@ -316,7 +329,7 @@ void TLab::MakeRawDataTreeFile(){
     
       if(Q[i] > 4090. )
 	continue;
-	
+      
       // one histogram per channel and per run
       if      ( eventNumber < nOR1 )
 
@@ -332,14 +345,6 @@ void TLab::MakeRawDataTreeFile(){
 	
 	hQ_1[i]->Fill(Q[i]);
 	
-	if   ( i==(2+index) )
-	  hQQ_1[i]->Fill(Q[i]);
-	else{
-	  
-	  //if( QIsInComptonRange(Q[i],i)  )
-	  hQQ_1[i]->Fill(Q[i] + Q[2+index]);
-	}
-
       }
       hT[i]->Fill(T[i]);
       
@@ -369,6 +374,27 @@ void TLab::MakeRawDataTreeFile(){
   
   rootFileRawData->Close();
   
+}
+
+Bool_t QIsInComptonRange(Float_t Q, Int_t ch){
+  
+  // run 501
+  switch(ch){
+  case 0  : if( Q > 1500             ) return kTRUE;
+  case 1  : if( Q > 900              ) return kTRUE;
+  case 2  : if( Q > 800  && Q < 2300 ) return kTRUE;
+  case 3  : if( Q > 900              ) return kTRUE;
+  case 4  : if( Q > 1000             ) return kTRUE;
+  case 5  : if( Q > 1000             ) return kTRUE;
+  case 6  : if( Q > 1000             ) return kTRUE;
+  case 7  : if( Q > 1000 && Q < 2500 ) return kTRUE;
+  case 8  : if( Q > 1000             ) return kTRUE;
+  case 9  : if( Q > 1000             ) return kTRUE;
+  case 10 : if( Q > 1000             ) return kTRUE;
+  }
+  
+  return kFALSE;
+
 }
 
 Bool_t TLab::CalibratedROOTFileExists(){
@@ -420,6 +446,9 @@ void TLab::MakeCalibratedDataTreeFile(){
   cout << " Making calibrated data tree " << endl;
 
   SetPedestals();
+  
+  if(oneRun)
+    FillQSumHistos();
   
   SetPhotopeaks();
     
@@ -635,16 +664,6 @@ void TLab::SetPedestals(){
   
   TString histName = "";
   
-  // cout << endl;
-  // for(Int_t run = 0 ; run < nRuns ; run++ ){    
-  //   for( Int_t i = 0 ; i < nChannels ; i++ ){
-  //     histName.Form("hQ%d_%d",i,run);
-  //     hQ[i][run] = (TH1F*)rootFileRawData->Get(histName);
-  //     pedQ[i][run] = hQ[i][run]->GetXaxis()->
-  // 	GetBinCenter(hQ[i][run]->GetMaximumBin());
-  //   }
-  // }
-  
   cout << endl;
   
   cout << " prior to: for( Int_t i = 0 ; i < nCha " << endl;
@@ -654,14 +673,14 @@ void TLab::SetPedestals(){
     //-----------------
     // pre-run OR data  
     run = 0;
-
+    
     histName.Form("hQ_%d_%d",run,i);
     hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
     pedQ[i][run] = hQ_0[i]->GetXaxis()->
       GetBinCenter(hQ_0[i]->GetMaximumBin());
     
     if( pedQ[i][run] > 800.)
-      pedQ[i][run] = 600.0;
+      pedQ[i][run] = 609.0;
     //-----------------
     
  
@@ -675,7 +694,7 @@ void TLab::SetPedestals(){
     
     // central channels may have no pedestal 
     if( pedQ[i][run] > 800.)
-      pedQ[i][run] = 600.0;
+      pedQ[i][run] = 633.0;
     //-----------------
     
 
@@ -710,11 +729,50 @@ Float_t TLab::GetPedestal(Int_t channel){
   return pedQ[channel][DefaultPedestalRun()]; 
 }
 
+void TLab::FillQSumHistos(){
+
+  cout << endl;
+  cout << " Filling Q Sum Histograms " << endl;
+  
+  TString rawFileName;
+  
+  cout << endl;
+  cout << " Reading " << rootFileRawName << endl;
+  rootFileRawData = new TFile(rootFileRawName);
+
+  rawDataTree     = (TTree*)rootFileRawData->Get("rawDataTree");
+
+  rawDataTree->SetBranchAddress("Q",Q);
+
+  TString histName = "";
+  
+  Int_t centralIndex = -1;
+
+  for( Int_t ch = 0 ; ch < nChannels ; ch++ ){
+
+    centralIndex = 2;
+      
+    if( ch > 4 )
+      centralIndex = 7;
+    
+    histName.Form("hQQ_1_%d",ch);
+    hQQ_1[ch] = (TH1F*)rootFileRawData->Get(histName);
+    
+    if   ( ch == 2 || ch == 7 ) 
+      hQQ_1[ch]->Fill(Q[ch]);
+    else if( QIsInComptonRange(Q[ch],ch) &&
+	     QIsInComptonRange(Q[ch],centralIndex) )  
+      hQQ_1[ch]->Fill(Q[ch] + Q[centralIndex] - GetPedestal(ch));
+    
+  }
+
+}
+
 void TLab::SetPhotopeaks(){
 
   InitPhotopeaks();
   
-  FitPhotopeaks();
+  //FitPhotopeaks();
 
 }
 
@@ -727,31 +785,26 @@ void TLab::InitPhotopeaks(){
       HWHM[ch][run] = 125;
     }
   }
-
-  phoQ[0][1] = 2610.; 
-  phoQ[1][1] = 2603.; 
-  phoQ[2][1] = 2757.; 
-  phoQ[3][1] = 2894.; 
-  phoQ[4][1] = 2740.; 
   
-  phoQ[5][1] = 2821.; 
-  phoQ[6][1] = 2660.; 
-  phoQ[7][1] = 2628.; 
-  phoQ[8][1] = 2600.; 
-  phoQ[9][1] = 2761.; 
- 
-  
-}
-
-
-void TLab::InitComptonRanges(){
-
-  for (Int_t ch = 0 ; ch < nChannels ; ch++){
-    comp[0][ch] = 2600.;
-    comp[1][ch] = 2600.;
+  if( oneRun ){
+    phoQ[0][1] = 2610., phoQ[1][1] = 2603.;
+    phoQ[2][1] = 2757., phoQ[3][1] = 2894.;
+    phoQ[4][1] = 2740., phoQ[5][1] = 2821.;
+    phoQ[6][1] = 2660., phoQ[7][1] = 2628.; 
+    phoQ[8][1] = 2600., phoQ[9][1] = 2761.; 
   }
   
 }
+
+
+// void TLab::InitComptonRanges(){
+
+//   for (Int_t ch = 0 ; ch < nChannels ; ch++){
+//     comp[0][ch] = 2600.;
+//     comp[1][ch] = 2600.;
+//   }
+  
+// }
 
 
 
@@ -1087,11 +1140,8 @@ void TLab::CalculateAsymmetry(){
     nB[i] = 0;
   }
   
-  // !!! Recalibrate Energy
+  // To Do: Recalibrate Energy
   
-  //
-  
-
   Bool_t AB000 = kFALSE, AB090 = kFALSE,
     AB180 = kFALSE, AB270 = kFALSE;
   
