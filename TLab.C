@@ -1122,11 +1122,8 @@ void TLab::CalculateAsymmetry(){
     nB[i] = 0;
   }
   
-  // !!! Recalibrate Energy
+  // To Do: Recalibrate Energy
   
-  //
-  
-
   Bool_t AB000 = kFALSE, AB090 = kFALSE,
     AB180 = kFALSE, AB270 = kFALSE;
   
