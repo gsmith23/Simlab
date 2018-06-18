@@ -186,6 +186,12 @@ void TLab::SetEventNumbers(Int_t run){
     nOR2 = 0;
     oneRun = kTRUE;
   }
+  else if(run == 501500){
+    nOR1 = 0;
+    nAND = 500; 
+    nOR2 = 0;
+    oneRun = kTRUE;
+  }
   else{
 
     cout << endl;
@@ -811,7 +817,7 @@ void TLab::SetPhotopeaks(){
   
   InitPhotopeaks();
   
-  //FitPhotopeaks();
+  FitPhotopeaks();
 
 }
 
@@ -830,8 +836,16 @@ void TLab::InitPhotopeaks(){
     }
   }
   
-  if( oneRun ){
+  if(runNumberInt==1460){
+    phoQ[0][1] = 3340., phoQ[1][1] = 3420.;
+    phoQ[2][1] = 3300., phoQ[3][1] = 3140.;
+    phoQ[4][1] = 3340., phoQ[5][1] = 3500.;
+    phoQ[6][1] = 3440., phoQ[7][1] = 3660.; 
+    phoQ[8][1] = 3410., phoQ[9][1] = 3050.; 
+  
     
+  }
+  else if( oneRun ){
     cout << endl;
     cout << " Using run 501 values " << endl;
     
@@ -863,13 +877,16 @@ Int_t TLab::GetMinQ(Int_t ch){
 
   Int_t minQ = 2000;
 
-  if     ( runNumberInt == 49801 ){
+  if     ( runNumberInt == 49801 ||
+	   runNumberInt == 5010 ){
     
     if     (ch == 2)
       minQ = 1999;
     else if(ch == 7)
       minQ = 2001;
-    
+  }
+  else if( runNumberInt == 1460 ){
+    minQ = 2700;
   }
   
   return minQ;
@@ -886,8 +903,12 @@ Int_t TLab::GetMaxQ(Int_t ch){
       maxQ = 4499;
     else if(ch == 7)
       maxQ = 4501;
-    
   }
+  else if( runNumberInt == 1460 ){
+    maxQ = 3900;
+  }
+
+  
   return maxQ;
 }
 
@@ -916,6 +937,7 @@ void TLab::FitPhotopeaks(){
   Int_t minQ = 2000;
   Int_t maxQ = 4500;
     
+  Int_t fitRange = 250;
   
   for( Int_t i = 0 ; i < nChannels ; i++ ){
     
@@ -937,31 +959,17 @@ void TLab::FitPhotopeaks(){
     maxBinQ = hQ_0[i]->GetXaxis()->
       GetBinCenter(hQ_0[i]->GetMaximumBin());
     
-
     phoQfit = new TF1("phoQfit",
 		      "[0]*exp(-0.5*(((x-[1])/[2])^2))",
-		      maxBinQ-250,maxBinQ+250);
+		      maxBinQ-fitRange,
+		      maxBinQ+fitRange);
     
     phoQfit->SetLineColor(2);
     
+    phoQfit->SetParameters(10.,GetPhotopeak(i),100.);
     
-    phoQfit->SetParameters(10.,3000.,100.);
-    
-    // adjust parameters for some channels
-    // To do: move to separate function
-    // with run number as argument
-    // if      (i == 9)
-    //   phoQfit->SetParameters(10.,2800.,100.);
-    // else if (i == 2)
-    //   phoQfit->SetParameters(10.,3200.,100.);
-    
-    //phoQfit->SetParLimits(1.,2700.,3700.);
-    //phoQfit->SetParLimits(2.,100.,300.);
-    
-    if      (i == 3 ){
-      phoQfit->SetParameters(10.,3200.,100.);
-      phoQfit->SetParLimits(1.,3000.,3400.);
-    }
+    // phoQfit->SetParLimits(1.,2700.,3700.);
+    // phoQfit->SetParLimits(2.,100.,300.);
 
     hQ_0[i]->Fit("phoQfit","RQ");
     
@@ -1051,9 +1059,11 @@ Int_t TLab::DefaultPedestalRun(){
     // central channel method TBD
     return 1;
   }
-  else{ 
-    // old runs use the OR data
-    return 2;
+  else{ // OR data method 
+    if(runNumberInt == 1460 )
+      return 0;
+    else
+      return 2;
   }
 }
 
@@ -1061,10 +1071,15 @@ Int_t TLab::DefaultPhotopeakRun(Int_t channel){
   
   if( channel == 2  || 
       channel == 7  ||
-      oneRun)
+      oneRun          )
     return 1;
-  else  
-    return 2;
+  else  {
+    if(runNumberInt == 1460 )
+      return 0;
+    else
+      return 2;
+  }
+  
 }
 
 Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
@@ -1132,7 +1147,7 @@ Bool_t TLab::GoodTheta(Float_t theta){
   
   Bool_t goodTheta = kFALSE;
   
-  // Asymmety is minimal below 
+  // Asymmetry is minimal below 
   // 30 degrees but allow
   // for energy resolution
   Float_t thetaRange[2];
@@ -1159,7 +1174,7 @@ void TLab::CalculateAsymmetry(){
     for(Int_t k = 0 ; k < nPhiBins; k++){
       AsymMatrix[j][k] = 0;
     }
- }
+  }
   
   rootFileCalData = new TFile(rootFileCalName);
   
@@ -1205,7 +1220,11 @@ void TLab::CalculateAsymmetry(){
   Float_t totEA = 0.;
   Float_t totEB = 0.;
   Int_t   thBin = -1.;
-    
+  
+  Int_t nTotEnAB   = 0;
+  Int_t nCentralAB = 0;
+  Int_t nOuterAB   = 0;
+
   for(Long64_t nEntry = 0 ; nEntry < maxEntry; nEntry++ ){
     
     calDataTree->GetEvent(nEntry);
@@ -1227,6 +1246,8 @@ void TLab::CalculateAsymmetry(){
 	(totEB < minE) ||
 	(totEB > maxE))
       continue;
+
+    nTotEnAB++;
     
     A[4] = kFALSE;
     B[4] = kFALSE;
@@ -1237,6 +1258,7 @@ void TLab::CalculateAsymmetry(){
     // assign theta bin to array A  
     // central crystal
     for (Int_t k = 0 ; k < nThBins; k++){
+      
       if( ( GoodTheta(tHA[4]) ) &&
 	  ( tHA[4] > ThMin[k] ) &&
 	  ( tHA[4] < ThMax[k] )){
@@ -1259,7 +1281,9 @@ void TLab::CalculateAsymmetry(){
     // Central Crystals are always required
     if( !A[4] || !B[4] )
       continue;
-    
+
+    nCentralAB++;
+
     //  Outer crystal selections
     for (Int_t j = 0 ; j < nCrystals ; j++){
       
@@ -1356,11 +1380,17 @@ void TLab::CalculateAsymmetry(){
       AsymMatrix[thBin][2]+=1.;
     else if(AB270)
       AsymMatrix[thBin][3]+=1.;
-    
+    else
+      nOuterAB--;
+
+    nOuterAB++;
+        
   } // end of : for(Int_t i = 0 ; i < calDa...
 
-  if(nDuplicates!=0)
+  if(nDuplicates!=0){
+    cout << endl;
     cout << " nDuplicates = " << nDuplicates << endl;
+  }
   
   cout << endl;
   cout << " Asymmetry"<<endl;
@@ -1373,6 +1403,16 @@ void TLab::CalculateAsymmetry(){
 	 << " " << AsymMatrix[i][2] << "\t"
 	 << " " << AsymMatrix[i][3] << endl;
     
+  cout << endl;
+  cout << "-------------------------------------------------" << endl;
+  cout << maxEntry   << " total events  "                     << endl;
+  cout << nTotEnAB   << " total energy 450 - 550 For A & B  " << endl;
+  cout << nA[4]      << " Compton scatters in A central "     << endl;
+  cout << nCentralAB << " Compton's in A & B central "        << endl;
+  cout << nOuterAB   << " Compton's in A & B outer & central" << endl;
+  cout << "-------------------------------------------------" << endl;
+  cout << endl;
+
 }
 
 Float_t TLab::RandomLabPhi(){
@@ -1457,14 +1497,17 @@ Float_t TLab::PhotonEnergyToTheta(Float_t energy){
 }
 
 void TLab::GetThetaBinValues(){
-  
-  Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
 
+  Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
+  
   for (Int_t i = 0 ; i < nThBins ; i++){
     ThMin[i] = thetaLowEdge + i*thetaBinWidth;
     ThMax[i] = ThMin[i] + thetaBinWidth;
     plotTheta[i] = ThMin[i] + (ThMax[i] - ThMin[i])/2.;
+
   }
+
+
 }
 
 void TLab::GraphAsymmetry(Char_t option){
@@ -1558,36 +1601,37 @@ void TLab::GraphAsymmetry(Char_t option){
   Float_t aSimTrue[nThBins]={0};
   Float_t aSimTrueE[nThBins]={0};
   
-  Float_t nSim[nThBins][nPhiBins]={{0},{0}};
+  //Float_t nSim[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSim[nThBins][nPhiBins]={0};
   Float_t nSimInt[nThBins]={0};
-  Float_t nSimTrue[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrue[nThBins][nPhiBins]={0};
   Float_t nSimTrueInt[nThBins]={0};
   
-  Float_t nSimE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimE[nThBins][nPhiBins]={0};
   //  Float_t nSimIntE[nThBins]={0};
-  Float_t nSimTrueE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueE[nThBins][nPhiBins]={0};
   //  Float_t nSimTrueIntE[nThBins]={0};
   
-  Float_t nSimU[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimU[nThBins][nPhiBins]={0};
   Float_t nSimUInt[nThBins]={0};
-  Float_t nSimTrueU[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueU[nThBins][nPhiBins]={0};
   Float_t nSimTrueUInt[nThBins]={0};
   
-  Float_t nSimUE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimUE[nThBins][nPhiBins]={0};
   Float_t nSimUIntE[nThBins]={0};
-  Float_t nSimTrueUE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimTrueUE[nThBins][nPhiBins]={0};
   Float_t nSimTrueUIntE[nThBins]={0};
   
-  Float_t nSimC[nThBins][nPhiBins]={{0},{0}};
-  Float_t nSimTrueC[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimC[nThBins][nPhiBins]={0};
+  Float_t nSimTrueC[nThBins][nPhiBins]={0};
   
-  Float_t nSimCE[nThBins][nPhiBins]={{0},{0}};
-  Float_t nSimTrueCE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nSimCE[nThBins][nPhiBins]={0};
+  Float_t nSimTrueCE[nThBins][nPhiBins]={0};
   
-  Float_t nAsymMatrix[nThBins][nPhiBins]={{0},{0}};
+  Float_t nAsymMatrix[nThBins][nPhiBins]={0};
   Float_t nAsymMatrixInt[nThBins] = {0};
   
-  Float_t nAsymMatrixE[nThBins][nPhiBins]={{0},{0}};
+  Float_t nAsymMatrixE[nThBins][nPhiBins]={0};
   //Float_t nAsymMatrixIntE[nThBins] = {0};
   
   Float_t f_aSim[nThBins]={0};
@@ -1613,7 +1657,8 @@ void TLab::GraphAsymmetry(Char_t option){
   
   // use 90 and 270 for 90 degrees?
   Bool_t use270 = kTRUE;
-  
+  //use270 = kFALSE;
+
   //  lab calculation (not theory only)
   if( option!='t' ){
     
@@ -1662,7 +1707,7 @@ void TLab::GraphAsymmetry(Char_t option){
 	mu[i] = (AsymMatrix[i][1] - AsymMatrix[i][0]);
 	mu[i] = mu[i]/(AsymMatrix[i][1] + AsymMatrix[i][0]);
 	
-      }
+      }// end of: if (dPhiDiff  == 90){
       if (dPhiDiff  == 180){
 	if( AsymMatrix[i][2] == 0 ) continue; 
 	

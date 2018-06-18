@@ -97,8 +97,9 @@ class TLab : public TObject{
   
   // For Graphing
   static const Int_t nPhiBins = 4;
-  //static const Int_t nThBins  = 7;
+
   static const Int_t nThBins  = 8;
+  //static const Int_t nThBins  = 1;
   
   // 39, 54, 69, 84, 99, 114, 129
   /* Float_t thetaLowEdge  = 31.5; */

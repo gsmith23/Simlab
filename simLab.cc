@@ -360,7 +360,7 @@ Int_t main(int argc, char **argv){
 	
     }// end of: if( strcmp(argv[1],"1")==0 || ......
       
-    delete data;
+    //delete data;
       
   }// end of: if( strcmp(argv[1],"1")==0 || ......
   
