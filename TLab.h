@@ -45,6 +45,7 @@ class TLab : public TObject{
   Int_t   GetMinQ();
   Int_t   GetMaxQ();
   
+  Bool_t  DoFitPhotopeaks();
   void    FitPhotopeaks();
   
   Float_t GetPhotopeak(Int_t);
@@ -100,8 +101,8 @@ class TLab : public TObject{
   // For Graphing
   static const Int_t nPhiBins = 4;
 
-  //static const Int_t nThBins  = 7;
-  static const Int_t nThBins  = 1;
+  static const Int_t nThBins  = 7;
+  //static const Int_t nThBins  = 1;
 
 /*   Float_t thetaLowEdge  = 10.0; */
 /*   Float_t thetaHighEdge = 170.; */

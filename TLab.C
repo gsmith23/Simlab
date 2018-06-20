@@ -380,16 +380,26 @@ Bool_t TLab::QIsInComptonRange(Float_t Q, Int_t ch){
   
   // run 501 (should be okay for 498)
   switch(ch){
-  case 0  : if( Q > 900  && Q < 2300 ) return kTRUE;
-  case 1  : if( Q > 900  && Q < 2300 ) return kTRUE;
-  case 2  : if( Q > 800  && Q < 2400 ) return kTRUE;
-  case 3  : if( Q > 900  && Q < 2600 ) return kTRUE;
-  case 4  : if( Q > 1000 && Q < 2400 ) return kTRUE;
-  case 5  : if( Q > 1000 && Q < 2400 ) return kTRUE;
-  case 6  : if( Q > 900  && Q < 2400 ) return kTRUE;
-  case 7  : if( Q > 900  && Q < 2300 ) return kTRUE;
-  case 8  : if( Q > 900  && Q < 2300 ) return kTRUE;
-  case 9  : if( Q > 1000 && Q < 2400 ) return kTRUE;
+  // case 0  : if( Q > 900  && Q < 2300 ) return kTRUE;
+  // case 1  : if( Q > 900  && Q < 2300 ) return kTRUE;
+  // case 2  : if( Q > 800  && Q < 2400 ) return kTRUE;
+  // case 3  : if( Q > 900  && Q < 2600 ) return kTRUE;
+  // case 4  : if( Q > 1000 && Q < 2400 ) return kTRUE;
+  // case 5  : if( Q > 1000 && Q < 2400 ) return kTRUE;
+  // case 6  : if( Q > 900  && Q < 2400 ) return kTRUE;
+  // case 7  : if( Q > 800  && Q < 2300 ) return kTRUE;
+  // case 8  : if( Q > 900  && Q < 2300 ) return kTRUE;
+  // case 9  : if( Q > 1000 && Q < 2400 ) return kTRUE;
+  case 0  : if( Q >  900 ) return kTRUE;
+  case 1  : if( Q >  900 ) return kTRUE;
+  case 2  : if( Q < 2400 ) return kTRUE;
+  case 3  : if( Q >  900 ) return kTRUE;
+  case 4  : if( Q > 1000 ) return kTRUE;
+  case 5  : if( Q > 1000 ) return kTRUE;
+  case 6  : if( Q >  900 ) return kTRUE;
+  case 7  : if( Q < 2300 ) return kTRUE;
+  case 8  : if( Q >  900 ) return kTRUE;
+  case 9  : if( Q > 1000 ) return kTRUE;
   }
 
   return kFALSE;
@@ -467,7 +477,8 @@ void TLab::MakeCalibratedDataTreeFile(){
       temp_phoQ = GetPhotopeak(i) - GetPedestal(i);
       HWHM[i][run] = HWHM[i][run]*511./temp_phoQ;
 
-      if(run==1 || commentAll)
+      if(run==DefaultPhotopeakRun(i) || 
+	 commentAll)
 	cout << "HWHM["<< i 
 	     << "]["   << run 
 	     << "] = " << HWHM[i][run] 
@@ -699,8 +710,14 @@ void TLab::SetPedestals(){
       GetBinCenter(hQ_1[i]->GetMaximumBin());
     
     // central channels may have no pedestal 
-    if( pedQ[i][run] > 800.)
-      pedQ[i][run] = 633.0;
+    if( pedQ[i][run] > 800.){
+      
+      if     (i==2)
+	pedQ[i][run] = 609.0;
+      else if(i==7)
+	pedQ[i][run] = 633.0;
+
+    }
     //-----------------
     
 
@@ -781,8 +798,10 @@ void TLab::FillQSumHistos(){
       
       Q_sum = Q[ch] + Q[centralIndex] - GetPedestal(centralIndex);
 
-      if   ( (ch == 2 || ch == 7) && Q[ch] > 800. ) 
-	hQQ_1[ch]->Fill(Q[ch]);
+      if   ( ch == 2 || ch == 7  ) {
+	if(Q[ch] > 800.)
+	  hQQ_1[ch]->Fill(Q[ch]);
+      }
       else if( QIsInComptonRange(Q[ch],ch) &&
 	       QIsInComptonRange(Q[centralIndex],centralIndex) ){
 	hQQ_1[ch]->Fill(Q_sum);
@@ -803,15 +822,20 @@ void TLab::SetPhotopeaks(){
   
   InitPhotopeaks();
   
-  FitPhotopeaks();
-
+  if(DoFitPhotopeaks()){
+    FitPhotopeaks();
+  }
+  else{
+    cout << endl;
+    cout << " Using default values " << endl;
+  }
+  
 }
 
 
 void TLab::InitPhotopeaks(){
 
   cout << endl;
-  cout << "--------------------------" << endl;
   cout << "  Initialising Photopeaks " <<endl;
 
   
@@ -830,11 +854,23 @@ void TLab::InitPhotopeaks(){
   }
   
   if(runNumberInt==1460){
-    phoQ[0][1] = 3340., phoQ[1][1] = 3420.;
-    phoQ[2][1] = 3300., phoQ[3][1] = 3140.;
-    phoQ[4][1] = 3340., phoQ[5][1] = 3500.;
-    phoQ[6][1] = 3440., phoQ[7][1] = 3660.; 
-    phoQ[8][1] = 3410., phoQ[9][1] = 3050.; 
+    phoQ[0][0] = 3340., phoQ[1][0] = 3420.;
+    phoQ[2][1] = 3300., phoQ[3][0] = 3140.;
+    phoQ[4][0] = 3340., phoQ[5][0] = 3500.;
+    phoQ[6][0] = 3440., phoQ[7][1] = 3660.; 
+    phoQ[8][0] = 3410., phoQ[9][0] = 3050.; 
+  
+    photopeaksInitByChan = kTRUE;
+    
+  }
+  if(runNumberInt==1470){
+  
+    // channel 9 drifted from previous run
+    phoQ[0][1] = 3350., phoQ[1][2] = 3420.;
+    phoQ[2][1] = 3300., phoQ[3][2] = 3140.;
+    phoQ[4][2] = 3340., phoQ[5][2] = 3500.;
+    phoQ[6][2] = 3440., phoQ[7][1] = 3660.; 
+    phoQ[8][2] = 3410., phoQ[9][2] = 2800.; 
   
     photopeaksInitByChan = kTRUE;
     
@@ -843,11 +879,11 @@ void TLab::InitPhotopeaks(){
     cout << endl;
     cout << " Using run 501 values " << endl;
     
-    phoQ[0][1] = 2610., phoQ[1][1] = 2603.;
-    phoQ[2][1] = 2757., phoQ[3][1] = 2894.;
-    phoQ[4][1] = 2740., phoQ[5][1] = 2821.;
-    phoQ[6][1] = 2660., phoQ[7][1] = 2628.; 
-    phoQ[8][1] = 2600., phoQ[9][1] = 2761.; 
+    phoQ[0][1] = 2596., phoQ[1][1] = 2625.;
+    phoQ[2][1] = 2763., phoQ[3][1] = 2902.;
+    phoQ[4][1] = 2728., phoQ[5][1] = 2800.;
+    phoQ[6][1] = 2656., phoQ[7][1] = 2629.; 
+    phoQ[8][1] = 2588., phoQ[9][1] = 2742.; 
 
     photopeaksInitByChan = kTRUE;
     
@@ -874,9 +910,14 @@ Int_t TLab::GetMinQ(){
 
   Int_t minQ = 2200;
 
-  if( runNumberInt == 1460 ){
+  if    ( runNumberInt == 1460 ){
     minQ = 2700;
   }
+  else if( runNumberInt == 1470 ){
+    minQ = 2500;
+  }
+
+  
   
   return minQ;
 
@@ -886,18 +927,26 @@ Int_t TLab::GetMaxQ(){
 
   Int_t maxQ = 3600;
 
-  if( runNumberInt == 1460 ){
+  if( runNumberInt == 1460 ||
+      runNumberInt == 1470){
     maxQ = 3900;
   }
-
   
   return maxQ;
+}
+
+Bool_t TLab::DoFitPhotopeaks(){
+
+  if( runNumberInt == 49801 )
+    return kFALSE;
+  else
+    return kTRUE;
 }
 
 void TLab::FitPhotopeaks(){
 
   cout << endl;
-  cout << " Setting Photopeaks " << endl;
+  cout << " Fitting Photopeaks " << endl;
   
   TString rawFileName;
   
@@ -920,10 +969,17 @@ void TLab::FitPhotopeaks(){
   Int_t maxQ = 4500;
   
   Int_t fitRange = 250;
+
+  Bool_t comments = kFALSE;
+  Bool_t savePlotPDFs = kFALSE;
   
   Int_t run;
 
   for( Int_t i = 0 ; i < nChannels ; i++ ){
+
+    // histogram range
+    minQ = GetMinQ();
+    maxQ = GetMaxQ();
 
     //----------------------------------------------
     // main run AND data 
@@ -936,10 +992,12 @@ void TLab::FitPhotopeaks(){
     maxBinQ = hQ_1[i]->GetXaxis()->
       GetBinCenter(hQ_1[i]->GetMaximumBin());
 
-    cout << " ------------------------------------ "  << endl;
-    cout << " Run 1 channel " << i << " photopeak = " 
-	 << GetPhotopeak(i) << endl;
-    cout << " ------------------------------------ "  << endl;
+    if(comments){
+      cout << " ------------------------------------ "  << endl;
+      cout << " Run 1 channel " << i << " photopeak = " 
+	   << GetPhotopeak(i) << endl;
+      cout << " ------------------------------------ "  << endl;
+    }
     
     phoQfit = new TF1("phoQfit",
 		      "[0]*exp(-0.5*(((x-[1])/[2])^2))",
@@ -958,7 +1016,8 @@ void TLab::FitPhotopeaks(){
     phoQ[i][run] = phoQfit->GetParameter(1.);
     HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
     
-    canvas->SaveAs(plotName);
+    if(savePlotPDFs)
+      canvas->SaveAs(plotName);
     //----------------------------------------------
     
     if(oneRun)
@@ -972,17 +1031,12 @@ void TLab::FitPhotopeaks(){
     
     hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
     
-    // histogram range
-    minQ = GetMinQ();
-    maxQ = GetMaxQ();
-    
     hQ_0[i]->GetXaxis()->SetRangeUser(minQ,maxQ);
 
     maxBinQ = hQ_0[i]->GetXaxis()->
       GetBinCenter(hQ_0[i]->GetMaximumBin());
-    
-    
-    
+        
+    phoQfit->SetRange(maxBinQ-fitRange,maxBinQ+fitRange);
     phoQfit->SetParameters(10.,GetPhotopeak(i),100.);
     
     // phoQfit->SetParLimits(1.,2700.,3700.);
@@ -997,7 +1051,8 @@ void TLab::FitPhotopeaks(){
     phoQ[i][run] = phoQfit->GetParameter(1.);
     HWHM[i][run] = phoQfit->GetParameter(2.)*Sqrt(Log(2.));
     
-    canvas->SaveAs(plotName);
+    if(savePlotPDFs)
+      canvas->SaveAs(plotName);
     //----------------------------------------------
     
     
@@ -1012,6 +1067,7 @@ void TLab::FitPhotopeaks(){
     maxBinQ = hQ_2[i]->GetXaxis()->
       GetBinCenter(hQ_2[i]->GetMaximumBin());
     
+    phoQfit->SetRange(maxBinQ-fitRange,maxBinQ+fitRange);
     phoQfit->SetParameters(10.,GetPhotopeak(i),100.);
 
     hQ_2[i]->Fit("phoQfit","RQ");
@@ -1023,15 +1079,18 @@ void TLab::FitPhotopeaks(){
     phoQ[i][run] = phoQfit->GetParameter(1.);
     HWHM[i][run] = (phoQfit->GetParameter(2.))*Sqrt(Log(2.));
     
-    canvas->SaveAs(plotName);
+    if(savePlotPDFs)
+      canvas->SaveAs(plotName);
     
   }
     
   for( Int_t run = 0 ; run < nRuns ; run++ ){
     cout << endl;  
     for( Int_t i = 0 ; i < nChannels ; i++ ){
-      cout << " phoQ["<< i << "][" << run 
-	   << "] =  " << phoQ[i][run] << endl;
+      
+      if(run==DefaultPhotopeakRun(i))
+	cout << " phoQ["<< i << "][" << run 
+	     << "] =  " << phoQ[i][run] << endl;
     }
   }
 
@@ -1051,7 +1110,7 @@ Int_t TLab::DefaultPedestalRun(){
     return 1;
   }
   else{ // OR data method 
-    if(runNumberInt == 1460 )
+    if(runNumberInt == 1460)
       return 0;
     else
       return 2;
@@ -1335,8 +1394,8 @@ void TLab::CalculateAsymmetry(){
     // for this event
     if((A[1]&&B[1])||
        (A[3]&&B[3])||
-       (A[5]&&B[5])||
-       (A[7]&&B[7]))
+       (A[7]&&B[7])||
+       (A[5]&&B[5]))
       AB000 = kTRUE;
     
     if((A[1]&&B[3])||
@@ -1352,9 +1411,9 @@ void TLab::CalculateAsymmetry(){
       AB180 = kTRUE;
     
     if((A[1]&&B[5])||
-       (A[5]&&B[7])||
+       (A[3]&&B[1])||
        (A[7]&&B[3])||
-       (A[3]&&B[1]))
+       (A[5]&&B[7]))
       AB270 = kTRUE;
     
     // check that only one combination
