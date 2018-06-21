@@ -823,7 +823,16 @@ void TLab::SetPhotopeaks(){
   InitPhotopeaks();
   
   if(DoFitPhotopeaks()){
-    FitPhotopeaks();
+    
+    Char_t fitPhoto = 'n';
+    
+    cout << endl;
+    cout << " Do you want to fit the photopeaks? " << endl;
+    cout << " Answer y or n (default is 'n')  " << endl;
+    cin >>  fitPhoto;
+    
+    if(fitPhoto=='y')
+      FitPhotopeaks();
   }
   else{
     cout << endl;
@@ -1068,7 +1077,7 @@ void TLab::FitPhotopeaks(){
       GetBinCenter(hQ_2[i]->GetMaximumBin());
     
     phoQfit->SetRange(maxBinQ-fitRange,maxBinQ+fitRange);
-    phoQfit->SetParameters(10.,GetPhotopeak(i),100.);
+    //phoQfit->SetParameters(10.,GetPhotopeak(i),100.);
 
     hQ_2[i]->Fit("phoQfit","RQ");
     
