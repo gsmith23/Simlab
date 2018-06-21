@@ -368,6 +368,7 @@ void TLab::MakeRawDataTreeFile(){
   
 
   rawDataTree->Write();
+  rawDataTree->Delete();
   
   // writes the histograms
   rootFileRawData->Write();
@@ -378,28 +379,24 @@ void TLab::MakeRawDataTreeFile(){
 
 Bool_t TLab::QIsInComptonRange(Float_t Q, Int_t ch){
   
+  Float_t lowQ  = Q;
+  Float_t highQ = 0;
+  
+  if(runNumberInt==5010)
+    highQ = Q;
+
   // run 501 (should be okay for 498)
   switch(ch){
-  // case 0  : if( Q > 900  && Q < 2300 ) return kTRUE;
-  // case 1  : if( Q > 900  && Q < 2300 ) return kTRUE;
-  // case 2  : if( Q > 800  && Q < 2400 ) return kTRUE;
-  // case 3  : if( Q > 900  && Q < 2600 ) return kTRUE;
-  // case 4  : if( Q > 1000 && Q < 2400 ) return kTRUE;
-  // case 5  : if( Q > 1000 && Q < 2400 ) return kTRUE;
-  // case 6  : if( Q > 900  && Q < 2400 ) return kTRUE;
-  // case 7  : if( Q > 800  && Q < 2300 ) return kTRUE;
-  // case 8  : if( Q > 900  && Q < 2300 ) return kTRUE;
-  // case 9  : if( Q > 1000 && Q < 2400 ) return kTRUE;
-  case 0  : if( Q >  900 ) return kTRUE;
-  case 1  : if( Q >  900 ) return kTRUE;
-  case 2  : if( Q < 2400 ) return kTRUE;
-  case 3  : if( Q >  900 ) return kTRUE;
-  case 4  : if( Q > 1000 ) return kTRUE;
-  case 5  : if( Q > 1000 ) return kTRUE;
-  case 6  : if( Q >  900 ) return kTRUE;
-  case 7  : if( Q < 2300 ) return kTRUE;
-  case 8  : if( Q >  900 ) return kTRUE;
-  case 9  : if( Q > 1000 ) return kTRUE;
+  case 0  : if( lowQ > 1100 && highQ < 2200 ) return kTRUE; break;
+  case 1  : if( lowQ > 1050 && highQ < 2200 ) return kTRUE; break;
+  case 2  : if( lowQ >  900 && highQ < 2100 ) return kTRUE; break;
+  case 3  : if( lowQ > 1000 && highQ < 2400 ) return kTRUE; break;
+  case 4  : if( lowQ > 1100 && highQ < 2200 ) return kTRUE; break;
+  case 5  : if( lowQ > 1100 && highQ < 2300 ) return kTRUE; break;
+  case 6  : if( lowQ > 1000 && highQ < 2400 ) return kTRUE; break;
+  case 7  : if( lowQ > 900  && highQ < 2200 ) return kTRUE; break;
+  case 8  : if( lowQ > 975  && highQ < 2200 ) return kTRUE; break;
+  case 9  : if( lowQ > 1000 && highQ < 2300 ) return kTRUE; break;
   }
 
   return kFALSE;
@@ -491,7 +488,9 @@ void TLab::MakeCalibratedDataTreeFile(){
        << rootFileRawName << endl;
   
   // read from this
-  rootFileRawData = new TFile(rootFileRawName);
+  rootFileRawData = TFile::Open(rootFileRawName);
+  //rootFileRawData = new TFile(rootFileRawName);
+  
   rawDataTree     = (TTree*)rootFileRawData->Get("rawDataTree");
   
   // write to this
@@ -660,6 +659,9 @@ void TLab::MakeCalibratedDataTreeFile(){
   
   rootFileCalData->Write();
   
+  rawDataTree->Delete();
+  rootFileRawData->Close();
+  
 }
 
 void TLab::SetPedestals(){
@@ -678,7 +680,9 @@ void TLab::SetPedestals(){
   
   cout << endl;
   cout << " Reading " << rootFileRawName << endl;
-  rootFileRawData = new TFile(rootFileRawName);
+  
+  rootFileRawData = TFile::Open(rootFileRawName);
+  //rootFileRawData = new TFile(rootFileRawName);
   
   TString histName = "";
   
@@ -796,11 +800,13 @@ void TLab::FillQSumHistos(){
       if( ch > 4 )
 	centralIndex = 7;
       
-      Q_sum = Q[ch] + Q[centralIndex] - GetPedestal(centralIndex);
+      Q_sum = Q[ch] + Q[centralIndex]- GetPedestal(centralIndex);
 
       if   ( ch == 2 || ch == 7  ) {
+	
 	if(Q[ch] > 800.)
 	  hQQ_1[ch]->Fill(Q[ch]);
+	
       }
       else if( QIsInComptonRange(Q[ch],ch) &&
 	       QIsInComptonRange(Q[centralIndex],centralIndex) ){
@@ -811,6 +817,10 @@ void TLab::FillQSumHistos(){
   }
   // append
   rootFileRawData->Write();
+  
+  //delete tree pointer?
+
+  rootFileRawData->Close();
   
 }
 
