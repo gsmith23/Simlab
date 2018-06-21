@@ -157,6 +157,12 @@ void TLab::SetEventNumbers(Int_t run){
     nAND = 170907253; // 469 - AND (468 was interupted)
     nOR2 = 1269750;   // 470 - OR
   }
+  else if(run == 14700){
+    // Runs: 467 (or), 469 (AND), 470 (OR)
+    nOR1 = 100000; // 467 - OR prior to power up/down 
+    nAND = 1000000; // 469 - AND (468 was interupted)
+    nOR2 = 100000; // 470 - OR
+  }
   else if(run == 123){
     nOR1 = 11111111;
     nAND = 22222222;
@@ -882,7 +888,8 @@ void TLab::InitPhotopeaks(){
     photopeaksInitByChan = kTRUE;
     
   }
-  if(runNumberInt==1470){
+  if(runNumberInt==1470 || 
+     runNumberInt==14700 ){
   
     // channel 9 drifted from previous run
     phoQ[0][1] = 3350., phoQ[1][2] = 3420.;
@@ -932,7 +939,8 @@ Int_t TLab::GetMinQ(){
   if    ( runNumberInt == 1460 ){
     minQ = 2700;
   }
-  else if( runNumberInt == 1470 ){
+  else if( runNumberInt == 1470  ||
+	   runNumberInt == 14700){
     minQ = 2500;
   }
 
@@ -947,7 +955,8 @@ Int_t TLab::GetMaxQ(){
   Int_t maxQ = 3600;
 
   if( runNumberInt == 1460 ||
-      runNumberInt == 1470){
+      runNumberInt == 1470 ||
+      runNumberInt == 14700 ){
     maxQ = 3900;
   }
   
