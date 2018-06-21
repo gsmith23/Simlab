@@ -388,25 +388,42 @@ Bool_t TLab::QIsInComptonRange(Float_t Q, Int_t ch){
   Float_t lowQ  = Q;
   Float_t highQ = 0;
   
+  // mimic 5010 to data with no outer ch photopeaks
   if(runNumberInt==5010)
     highQ = Q;
 
-  // run 501 (should be okay for 498)
-  switch(ch){
-  case 0  : if( lowQ > 1100 && highQ < 2200 ) return kTRUE; break;
-  case 1  : if( lowQ > 1050 && highQ < 2200 ) return kTRUE; break;
-  case 2  : if( lowQ >  900 && highQ < 2100 ) return kTRUE; break;
-  case 3  : if( lowQ > 1000 && highQ < 2400 ) return kTRUE; break;
-  case 4  : if( lowQ > 1100 && highQ < 2200 ) return kTRUE; break;
-  case 5  : if( lowQ > 1100 && highQ < 2300 ) return kTRUE; break;
-  case 6  : if( lowQ > 1000 && highQ < 2400 ) return kTRUE; break;
-  case 7  : if( lowQ > 900  && highQ < 2200 ) return kTRUE; break;
-  case 8  : if( lowQ > 975  && highQ < 2200 ) return kTRUE; break;
-  case 9  : if( lowQ > 1000 && highQ < 2300 ) return kTRUE; break;
+  if(oneRun){
+    // run 501 (should be okay for 498)
+    switch(ch){
+    case 0  : if( lowQ > 1100 && highQ < 2200 ) return kTRUE; break;
+    case 1  : if( lowQ > 1050 && highQ < 2200 ) return kTRUE; break;
+    case 2  : if( lowQ >  900 && highQ < 2100 ) return kTRUE; break;
+    case 3  : if( lowQ > 1000 && highQ < 2400 ) return kTRUE; break;
+    case 4  : if( lowQ > 1100 && highQ < 2200 ) return kTRUE; break;
+    case 5  : if( lowQ > 1100 && highQ < 2300 ) return kTRUE; break;
+    case 6  : if( lowQ > 1000 && highQ < 2400 ) return kTRUE; break;
+    case 7  : if( lowQ > 900  && highQ < 2200 ) return kTRUE; break;
+    case 8  : if( lowQ > 975  && highQ < 2200 ) return kTRUE; break;
+    case 9  : if( lowQ > 1000 && highQ < 2300 ) return kTRUE; break;
+    }
   }
-
+  else if(runNumberInt==1470  ||
+	  runNumberInt==14700 ){
+    switch(ch){
+    case 0  : if( lowQ > 1100 && highQ < 2200 ) return kTRUE; break;
+    case 1  : if( lowQ > 1050 && highQ < 2200 ) return kTRUE; break;
+    case 2  : if( lowQ >  900 && highQ < 2100 ) return kTRUE; break;
+    case 3  : if( lowQ > 1000 && highQ < 2400 ) return kTRUE; break;
+    case 4  : if( lowQ > 1100 && highQ < 2200 ) return kTRUE; break;
+    case 5  : if( lowQ > 1100 && highQ < 2300 ) return kTRUE; break;
+    case 6  : if( lowQ > 1000 && highQ < 2400 ) return kTRUE; break;
+    case 7  : if( lowQ > 900  && highQ < 2200 ) return kTRUE; break;
+    case 8  : if( lowQ > 975  && highQ < 2200 ) return kTRUE; break;
+    case 9  : if( lowQ > 1000 && highQ < 2300 ) return kTRUE; break;
+    }
+  }
   return kFALSE;
-  
+    
 }
 
 Bool_t TLab::CalibratedROOTFileExists(){
@@ -892,7 +909,7 @@ void TLab::InitPhotopeaks(){
      runNumberInt==14700 ){
   
     // channel 9 drifted from previous run
-    phoQ[0][1] = 3350., phoQ[1][2] = 3420.;
+    phoQ[0][2] = 3350., phoQ[1][2] = 3420.;
     phoQ[2][1] = 3300., phoQ[3][2] = 3140.;
     phoQ[4][2] = 3340., phoQ[5][2] = 3500.;
     phoQ[6][2] = 3440., phoQ[7][1] = 3660.; 
