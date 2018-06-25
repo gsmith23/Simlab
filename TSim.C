@@ -1190,7 +1190,7 @@ Int_t TSim::InvestigateAcceptance(TString inputFileNumber){
    }
 
    cout << endl;
-   cout << " Getting asymmetry " << endl;
+   cout << " investigating acceptance " << endl;
    
    TString plotName;
    plotName = "../Plots/Asym_" + inputFileNumber;

@@ -7,5 +7,6 @@
 #pragma link C++ class TSim;
 #pragma link C++ class TLab;
 #pragma link C++ class TTheory;
+#pragma link C++ class TEventNumbers;
 
 #endif

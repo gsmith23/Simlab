@@ -2,6 +2,7 @@
 #define TLab_h
 
 #include "./includes.h"
+#include "TEventNumbers.h"
 
 //------------------------------------------------------------------------------------------------
 
@@ -33,13 +34,15 @@ class TLab : public TObject{
   
   void    SetPedestals();
   Float_t GetPedestal(Int_t);
-  Int_t   DefaultPedestalRun();
+  Int_t   DefaultPedestalPart();
   
   void    FillQSumHistos();
   
   void    SetPhotopeaks();
   void    InitPhotopeaks();
   
+  Int_t   GetCentralIndex(Int_t);
+
   Bool_t  photopeaksInitByChan = kFALSE;
 
   Int_t   GetMinQ();
@@ -49,7 +52,9 @@ class TLab : public TObject{
   void    FitPhotopeaks();
   
   Float_t GetPhotopeak(Int_t);
-  Int_t   DefaultPhotopeakRun(Int_t);
+  Int_t   DefaultPhotopeakPart(Int_t);
+  
+  void    HWHM_Q_To_E();
   
   Bool_t QIsInComptonRange(Float_t, Int_t);
 
@@ -87,9 +92,9 @@ class TLab : public TObject{
 
   
   // OR, AND, OR
-  const static Int_t nRuns = 3;
+  const static Int_t nParts = 3;
 
-  Bool_t oneRun = kFALSE;
+  Bool_t onePart = kFALSE;
     
   // crystals per array
   static const Int_t nCrystals = 9;
@@ -111,7 +116,6 @@ class TLab : public TObject{
   Float_t thetaLowEdge  = 31.5;
   Float_t thetaHighEdge = 136.5;
 
-
   Long64_t nOR1;
   Long64_t nAND;
   Long64_t nOR2;
@@ -129,6 +133,8 @@ class TLab : public TObject{
   TString simRunU;
   
   ifstream *inData;
+  
+  TEventNumbers * evntNs = nullptr;
 
   TFile  *rootFileRawData;
   TTree  *rawDataTree;
@@ -145,18 +151,18 @@ class TLab : public TObject{
   TCanvas *canvas2;
   
   // Raw data
-  //TH1F   *hQ[nChannels][nRuns];
+  //TH1F   *hQ[nChannels][nParts];
   
-  // pre-run OR data
+  // pre-run/part OR data
   TH1F   *hQ_0[nChannels];
   
-  // main run
+  // main run/part
   TH1F   *hQ_1[nChannels];
   
-  // main run outer summed with inner
+  // main run/part outer summed with inner
   TH1F   *hQQ_1[nChannels];
   
-  // post-run OR data
+  // post-run/part OR data
   TH1F   *hQ_2[nChannels];
   
   TH1F   *hT[nChannels];
@@ -168,9 +174,9 @@ class TLab : public TObject{
   Float_t T[nChannels];
 
   // Fit Results
-  Float_t pedQ[nChannels][nRuns];
-  Float_t phoQ[nChannels][nRuns];
-  Float_t HWHM[nChannels][nRuns];
+  Float_t pedQ[nChannels][nParts];
+  Float_t phoQ[nChannels][nParts];
+  Float_t HWHM[nChannels][nParts];
 
   // Cal data
   TH1F   *hEA[nCrystals];
