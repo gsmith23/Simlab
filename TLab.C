@@ -4,33 +4,40 @@
 ClassImp(TLab)
 #endif
 
-// Default Constructor
 TLab::TLab( ) {
   cout <<  endl;
   cout << " Default constructor. " << endl;
 }
 
-// option for use with one raw file 
 TLab::TLab(TString runNumber) {
-  SetFilenames(runNumber);
+  SetInfo(runNumber);
 }
 
-//option for use with one raw file and one sim file
 TLab::TLab(TString runNumber,
 	   TString simNumber) {
   simRun = simNumber;
-  SetFilenames(runNumber);
+  SetInfo(runNumber);
 }
 
-// option for use with two simulated files
-// one being unpolarised
 TLab::TLab(TString runNumber,
 	   TString simNumber,
 	   TString simNumberU) {
   
   simRun  = simNumber;
   simRunU = simNumberU;
-  SetFilenames(runNumber);
+  SetInfo(runNumber);
+  
+}
+
+TLab::TLab(TString runNumber,
+	   TString simNumber,
+	   TString simNumberU,
+	   TString simNumberP) {
+  
+  simRun  = simNumber;
+  simRunU = simNumberU;
+  simRunP = simNumberP;
+  SetInfo(runNumber);
   
 }
 
@@ -39,23 +46,23 @@ TLab::TLab(TString runNumber,
 TLab::~TLab()
 {
   cout << endl;
-  cout << " TLab object has been destructed!" << endl;
+  cout << " I have destructed the TLab object for you. " << endl;
 }
 
 // ------------------------------------------------
 
-void TLab::SetFilenames(TString runNumber){
+void TLab::SetInfo(TString runNumber){
 
   cout << endl;
-  cout << " TLab object has been created " << endl;
+  cout << " I have created a TLab object for you. " << endl;
   
   runNumberInt = runNumber.Atoi();
   
-  evntNs = new TEventNumbers(runNumberInt);
+  runInfo = new TRunInfo(runNumberInt);
   
-  nOR1   = evntNs->GetnOR1();
-  nAND   = evntNs->GetnAND();
-  onePart = evntNs->GetOnePart();
+  nOR1    = runInfo->GetnOR1();
+  nAND    = runInfo->GetnAND();
+  onePart = runInfo->GetOnePart();
 
   cout << endl;
   cout << " Run Number = " << runNumberInt << endl;
@@ -84,13 +91,8 @@ Bool_t TLab::RawROOTFileExists(){
   return file;
 }
 
-
-
 void TLab::MakeRawDataTreeFile(){
 
-  TString textFile = "??";
-  TString rootFile = "??";
-  
   eventNumber = 0;
   
   for(Int_t i = 0 ; i < nChannels ; i++ ){
@@ -98,15 +100,11 @@ void TLab::MakeRawDataTreeFile(){
     T[i] = 0.0;
   }
   
-  textFile = textFileName;
-  rootFile = rootFileRawName;
-    
-  inData = new ifstream(textFile);
-  
-  rootFileRawData = new TFile(rootFile,"RECREATE","Raw LYSO data");
+  inData = new ifstream(textFileName);
+
+  rootFileRawData = new TFile(rootFileRawName,"RECREATE","Raw LYSO data");
   rawDataTree     = new TTree("rawDataTree",
 			      "LYSO data QDC and TDC values");
-
   rawDataTree->Branch("eventNumber",
 		      &eventNumber,
 		      "eventNumber/L");
@@ -122,10 +120,12 @@ void TLab::MakeRawDataTreeFile(){
   TString nameHist;
   TString titleHist;
   
+  Int_t part = 0;
+
   for(Int_t i = 0 ; i < nChannels ; i++ ){
 
     //  pre-run OR data 
-    Int_t part = 0; 
+    part = 0; 
     nameHist.Form("hQ_%d_%d",part,i);
     titleHist.Form("hQ_%d_%d;QDC bin;Counts",part,i);
     hQ_0[i] = new TH1F(nameHist,titleHist,4096,0,4096);
@@ -152,7 +152,7 @@ void TLab::MakeRawDataTreeFile(){
   eventNumber = 0;
   
   Int_t index = 0;
-
+  
   while(*inData 
 	>> Q[0+index] 
 	>> Q[1+index] 
@@ -167,18 +167,19 @@ void TLab::MakeRawDataTreeFile(){
 	){
 
     if(eventNumber==0){
-      
       if(index==0){
 	cout << endl;
 	cout << " Line format: " << endl;
       }
       cout << " ";
       
+      for (Int_t i = 0 ; i < 5 ; i++)
+	cout << Q[i+index] << " ";
       for (Int_t i = 0 ; i < 5 ; i++){
-	cout << Q[i+index] << " " 
-	     << T[1+index] << " " 
-	     << endl;
+	cout << T[1+index] << " ";
+	
       }
+      cout << endl;
     }
 
     // raw text file has event data over two lines  
@@ -190,21 +191,13 @@ void TLab::MakeRawDataTreeFile(){
 	continue;
       
       // one histogram per channel and per part
-      if      ( eventNumber < nOR1 ){
-	// pre-part OR data 
+      if      ( eventNumber < nOR1 )
 	hQ_0[i]->Fill(Q[i]);
-      }
-      else if ( eventNumber > (nOR1+nAND)){
-	// post-part OR data 
-	
+      else if ( eventNumber > (nOR1+nAND))
 	hQ_2[i]->Fill(Q[i]);
-      }
-      else {
-	// main part
-	
+      else 
 	hQ_1[i]->Fill(Q[i]);
-	
-      }
+
       hT[i]->Fill(T[i]);
       
     } // end of: for(Int_t i = 0 ; i < 16 ; i++ ...
@@ -212,20 +205,17 @@ void TLab::MakeRawDataTreeFile(){
     if(index==5){
       rawDataTree->Fill();
       eventNumber++;
-    }
-    
-    if(index==0)
-      index = 5;
-    else
       index = 0;
+    }
+    else
+      index = 5;
     
   }// end of: while( .....
   
   cout << endl;
-  cout << " Making " << rootFile << endl;
+  cout << " Making " << rootFileRawName    << endl;
   cout << " " << eventNumber << " events " << endl;
   
-
   rawDataTree->Write();
   rawDataTree->Delete();
   
@@ -296,8 +286,6 @@ void TLab::MakeCalibratedDataTreeFile(){
     FillQSumHistos();
 
   SetPhotopeaks(); // Q peak and HWHM
-    
-  
   
   cout << endl;
   cout << "Post photopeak setting rootFileRawName is " 
@@ -315,9 +303,6 @@ void TLab::MakeCalibratedDataTreeFile(){
   calDataTree     = new TTree("calDataTree",
 			      "LYSO data QDC and TDC values");
   
-  
-  
-
   TString tempString = ""; 
   
   rawDataTree->SetBranchAddress("Q",Q);
@@ -582,8 +567,8 @@ void TLab::FillQSumHistos(){
 
       if   ( ch == 2 || ch == 7 ) 
 	hQQ_1[ch]->Fill(Q[ch]);
-      else if( evntNs->QIsInComptonRange(Q[ch],ch) &&
-	       evntNs->QIsInComptonRange(Q[centralIndex],
+      else if( runInfo->QIsInComptonRange(Q[ch],ch) &&
+	       runInfo->QIsInComptonRange(Q[centralIndex],
 					 centralIndex) ){
 	hQQ_1[ch]->Fill(Q_sum);
       
@@ -630,11 +615,20 @@ void TLab::InitPhotopeaks(){
 
   cout << endl;
   cout << "  Initialising Photopeaks " <<endl;
+
+  cout << endl;
   
   for (Int_t ch = 0 ; ch < nChannels ; ch++){
     for (Int_t part = 0 ; part < nParts ; part++){
-      phoQ[ch][part] = evntNs->GetPhotoStartVal(ch,part,onePart);
+      phoQ[ch][part] = runInfo->GetPhotoStartVal(ch,part,onePart);
       HWHM[ch][part] = 125;
+  
+      if(part == DefaultPhotopeakPart(ch))
+	cout << " phoQ[" << ch 
+	     << "]["     << part 
+	     << "] = "
+	     << phoQ[ch][part] 
+	     << endl;
     }
   }
 }
@@ -665,8 +659,6 @@ void TLab::FitPhotopeaks(){
   cout << endl;
   cout << " Fitting Photopeaks " << endl;
   
-  TString rawFileName;
-  
   cout << endl;
   cout << " Reading " << rootFileRawName << endl;
   rootFileRawData = TFile::Open(rootFileRawName,"update");
@@ -675,18 +667,18 @@ void TLab::FitPhotopeaks(){
 	       
   TCanvas *canvas = new TCanvas("canvas","canvas",
 				10,10,1200,800);
-  TF1 *phoQfit = nullptr;
+  TF1     *phoQfit = nullptr;
   
   TString histName = "";
   Char_t  plotName[128];
 
-  Double_t maxBinQ = 0.;  
-  Int_t    fitRange = 250;
+  Float_t maxBinQ = 0.;  
+  Int_t   fitRange = 250;
 
-  Bool_t comments = kFALSE;
-  Bool_t savePlotPDFs = kFALSE;
+  Bool_t  comments = kFALSE;
+  Bool_t  savePlotPDFs = kFALSE;
   
-  Int_t part;
+  Int_t   part;
   TString fitOption = "RQ";
   
   for( Int_t i = 0 ; i < nChannels ; i++ ){
@@ -697,7 +689,7 @@ void TLab::FitPhotopeaks(){
     if(comments){
       cout << " ------------------------------------ "  << endl;
       cout << " Before the fit:"                        << endl;
-      cout << " Part            "  << part  
+      cout << " Part           " << part  
 	   << " channel        " << i 
 	   << " photopeak =    " << GetPhotopeak(i) 
 	   << endl;
@@ -706,8 +698,8 @@ void TLab::FitPhotopeaks(){
         
     // using hQ_0 for any part here
     hQ_0[i] = (TH1F*)rootFileRawData->Get(histName);
-    hQ_0[i]->GetXaxis()->SetRangeUser(evntNs->GetMinQ(),
-				      evntNs->GetMaxQ());
+    hQ_0[i]->GetXaxis()->SetRangeUser(runInfo->GetMinQ(),
+				      runInfo->GetMaxQ());
     
     histName.Form("hQ_%d_%d_Fit",part,i);
     hQ_0[i]->SetName(histName);
@@ -865,20 +857,11 @@ Bool_t TLab::GoodTiming(Float_t time){
 
 Bool_t TLab::GoodTheta(Float_t theta){
   
-  Bool_t goodTheta = kFALSE;
-  
-  // Asymmetry is minimal below 
-  // 30 degrees but allow
-  // for energy resolution
-  Float_t thetaRange[2];
-  thetaRange[0] =  10.;
-  thetaRange[1] =  170.;
-  
-  if( theta > thetaRange[0]  && 
-      theta < thetaRange[1] )
-    goodTheta = kTRUE;
-  
-  return goodTheta;
+  if( theta > thetaLowEdge  && 
+      theta < thetaHighEdge )
+    return kTRUE;
+  else
+    return kFALSE;
 }
 
 void TLab::CalculateAsymmetry(){

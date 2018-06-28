@@ -2,7 +2,7 @@
 #define TLab_h
 
 #include "./includes.h"
-#include "TEventNumbers.h"
+#include "TRunInfo.h"
 
 //------------------------------------------------------------------------------------------------
 
@@ -13,6 +13,7 @@ class TLab : public TObject{
   TLab( TString); 
   TLab( TString, TString);
   TLab( TString, TString, TString); 
+  TLab( TString, TString, TString, TString); 
   ~TLab();
   
   //======================
@@ -21,7 +22,7 @@ class TLab : public TObject{
   //======================
   //======================
   
-  void SetFilenames(TString);
+  void SetInfo(TString);
 
   Bool_t RawTextFileExists();
   Bool_t RawROOTFileExists();
@@ -126,15 +127,16 @@ class TLab : public TObject{
   Float_t plotTheta[nThBins]; 
   Float_t AsymMatrix[nThBins][nPhiBins];
   
-  //Float_t comp
+  Int_t   runNumberInt;
   
-  Int_t runNumberInt;
   TString simRun;
   TString simRunU;
+  TString simRunP;
+  TString simRunE;
   
   ifstream *inData;
   
-  TEventNumbers * evntNs = nullptr;
+  TRunInfo * runInfo = nullptr;
 
   TFile  *rootFileRawData;
   TTree  *rawDataTree;
@@ -143,29 +145,24 @@ class TLab : public TObject{
   TTree  *calDataTree;
   
   TString textFileName;
-  
   TString rootFileRawName;
   TString rootFileCalName;
 
   TCanvas *canvas1;
   TCanvas *canvas2;
   
-  // Raw data
-  //TH1F   *hQ[nChannels][nParts];
-  
   // pre-run/part OR data
   TH1F   *hQ_0[nChannels];
-  
   // main run/part
   TH1F   *hQ_1[nChannels];
-  
-  // main run/part outer summed with inner
-  TH1F   *hQQ_1[nChannels];
-  
   // post-run/part OR data
   TH1F   *hQ_2[nChannels];
-  
+
   TH1F   *hT[nChannels];
+  
+  // main run/part outer summed with inner
+  // (Compton region only)
+  TH1F   *hQQ_1[nChannels];
 
   Long64_t eventNumber;
 
@@ -212,8 +209,6 @@ class TLab : public TObject{
   Char_t type;
 
   TSim *simData;
-
-  Int_t npeaks;
 
   TH1F *hr;
   

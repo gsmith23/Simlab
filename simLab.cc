@@ -85,9 +85,6 @@ Int_t main(int argc, char **argv){
     cout << "       | laboratory analysis |" << endl; 
     cout << "       -----------------------" << endl; 
     cout << endl;
-
-    cout << endl;
-    cout << "    Raw Data " << endl; 
     
     TLab* data;
     data = new TLab(argv[2]);
