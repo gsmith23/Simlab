@@ -62,12 +62,7 @@ class TLab : public TObject{
   Bool_t GoodTiming(Float_t);
   Bool_t GoodTheta(Float_t);
 
-  Float_t ElectronEnergyToTheta(Float_t);
-  Float_t PhotonEnergyToTheta(Float_t);
-
   Float_t ThetaToThetaError(Float_t, Int_t);
-  Float_t ThetaToPhotonEnergy(Float_t);
-  Float_t ThetaToElectronEnergy(Float_t);
 
   Int_t Chan2ArrayA(Int_t channel);
   Int_t Chan2ArrayB(Int_t channel);
@@ -96,6 +91,7 @@ class TLab : public TObject{
   const static Int_t nParts = 3;
 
   Bool_t onePart = kFALSE;
+  Bool_t applyCutsToCalTree = kTRUE;
     
   // crystals per array
   static const Int_t nCrystals = 9;

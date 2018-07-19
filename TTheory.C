@@ -1,5 +1,4 @@
 #include "TTheory.h"
-//#include "./includes.h"
 
 #if !defined(__CINT__)
 ClassImp(TTheory)

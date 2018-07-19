@@ -1,4 +1,5 @@
 #include "TLab.h"
+#include "Compton.h"
 
 #if !defined(__CINT__)
 ClassImp(TLab)
@@ -401,42 +402,36 @@ void TLab::MakeCalibratedDataTreeFile(){
       // channels for B go from 5 - 9
       chaB = (k+5);
       
-      // crytals for A 
+      // crystals for A 
       cryA = Chan2ArrayA(chaA);
-      // crytals for B 
+      // crystals for B 
       cryB = Chan2ArrayB(chaB);
       
       // to do: time calibration
       TA[cryA]  = T[chaA];
       TB[cryB]  = T[chaB];
       
-      // Energy Arrays 
-      // Set to use OR data after AND data
       QA_temp   = Q[chaA]-GetPedestal(chaA);
       QB_temp   = Q[chaB]-GetPedestal(chaB);
 
-      // pedestal subtracted
       QA[cryA]  = QA_temp;
       QB[cryB]  = QB_temp;
       
-      // Set to use OR data after AND data
       phoQA_temp = GetPhotopeak(chaA) - GetPedestal(chaA);
       phoQB_temp = GetPhotopeak(chaB) - GetPedestal(chaB);
       
       EA[cryA]  = QA_temp * 511./phoQA_temp;
       EB[cryB]  = QB_temp * 511./phoQB_temp;
       
-      // We presume the photons interacted 
+      // We assume the photons interacted 
       // in the central crystal first
-      // for all apart from centre crystal
-
       tHA[cryA] = PhotonEnergyToTheta(EA[cryA]);
       tHB[cryB] = PhotonEnergyToTheta(EB[cryB]);
       
       tHAErr[cryA] = ThetaToThetaError(tHA[cryA],chaA);
       tHBErr[cryB] = ThetaToThetaError(tHB[cryB],chaB);
     }
-
+    
     // central crystals
     tHA[4] = ElectronEnergyToTheta(EA[4]);
     tHB[4] = ElectronEnergyToTheta(EB[4]);
@@ -450,6 +445,13 @@ void TLab::MakeCalibratedDataTreeFile(){
       hEA[j]->Fill(EA[j]);
       hEB[j]->Fill(EB[j]);
       
+    }
+  
+    if ( applyCutsToCalTree){ 
+      
+      if( !GoodTheta( tHA[4]) ||
+	  !GoodTheta( tHB[4])  )
+	continue;
     }
     
     calDataTree->Fill();
@@ -648,7 +650,8 @@ Float_t TLab::GetPhotopeak(Int_t channel){
 
 Bool_t TLab::DoFitPhotopeaks(){
 
-  if( runNumberInt == 49801 )
+  if( runNumberInt == 49801 ||
+      runNumberInt == 49802)
     return kFALSE;
   else
     return kTRUE;
@@ -794,17 +797,8 @@ Int_t TLab::DefaultPhotopeakPart(Int_t channel){
   
 }
 
-Float_t TLab::ThetaToPhotonEnergy(Float_t theta){
-  return (511./(2 - Cos(TMath::DegToRad()*theta)));
-}
-
-Float_t TLab::ThetaToElectronEnergy(Float_t theta){
-  return (511. - (511./(2. - Cos(TMath::DegToRad()*theta))));
-}
-
 Float_t TLab::ThetaToThetaError(Float_t theta,
 				Int_t channel){
-  
   Float_t EnergyRes = 0.;
   EnergyRes = HWHM[channel][DefaultPhotopeakPart(channel)];
   EnergyRes = EnergyRes/Sqrt(511.);
@@ -1174,37 +1168,6 @@ Bool_t  TLab::RandomGoodLabPhi(Float_t phi,
 }
 
 
-Float_t TLab::ElectronEnergyToTheta(Float_t energy){
-
-  Float_t theta = 0.0;
-
-  energy = 511. - energy;
-  
-  const Float_t m = 511.0;
-
-  // cos(theta)
-  theta = 2 - m/energy;
-
-  theta = ACos(theta);
-  theta = RadToDeg()*theta;
-
-  return theta;
-}
-
-Float_t TLab::PhotonEnergyToTheta(Float_t energy){
-
-  Float_t theta = 0.0;
-
-  const Float_t m = 511.0;
-
-  // cos(theta)
-  theta = 2 - m/energy;
-  theta = ACos(theta);
-  theta = RadToDeg()*theta;
-  
-  return theta;
-}
-
 void TLab::GetThetaBinValues(){
 
   Float_t thetaBinWidth = (thetaHighEdge - thetaLowEdge)/(Float_t)nThBins;
@@ -1215,8 +1178,6 @@ void TLab::GetThetaBinValues(){
     plotTheta[i] = ThMin[i] + (ThMax[i] - ThMin[i])/2.;
 
   }
-
-
 }
 
 void TLab::GraphAsymmetry(Char_t option){

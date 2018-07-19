@@ -76,7 +76,7 @@ endif
 
 #-------------------------------------------------------------------------
 
-SRC           = TLab.C TSim.C TTheory.C Messages.C TRunInfo.C
+SRC           = TLab.C TSim.C TTheory.C TRunInfo.C Messages.C Compton.C
 
 OBJ           = $(SRC:.C=.o)
 HDR           = $(SRC:.C=.h)
