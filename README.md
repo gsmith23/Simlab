@@ -1,5 +1,5 @@
 # Simlab
-Root-based data analysis code and visualisation for Geant4 Simulated and Lab data.
+C++/ROOT data analysis and visualisation framework for Geant4 Simulated and Lab data.
 
 Written in C++/ROOT (https://root.cern.ch). 
 
