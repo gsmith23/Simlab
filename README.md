@@ -1,7 +1,7 @@
 # Simlab
 Root-based data analysis code and visualisation for Geant4 Simulated and Lab data.
 
-Written in C++/ROOT. 
+Written in C++/ROOT (https://root.cern.ch). 
 
 Author gary.smith@ed.ac.uk 2016 - 2018
 Co-authored by MPhys and summer students at the University of Edinburgh
